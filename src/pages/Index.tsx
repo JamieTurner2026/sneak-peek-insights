@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 // ── Data ──
 const TICKER_ITEMS = [
@@ -27,19 +28,33 @@ const MARKET = [
 const SIZES = ["7", "7.5", "8", "8.5", "9", "9.5", "10", "10.5", "11", "11.5", "12", "13"];
 
 const SHOE_DB = [
-  { name: "Air Jordan 1 Retro High OG", silhouette: "Jordan 1 High", colorway: "Chicago / Red-White-Black", release: "1985 / 2015 Retro", tech: "Air Sole Unit", confidence: 94, retailers: [{ name: "StockX", badge: "bb", price: "$387", source: "STOCKX" }, { name: "GOAT", badge: "ba", price: "$395", source: "GOAT" }, { name: "Nike SNKRS", badge: "bn", price: "$180", source: "RETAIL" }, { name: "eBay Auth.", badge: "bs", price: "$360", source: "EBAY" }] },
-  { name: "Nike Dunk Low Panda", silhouette: "Dunk Low", colorway: "White/Black", release: "2021", tech: "Foam Midsole", confidence: 91, retailers: [{ name: "StockX", badge: "bb", price: "$119", source: "STOCKX" }, { name: "GOAT", badge: "ba", price: "$125", source: "GOAT" }, { name: "Nike", badge: "bn", price: "$110", source: "RETAIL" }, { name: "Foot Locker", badge: "bd", price: "$110", source: "RETAIL" }] },
-  { name: "Yeezy Boost 350 V2", silhouette: "Yeezy 350", colorway: "Bone / Off-White", release: "2022", tech: "Boost Midsole / Primeknit", confidence: 88, retailers: [{ name: "StockX", badge: "bb", price: "$241", source: "STOCKX" }, { name: "GOAT", badge: "ba", price: "$250", source: "GOAT" }, { name: "Adidas", badge: "bn", price: "$230", source: "RETAIL" }, { name: "Flight Club", badge: "bs", price: "$255", source: "RESALE" }] },
+  { name: "Air Jordan 1 Retro High OG", silhouette: "Jordan 1 High", colorway: "Chicago / Red-White-Black", release: "1985 / 2015 Retro", tech: "Air Sole Unit", confidence: 94, designer: "Peter Moore", inspiration: "Designed by Peter Moore in 1985 for Michael Jordan, the AJ1 broke NBA uniform rules with its bold colorway, earning fines every game. It became a cultural icon bridging basketball, fashion, and hip-hop.", estimatedPrice: "$387", brand: "NIKE", retailers: [{ name: "StockX", badge: "bb", price: "$387", source: "STOCKX" }, { name: "GOAT", badge: "ba", price: "$395", source: "GOAT" }, { name: "Nike SNKRS", badge: "bn", price: "$180", source: "RETAIL" }, { name: "eBay Auth.", badge: "bs", price: "$360", source: "EBAY" }] },
+  { name: "Nike Dunk Low Panda", silhouette: "Dunk Low", colorway: "White/Black", release: "2021", tech: "Foam Midsole", confidence: 91, designer: "Nike Design Team", inspiration: "Originally created in 1985 as a college basketball shoe, the Dunk was designed to rep university colors. The Panda colorway became a modern classic with its clean black-and-white simplicity.", estimatedPrice: "$119", brand: "NIKE", retailers: [{ name: "StockX", badge: "bb", price: "$119", source: "STOCKX" }, { name: "GOAT", badge: "ba", price: "$125", source: "GOAT" }, { name: "Nike", badge: "bn", price: "$110", source: "RETAIL" }, { name: "Foot Locker", badge: "bd", price: "$110", source: "RETAIL" }] },
+  { name: "Yeezy Boost 350 V2", silhouette: "Yeezy 350", colorway: "Bone / Off-White", release: "2022", tech: "Boost Midsole / Primeknit", confidence: 88, designer: "Kanye West & adidas Design Team", inspiration: "Kanye West's vision of futuristic minimalism meets comfort. The 350 V2 features a distinctive side stripe and Primeknit upper, representing the intersection of high fashion and athletic performance.", estimatedPrice: "$241", brand: "ADIDAS", retailers: [{ name: "StockX", badge: "bb", price: "$241", source: "STOCKX" }, { name: "GOAT", badge: "ba", price: "$250", source: "GOAT" }, { name: "Adidas", badge: "bn", price: "$230", source: "RETAIL" }, { name: "Flight Club", badge: "bs", price: "$255", source: "RESALE" }] },
 ];
+
+interface ShoeResult {
+  name: string;
+  silhouette: string;
+  colorway: string;
+  release: string;
+  tech: string;
+  confidence: number;
+  designer: string;
+  inspiration: string;
+  estimatedPrice: string;
+  brand: string;
+  retailers: { name: string; badge: string; price: string; source: string }[];
+}
 
 // ── Component ──
 const Index = () => {
   const [tab, setTab] = useState(0);
   const [scanning, setScanning] = useState(false);
   const [scanned, setScanned] = useState(false);
-  const [shoeIdx, setShoeIdx] = useState(0);
+  const [aiShoe, setAiShoe] = useState<ShoeResult | null>(null);
   const [drawerCollapsed, setDrawerCollapsed] = useState(true);
-  const [vault, setVault] = useState<typeof SHOE_DB>([]);
+  const [vault, setVault] = useState<ShoeResult[]>([]);
   const [toast, setToast] = useState("");
   const [dropAlerts, setDropAlerts] = useState<Set<number>>(new Set());
 
@@ -72,7 +87,7 @@ const Index = () => {
   const [cameraActive, setCameraActive] = useState(false);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
 
-  const shoe = SHOE_DB[shoeIdx];
+  const shoe = aiShoe || SHOE_DB[0];
 
   const showToast = useCallback((msg: string) => {
     setToast(msg);
@@ -114,32 +129,84 @@ const Index = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tab, scanned]);
 
-  const doScan = useCallback(() => {
-    // Capture frame from video
-    if (videoRef.current && canvasRef.current && cameraActive) {
+  const doScan = useCallback(async (imageDataUrl?: string) => {
+    let imgData = imageDataUrl || null;
+    
+    // Capture frame from video if no image provided
+    if (!imgData && videoRef.current && canvasRef.current && cameraActive) {
       const video = videoRef.current;
       const canvas = canvasRef.current;
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
       canvas.getContext("2d")?.drawImage(video, 0, 0);
-      setCapturedImage(canvas.toDataURL("image/jpeg"));
+      imgData = canvas.toDataURL("image/jpeg", 0.8);
+      setCapturedImage(imgData);
       stopCamera();
     }
+    
     setScanning(true);
     setScanned(false);
+    setAiShoe(null);
     setDrawerCollapsed(true);
-    const idx = Math.floor(Math.random() * SHOE_DB.length);
-    setShoeIdx(idx);
-    setTimeout(() => {
-      setScanning(false);
-      setScanned(true);
-      setDrawerCollapsed(false);
-    }, 2800);
-  }, [cameraActive, stopCamera]);
+
+    if (imgData) {
+      try {
+        const { data, error } = await supabase.functions.invoke("identify-shoe", {
+          body: { imageBase64: imgData },
+        });
+        
+        if (error) throw error;
+        
+        // Build shoe result with retailer defaults
+        const result: ShoeResult = {
+          name: data.name || "Unknown Shoe",
+          silhouette: data.silhouette || "Unknown",
+          colorway: data.colorway || "Unknown",
+          release: data.release || "Unknown",
+          tech: data.tech || "Unknown",
+          confidence: data.confidence || 50,
+          designer: data.designer || "Unknown",
+          inspiration: data.inspiration || "No information available.",
+          estimatedPrice: data.estimatedPrice || "$0",
+          brand: data.brand || "UNKNOWN",
+          retailers: [
+            { name: "StockX", badge: "bb", price: data.estimatedPrice || "$—", source: "STOCKX" },
+            { name: "GOAT", badge: "ba", price: data.estimatedPrice || "$—", source: "GOAT" },
+            { name: `${data.brand || "Brand"} Direct`, badge: "bn", price: data.estimatedPrice || "$—", source: "RETAIL" },
+            { name: "eBay Auth.", badge: "bs", price: data.estimatedPrice || "$—", source: "EBAY" },
+          ],
+        };
+        
+        setAiShoe(result);
+        setScanning(false);
+        setScanned(true);
+        setDrawerCollapsed(false);
+      } catch (err) {
+        console.error("AI scan failed:", err);
+        showToast("AI SCAN FAILED — USING FALLBACK");
+        // Fallback to random shoe from DB
+        const fallback = SHOE_DB[Math.floor(Math.random() * SHOE_DB.length)];
+        setAiShoe(fallback);
+        setScanning(false);
+        setScanned(true);
+        setDrawerCollapsed(false);
+      }
+    } else {
+      // No image available, use fallback
+      const fallback = SHOE_DB[Math.floor(Math.random() * SHOE_DB.length)];
+      setAiShoe(fallback);
+      setTimeout(() => {
+        setScanning(false);
+        setScanned(true);
+        setDrawerCollapsed(false);
+      }, 2800);
+    }
+  }, [cameraActive, stopCamera, showToast]);
 
   const resetScan = useCallback(() => {
     setScanned(false);
     setCapturedImage(null);
+    setAiShoe(null);
     setDrawerCollapsed(true);
   }, []);
 
@@ -147,11 +214,12 @@ const Index = () => {
     if (e.target.files?.length) {
       const reader = new FileReader();
       reader.onload = (ev) => {
-        setCapturedImage(ev.target?.result as string);
+        const imgData = ev.target?.result as string;
+        setCapturedImage(imgData);
         stopCamera();
+        doScan(imgData);
       };
       reader.readAsDataURL(e.target.files[0]);
-      doScan();
     }
   }, [doScan, stopCamera]);
 
@@ -238,7 +306,7 @@ const Index = () => {
           <div>
             {!scanned && (
               <div className="capwrap">
-                <button className="capbtn" onClick={doScan}>
+                <button className="capbtn" onClick={() => doScan()}>
                   <div className="capinn">
                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
                   </div>
@@ -266,6 +334,12 @@ const Index = () => {
                     <div className="si2"><span className="sl">Release</span><span className="sv">{shoe.release}</span></div>
                     <div className="si2"><span className="sl">Tech</span><span className="sv">{shoe.tech}</span></div>
                   </div>
+
+                  <div className="sech">Designer</div>
+                  <div style={{ fontFamily: "var(--ft)", fontSize: 16, marginBottom: 5 }}>{shoe.designer}</div>
+
+                  <div className="sech">Inspiration & Story</div>
+                  <p style={{ fontFamily: "var(--fm)", fontSize: 11, lineHeight: 1.5, marginBottom: 12 }}>{shoe.inspiration}</p>
 
                   <button className="btn-o" style={{ marginTop: 0, marginBottom: 7 }} onClick={saveToVault}>+ SAVE TO VAULT</button>
 
