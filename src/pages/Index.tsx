@@ -52,9 +52,9 @@ const Index = () => {
   const [tab, setTab] = useState(0);
   const [scanning, setScanning] = useState(false);
   const [scanned, setScanned] = useState(false);
-  const [shoeIdx, setShoeIdx] = useState(0);
+  const [aiShoe, setAiShoe] = useState<ShoeResult | null>(null);
   const [drawerCollapsed, setDrawerCollapsed] = useState(true);
-  const [vault, setVault] = useState<typeof SHOE_DB>([]);
+  const [vault, setVault] = useState<ShoeResult[]>([]);
   const [toast, setToast] = useState("");
   const [dropAlerts, setDropAlerts] = useState<Set<number>>(new Set());
 
