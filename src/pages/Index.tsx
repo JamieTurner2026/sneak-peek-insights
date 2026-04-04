@@ -45,6 +45,7 @@ interface ShoeResult {
   estimatedPrice: string;
   brand: string;
   retailers: { name: string; badge: string; price: string; source: string }[];
+  photo?: string;
 }
 
 // ── Component ──
@@ -228,9 +229,9 @@ const Index = () => {
       showToast("ALREADY IN VAULT");
       return;
     }
-    setVault(prev => [...prev, shoe]);
+    setVault(prev => [...prev, { ...shoe, photo: capturedImage || undefined }]);
     showToast("SAVED TO VAULT ✓");
-  }, [vault, shoe, showToast]);
+  }, [vault, shoe, capturedImage, showToast]);
 
   const removeFromVault = useCallback((idx: number) => {
     setVault(prev => prev.filter((_, i) => i !== idx));
@@ -451,7 +452,7 @@ const Index = () => {
             </div>
           ) : vault.map((v, i) => (
             <div className="vitem" key={i}>
-              <div className="vthumb" />
+              <div className="vthumb" style={v.photo ? { backgroundImage: `url(${v.photo})` } : {}} />
               <div className="vinfo">
                 <div className="vname">{v.name}</div>
                 <div className="vsub">{v.colorway}</div>
