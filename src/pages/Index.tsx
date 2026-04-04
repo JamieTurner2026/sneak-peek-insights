@@ -700,6 +700,45 @@ const Index = () => {
         </div>
       </div>
 
+      {/* ── VAULT DETAIL MODAL ── */}
+      <div className={`mo ${vaultDetail ? "open" : ""}`}>
+        <div className="mb">
+          <button className="mclose" onClick={() => setVaultDetail(null)}>✕ CLOSE</button>
+          {vaultDetail && (
+            <>
+              {vaultDetail.photo && (
+                <div style={{ width: "100%", height: 220, backgroundImage: `url(${vaultDetail.photo})`, backgroundSize: "cover", backgroundPosition: "center", border: "3px solid var(--border)", marginBottom: 14 }} />
+              )}
+              <div className="stitle" style={{ fontSize: 28 }}>{vaultDetail.name}</div>
+              <div className="smeta">
+                <span>{vaultDetail.brand}</span>
+                <span>{vaultDetail.colorway}</span>
+                <span>{vaultDetail.confidence}% MATCH</span>
+              </div>
+
+              <div className="sgrid">
+                <div className="si2"><span className="sl">Silhouette</span><span className="sv">{vaultDetail.silhouette}</span></div>
+                <div className="si2"><span className="sl">Colorway</span><span className="sv">{vaultDetail.colorway}</span></div>
+                <div className="si2"><span className="sl">Release</span><span className="sv">{vaultDetail.release}</span></div>
+                <div className="si2"><span className="sl">Tech</span><span className="sv">{vaultDetail.tech}</span></div>
+              </div>
+
+              <div className="sech">Designer</div>
+              <div style={{ fontFamily: "var(--ft)", fontSize: 16, marginBottom: 5 }}>{vaultDetail.designer}</div>
+
+              <div className="sech">Inspiration & Story</div>
+              <p style={{ fontFamily: "var(--fm)", fontSize: 11, lineHeight: 1.5, marginBottom: 12 }}>{vaultDetail.inspiration}</p>
+
+              <div className="sech">Estimated Value</div>
+              <div style={{ fontFamily: "var(--ft)", fontSize: 28, color: "var(--red)", fontWeight: 700, marginBottom: 12 }}>{vaultDetail.estimatedPrice}</div>
+
+              <button className="btn-r" onClick={() => { setVaultDetail(null); setCheckoutOpen(true); setCkStep(0); setSelSize(""); }}>🛒 BUY NOW</button>
+              <button className="btn-o" onClick={() => setVaultDetail(null)}>CLOSE</button>
+            </>
+          )}
+        </div>
+      </div>
+
       {/* TOAST */}
       <div className={`toast ${toast ? "show" : ""}`}>{toast}</div>
     </>
