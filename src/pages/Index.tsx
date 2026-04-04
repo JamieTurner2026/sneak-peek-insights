@@ -89,14 +89,14 @@ function ShoeImage({ shoeId, name, style = {} }: { shoeId: string; name: string;
   const [tried, setTried] = useState(0);
 
   const handleError = () => {
-    if (tried === 0 && imgData.fallback) {
+    if (tried === 0 && imgData?.fallback) {
       setSrc(imgData.fallback);
       setTried(1);
     }
   };
 
   return (
-    <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", background: imgData.bg || "var(--sa)", ...style }}>
+    <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", background: imgData?.bg || "var(--sa)", ...style }}>
       {src ? (
         <img src={src} alt={name} onError={handleError} style={{ width: "100%", height: "100%", objectFit: "contain" }} />
       ) : (
