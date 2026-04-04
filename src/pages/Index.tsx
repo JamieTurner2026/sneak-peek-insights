@@ -452,7 +452,7 @@ const Index = () => {
             </div>
           ) : vault.map((v, i) => (
             <div className="vitem" key={i}>
-              <div className="vthumb" />
+              <div className="vthumb" style={v.photo ? { backgroundImage: `url(${v.photo})` } : {}} />
               <div className="vinfo">
                 <div className="vname">{v.name}</div>
                 <div className="vsub">{v.colorway}</div>
