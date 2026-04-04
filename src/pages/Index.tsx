@@ -1,747 +1,466 @@
-import { useState, useRef, useCallback, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { useState } from "react";
 
-// ── Data ──
-const TICKER_ITEMS = [
-  { text: "JORDAN 4 MILITARY BLUE", val: "$387 ▲12%" },
-  { text: "YEEZY 350 BONE", val: "$241 ▼3%" },
-  { text: "DUNK LOW PANDA RESTOCK", val: "JUNE 15" },
-  { text: "TRAVIS SCOTT x JORDAN 1 LOW", val: "$1,240 ▲8%" },
-  { text: "NEW BALANCE 550 GREEN", val: "$119 ▼1%" },
-  { text: "OFF-WHITE DUNK LOT 33", val: "$465 ▲5%" },
-  { text: "NIKE SB DUNK WHAT THE", val: "$892 ▼2%" },
-  { text: "ADIDAS SAMBA OG WHITE", val: "$104 ▲22%" },
-];
+// ─── SHOE IMAGE MAP ──────────────────────────────────────────────────────────
+const SHOE_IMAGES: Record<string, { primary: string; fallback: string; bg: string }> = {
+  "AJ1-CHI": {
+    primary: "https://image.goat.com/750/attachments/product_template_pictures/images/011/824/726/original/9978_00.png.png",
+    fallback: "https://images.unsplash.com/photo-1600269452121-4f2416e55c28?auto=format&fit=crop&q=80&w=600",
+    bg: "#e8d5d5",
+  },
+  "AJ3-BLC": {
+    primary: "https://image.goat.com/750/attachments/product_template_pictures/images/014/519/258/original/306292_00.png.png",
+    fallback: "https://images.unsplash.com/photo-1605348532760-6753d2c43329?auto=format&fit=crop&q=80&w=600",
+    bg: "#d5d5d5",
+  },
+  "DUNK-PND": {
+    primary: "https://image.goat.com/750/attachments/product_template_pictures/images/046/880/925/original/921573_00.png.png",
+    fallback: "https://images.unsplash.com/photo-1607522370275-f6fd4197767c?auto=format&fit=crop&q=80&w=600",
+    bg: "#f0f0f0",
+  },
+  "YZY-ZBR": {
+    primary: "https://image.goat.com/750/attachments/product_template_pictures/images/012/475/614/original/502874_00.png.png",
+    fallback: "https://images.unsplash.com/photo-1584735175315-9d5df23be6e0?auto=format&fit=crop&q=80&w=600",
+    bg: "#ebebeb",
+  },
+  "NB-550": {
+    primary: "https://image.goat.com/750/attachments/product_template_pictures/images/047/745/438/original/875348_00.png.png",
+    fallback: "https://images.unsplash.com/photo-1539185441755-769473a23570?auto=format&fit=crop&q=80&w=600",
+    bg: "#dff0e8",
+  },
+};
 
-const DROPS = [
-  { name: "AIR JORDAN 1 RETRO HIGH OG 'CHICAGO'", brand: "JORDAN", date: "JUNE 12, 2025", retail: "$180", tag: "HOT", tagClass: "th", img: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600" },
-  { name: "YEEZY BOOST 350 V2 'ONYX'", brand: "ADIDAS", date: "JUNE 18, 2025", retail: "$230", tag: "SOON", tagClass: "ts", img: "https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=600" },
-  { name: "DUNK LOW 'UNIVERSITY BLUE'", brand: "NIKE", date: "JULY 01, 2025", retail: "$110", tag: "LIMITED", tagClass: "tl2", img: "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=600" },
-];
-
-const MARKET = [
-  { brand: "NIKE", name: "Air Force 1 '07", cw: "WHITE/WHITE", trend: "+4.2%", up: true, prices: [{ label: "RETAIL", val: "$110" }, { label: "RESALE", val: "$142" }, { label: "LOW", val: "$125" }, { label: "HIGH", val: "$168" }] },
-  { brand: "JORDAN", name: "Air Jordan 4 'Bred'", cw: "BLACK/CEMENT GREY/RED", trend: "-1.8%", up: false, prices: [{ label: "RETAIL", val: "$210" }, { label: "RESALE", val: "$387" }, { label: "LOW", val: "$340" }, { label: "HIGH", val: "$425" }] },
-  { brand: "NEW BALANCE", name: "550 'White Green'", cw: "WHITE/GREEN", trend: "+12.1%", up: true, prices: [{ label: "RETAIL", val: "$110" }, { label: "RESALE", val: "$178" }, { label: "LOW", val: "$145" }, { label: "HIGH", val: "$210" }] },
-];
-
-const SIZES = ["7", "7.5", "8", "8.5", "9", "9.5", "10", "10.5", "11", "11.5", "12", "13"];
-
-const SHOE_DB = [
-  { name: "Air Jordan 1 Retro High OG", silhouette: "Jordan 1 High", colorway: "Chicago / Red-White-Black", release: "1985 / 2015 Retro", tech: "Air Sole Unit", confidence: 94, designer: "Peter Moore", inspiration: "Designed by Peter Moore in 1985 for Michael Jordan, the AJ1 broke NBA uniform rules with its bold colorway, earning fines every game. It became a cultural icon bridging basketball, fashion, and hip-hop.", estimatedPrice: "$387", brand: "NIKE", retailers: [{ name: "StockX", badge: "bb", price: "$387", source: "STOCKX" }, { name: "GOAT", badge: "ba", price: "$395", source: "GOAT" }, { name: "Nike SNKRS", badge: "bn", price: "$180", source: "RETAIL" }, { name: "eBay Auth.", badge: "bs", price: "$360", source: "EBAY" }] },
-  { name: "Nike Dunk Low Panda", silhouette: "Dunk Low", colorway: "White/Black", release: "2021", tech: "Foam Midsole", confidence: 91, designer: "Nike Design Team", inspiration: "Originally created in 1985 as a college basketball shoe, the Dunk was designed to rep university colors. The Panda colorway became a modern classic with its clean black-and-white simplicity.", estimatedPrice: "$119", brand: "NIKE", retailers: [{ name: "StockX", badge: "bb", price: "$119", source: "STOCKX" }, { name: "GOAT", badge: "ba", price: "$125", source: "GOAT" }, { name: "Nike", badge: "bn", price: "$110", source: "RETAIL" }, { name: "Foot Locker", badge: "bd", price: "$110", source: "RETAIL" }] },
-  { name: "Yeezy Boost 350 V2", silhouette: "Yeezy 350", colorway: "Bone / Off-White", release: "2022", tech: "Boost Midsole / Primeknit", confidence: 88, designer: "Kanye West & adidas Design Team", inspiration: "Kanye West's vision of futuristic minimalism meets comfort. The 350 V2 features a distinctive side stripe and Primeknit upper, representing the intersection of high fashion and athletic performance.", estimatedPrice: "$241", brand: "ADIDAS", retailers: [{ name: "StockX", badge: "bb", price: "$241", source: "STOCKX" }, { name: "GOAT", badge: "ba", price: "$250", source: "GOAT" }, { name: "Adidas", badge: "bn", price: "$230", source: "RETAIL" }, { name: "Flight Club", badge: "bs", price: "$255", source: "RESALE" }] },
-];
-
-interface ShoeResult {
+// ─── TYPES ───────────────────────────────────────────────────────────────────
+interface ShoeData {
+  id: string;
   name: string;
-  silhouette: string;
-  colorway: string;
-  release: string;
-  tech: string;
-  confidence: number;
-  designer: string;
-  inspiration: string;
-  estimatedPrice: string;
   brand: string;
-  retailers: { name: string; badge: string; price: string; source: string }[];
+  colorway: string;
+  size: string;
+  condition: string;
+  match: number;
+  retail: number;
+  resale: number;
+  release: string;
+  silhouette: string;
+  tech: string;
+  sku: string;
+  tags: string[];
+  saved: string;
   photo?: string;
 }
 
-// ── Component ──
-const Index = () => {
-  const [tab, setTab] = useState(0);
-  const [scanning, setScanning] = useState(false);
-  const [scanned, setScanned] = useState(false);
-  const [aiShoe, setAiShoe] = useState<ShoeResult | null>(null);
-  const [drawerCollapsed, setDrawerCollapsed] = useState(true);
-  const [vault, setVault] = useState<ShoeResult[]>([]);
-  const [toast, setToast] = useState("");
-  const [dropAlerts, setDropAlerts] = useState<Set<number>>(new Set());
+// ─── DATA ────────────────────────────────────────────────────────────────────
+const INITIAL_VAULT: ShoeData[] = [
+  { id: "AJ1-CHI", name: "Air Jordan 1 Retro High OG", brand: "JORDAN", colorway: "Chicago", size: "10", condition: "Deadstock", match: 98.4, retail: 170, resale: 298, release: "Feb 2022", silhouette: "HIGH-TOP", tech: "Air Sole", sku: "DZ5485-612", tags: ["Jordan", "Retro", "Limited"], saved: "Mar 12, 2026" },
+  { id: "AJ3-BLC", name: "Air Jordan 3 Retro", brand: "JORDAN", colorway: "Black Cement", size: "10.5", condition: "Like New", match: 96.1, retail: 190, resale: 245, release: "Jan 2018", silhouette: "MID-TOP", tech: "Air Sole", sku: "854262-001", tags: ["Jordan", "Cement", "OG"], saved: "Mar 20, 2026" },
+  { id: "DUNK-PND", name: "Nike Dunk Low", brand: "NIKE", colorway: "Panda", size: "11", condition: "New in Box", match: 97.5, retail: 110, resale: 118, release: "Mar 2021", silhouette: "LOW-TOP", tech: "Cushlon", sku: "DD1391-100", tags: ["Nike", "Dunk", "Classic"], saved: "Apr 1, 2026" },
+  { id: "YZY-ZBR", name: "Yeezy Boost 350 V2", brand: "ADIDAS", colorway: "Zebra", size: "9.5", condition: "Deadstock", match: 94.3, retail: 220, resale: 240, release: "Feb 2017", silhouette: "LOW-TOP", tech: "Boost", sku: "CP9654", tags: ["Yeezy", "Adidas", "Boost"], saved: "Apr 2, 2026" },
+  { id: "NB-550", name: "New Balance 550", brand: "NEW BALANCE", colorway: "White / Green", size: "10", condition: "Used — Great", match: 92.6, retail: 110, resale: 95, release: "Nov 2020", silhouette: "LOW-TOP", tech: "Encap", sku: "BB550WT1", tags: ["New Balance", "Court", "Retro"], saved: "Apr 3, 2026" },
+];
 
-  // Modals
-  const [checkoutOpen, setCheckoutOpen] = useState(false);
-  const [memberOpen, setMemberOpen] = useState(false);
-  const [authOpen, setAuthOpen] = useState(false);
-  const [alertModal, setAlertModal] = useState<number | null>(null);
-  const [vaultDetail, setVaultDetail] = useState<ShoeResult | null>(null);
+const CONDITION_COLOR: Record<string, { bg: string; text: string }> = {
+  "Deadstock":     { bg: "#1a6b3c", text: "#fff" },
+  "New in Box":    { bg: "#0e4f8a", text: "#fff" },
+  "Like New":      { bg: "#5a3d8a", text: "#fff" },
+  "Used — Great":  { bg: "#8a5a1a", text: "#fff" },
+  "Used — Good":   { bg: "#6b2a2a", text: "#fff" },
+};
 
-  // Auth
-  const [loggedIn, setLoggedIn] = useState(false);
-  const [username, setUsername] = useState("GUEST");
-  const [authTab, setAuthTab] = useState(0);
+const RETAILERS = ["StockX", "GOAT", "Flight Club", "Stadium Goods", "eBay"];
 
-  // Checkout
-  const [ckStep, setCkStep] = useState(0);
-  const [selSize, setSelSize] = useState("");
+// ─── SHOE IMAGE COMPONENT ─────────────────────────────────────────────────────
+function ShoeImage({ shoeId, name, style = {} }: { shoeId: string; name: string; style?: React.CSSProperties }) {
+  const imgData = SHOE_IMAGES[shoeId];
+  const [src, setSrc] = useState(imgData?.primary || imgData?.fallback || "");
+  const [tried, setTried] = useState(0);
 
-  // Membership
-  const [selPlan, setSelPlan] = useState(1);
-
-  // Sell
-  const [sellConditions] = useState(["DS/NEW", "VNDS", "USED", "BEATERS"]);
-  const [selCondition, setSelCondition] = useState("");
-
-  const fileRef = useRef<HTMLInputElement>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const streamRef = useRef<MediaStream | null>(null);
-  const [cameraActive, setCameraActive] = useState(false);
-  const [capturedImage, setCapturedImage] = useState<string | null>(null);
-
-  const shoe = aiShoe || SHOE_DB[0];
-
-  const showToast = useCallback((msg: string) => {
-    setToast(msg);
-    setTimeout(() => setToast(""), 2000);
-  }, []);
-
-  // Camera management
-  const startCamera = useCallback(async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 720 } }
-      });
-      streamRef.current = stream;
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-        videoRef.current.play();
-      }
-      setCameraActive(true);
-      setCapturedImage(null);
-    } catch {
-      showToast("CAMERA ACCESS DENIED");
+  const handleError = () => {
+    if (tried === 0 && imgData?.fallback) {
+      setSrc(imgData.fallback);
+      setTried(1);
     }
-  }, [showToast]);
-
-  const stopCamera = useCallback(() => {
-    streamRef.current?.getTracks().forEach(t => t.stop());
-    streamRef.current = null;
-    setCameraActive(false);
-  }, []);
-
-  // Start/stop camera when scan tab is active
-  useEffect(() => {
-    if (tab === 0 && !scanned) {
-      startCamera();
-    } else {
-      stopCamera();
-    }
-    return () => { stopCamera(); };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tab, scanned]);
-
-  const doScan = useCallback(async (imageDataUrl?: string) => {
-    let imgData = imageDataUrl || null;
-    
-    // Capture frame from video if no image provided
-    if (!imgData && videoRef.current && canvasRef.current && cameraActive) {
-      const video = videoRef.current;
-      const canvas = canvasRef.current;
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      canvas.getContext("2d")?.drawImage(video, 0, 0);
-      imgData = canvas.toDataURL("image/jpeg", 0.8);
-      setCapturedImage(imgData);
-      stopCamera();
-    }
-    
-    setScanning(true);
-    setScanned(false);
-    setAiShoe(null);
-    setDrawerCollapsed(true);
-
-    if (imgData) {
-      try {
-        const { data, error } = await supabase.functions.invoke("identify-shoe", {
-          body: { imageBase64: imgData },
-        });
-        
-        if (error) throw error;
-        
-        // Build shoe result with retailer defaults
-        const result: ShoeResult = {
-          name: data.name || "Unknown Shoe",
-          silhouette: data.silhouette || "Unknown",
-          colorway: data.colorway || "Unknown",
-          release: data.release || "Unknown",
-          tech: data.tech || "Unknown",
-          confidence: data.confidence || 50,
-          designer: data.designer || "Unknown",
-          inspiration: data.inspiration || "No information available.",
-          estimatedPrice: data.estimatedPrice || "$0",
-          brand: data.brand || "UNKNOWN",
-          retailers: [
-            { name: "StockX", badge: "bb", price: data.estimatedPrice || "$—", source: "STOCKX" },
-            { name: "GOAT", badge: "ba", price: data.estimatedPrice || "$—", source: "GOAT" },
-            { name: `${data.brand || "Brand"} Direct`, badge: "bn", price: data.estimatedPrice || "$—", source: "RETAIL" },
-            { name: "eBay Auth.", badge: "bs", price: data.estimatedPrice || "$—", source: "EBAY" },
-          ],
-        };
-        
-        setAiShoe(result);
-        setScanning(false);
-        setScanned(true);
-        setDrawerCollapsed(false);
-      } catch (err) {
-        console.error("AI scan failed:", err);
-        showToast("AI SCAN FAILED — USING FALLBACK");
-        // Fallback to random shoe from DB
-        const fallback = SHOE_DB[Math.floor(Math.random() * SHOE_DB.length)];
-        setAiShoe(fallback);
-        setScanning(false);
-        setScanned(true);
-        setDrawerCollapsed(false);
-      }
-    } else {
-      // No image available, use fallback
-      const fallback = SHOE_DB[Math.floor(Math.random() * SHOE_DB.length)];
-      setAiShoe(fallback);
-      setTimeout(() => {
-        setScanning(false);
-        setScanned(true);
-        setDrawerCollapsed(false);
-      }, 2800);
-    }
-  }, [cameraActive, stopCamera, showToast]);
-
-  const resetScan = useCallback(() => {
-    setScanned(false);
-    setCapturedImage(null);
-    setAiShoe(null);
-    setDrawerCollapsed(true);
-  }, []);
-
-  const handleFile = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files?.length) {
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        const imgData = ev.target?.result as string;
-        setCapturedImage(imgData);
-        stopCamera();
-        doScan(imgData);
-      };
-      reader.readAsDataURL(e.target.files[0]);
-    }
-  }, [doScan, stopCamera]);
-
-  const saveToVault = useCallback(() => {
-    if (vault.find(v => v.name === shoe.name)) {
-      showToast("ALREADY IN VAULT");
-      return;
-    }
-    setVault(prev => [...prev, { ...shoe, photo: capturedImage || undefined }]);
-    showToast("SAVED TO VAULT ✓");
-  }, [vault, shoe, capturedImage, showToast]);
-
-  const removeFromVault = useCallback((idx: number) => {
-    setVault(prev => prev.filter((_, i) => i !== idx));
-    showToast("REMOVED FROM VAULT");
-  }, [showToast]);
-
-  const toggleAlert = useCallback((idx: number) => {
-    setDropAlerts(prev => {
-      const n = new Set(prev);
-      if (n.has(idx)) n.delete(idx); else n.add(idx);
-      return n;
-    });
-    setAlertModal(null);
-    showToast(dropAlerts.has(idx) ? "ALERT REMOVED" : "ALERT SET ✓");
-  }, [dropAlerts, showToast]);
-
-  const doLogin = useCallback((name?: string) => {
-    setLoggedIn(true);
-    setUsername(name || "SNEAKERHEAD99");
-    setAuthOpen(false);
-    showToast("LOGGED IN ✓");
-  }, [showToast]);
-
-  // Ticker duplicated for seamless loop
-  const tickerContent = [...TICKER_ITEMS, ...TICKER_ITEMS];
+  };
 
   return (
-    <>
-      {/* TICKER */}
-      <div className="ticker-bar">
-        <div className="ticker-inner">
-          {tickerContent.map((t, i) => (
-            <span className="tick-item" key={i}>{t.text} <b>{t.val}</b></span>
-          ))}
+    <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", background: imgData?.bg || "#e0d6c2", ...style }}>
+      {src ? (
+        <img src={src} alt={name} onError={handleError} style={{ width: "85%", height: "85%", objectFit: "contain", filter: "drop-shadow(3px 4px 6px rgba(0,0,0,0.18))" }} />
+      ) : (
+        <svg viewBox="0 0 80 40" style={{ width: "60%", opacity: 0.18 }}>
+          <path d="M5 30 Q10 10 30 15 Q50 5 60 15 Q75 10 75 25 Q75 35 60 35 L15 35 Q5 35 5 30Z" fill="#1a1818" />
+          <ellipse cx="25" cy="33" rx="8" ry="3" fill="#1a1818" opacity="0.3" />
+          <ellipse cx="60" cy="33" rx="8" ry="3" fill="#1a1818" opacity="0.3" />
+        </svg>
+      )}
+    </div>
+  );
+}
+
+// ─── STAT PILL ────────────────────────────────────────────────────────────────
+function StatPill({ label, value }: { label: string; value: string }) {
+  return (
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", background: "#fff", border: "2px solid #1a1818", padding: "5px 10px", flex: 1, minWidth: 70 }}>
+      <span style={{ fontFamily: "'Courier New', monospace", fontSize: 8, color: "#c8102e", textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 700 }}>{label}</span>
+      <span style={{ fontFamily: "'Oswald', sans-serif", fontSize: 13, color: "#1a1818", fontWeight: 600 }}>{value}</span>
+    </div>
+  );
+}
+
+// ─── SHOE CARD — GRID ─────────────────────────────────────────────────────────
+function ShoeCardGrid({ shoe, onRemove, onBuy }: { shoe: ShoeData; onRemove: (id: string) => void; onBuy: (shoe: ShoeData) => void }) {
+  const [hovered, setHovered] = useState(false);
+  const profit = shoe.resale - shoe.retail;
+  const profitPct = ((profit / shoe.retail) * 100).toFixed(0);
+  const cond = CONDITION_COLOR[shoe.condition] || { bg: "#333", text: "#fff" };
+
+  return (
+    <div
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        border: "3px solid #1a1818",
+        background: "#f0e6d3",
+        display: "flex",
+        flexDirection: "column",
+        cursor: "pointer",
+        transition: "transform 0.18s, box-shadow 0.18s",
+        transform: hovered ? "translateY(-5px)" : "translateY(0)",
+        boxShadow: hovered ? "7px 7px 0 #1a1818" : "none",
+        position: "relative",
+        overflow: "hidden",
+      }}
+      onClick={() => onBuy(shoe)}
+    >
+      <div style={{ width: "100%", aspectRatio: "4/3", position: "relative", overflow: "hidden" }}>
+        <ShoeImage shoeId={shoe.id} name={shoe.name} />
+        <div style={{ position: "absolute", top: 7, left: 7, background: "#f5a623", color: "#1a1818", fontFamily: "'Oswald', sans-serif", fontSize: 11, fontWeight: 700, padding: "2px 8px", letterSpacing: "0.04em" }}>
+          {shoe.match}% MATCH
         </div>
-        <button className="bell-btn" onClick={() => showToast("🔔 ALERTS ON")}>🔔 ALERTS</button>
+        <div style={{ position: "absolute", bottom: 7, left: 7, background: cond.bg, color: cond.text, fontFamily: "'Oswald', sans-serif", fontSize: 10, fontWeight: 600, padding: "2px 8px", letterSpacing: "0.04em" }}>
+          {shoe.condition.toUpperCase()}
+        </div>
+        <div style={{ position: "absolute", bottom: 7, right: 7, fontFamily: "'Courier New', monospace", fontSize: 9, color: "#1a1818", background: "rgba(240,230,211,0.85)", padding: "1px 5px" }}>
+          {shoe.sku}
+        </div>
+        <button
+          onClick={(e) => { e.stopPropagation(); onRemove(shoe.id); }}
+          style={{ position: "absolute", top: 7, right: 7, background: "rgba(200,16,46,0.92)", border: "none", color: "#fff", fontFamily: "'Oswald', sans-serif", fontSize: 13, width: 28, height: 28, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", opacity: hovered ? 1 : 0, transition: "opacity 0.2s" }}
+        >✕</button>
       </div>
 
-      {/* ── SCAN SCREEN ── */}
-      <div className={`screen ${tab === 0 ? "active" : ""}`} style={{ position: "relative" }}>
-        {/* Live camera feed */}
-        <video ref={videoRef} className="jbg" style={{ objectFit: "cover", background: "#111" }} playsInline muted autoPlay />
-        <canvas ref={canvasRef} style={{ display: "none" }} />
-        {/* Fallback background when no camera */}
-        {!cameraActive && !capturedImage && (
-          <div className="jbg" style={{ backgroundImage: "url(https://images.unsplash.com/photo-1556906781-9a412961c28c?w=800)" }} />
-        )}
-        {/* Captured frame */}
-        <div className={`cam-scanned ${capturedImage || scanned ? "vis" : ""}`} style={{ backgroundImage: capturedImage ? `url(${capturedImage})` : "url(https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800)" }} />
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "#1a1818", padding: "5px 10px" }}>
+        <span style={{ fontFamily: "'Oswald', sans-serif", fontSize: 11, color: "#f5a623", fontWeight: 700, letterSpacing: "0.1em" }}>{shoe.brand}</span>
+        <span style={{ fontFamily: "'Courier New', monospace", fontSize: 10, color: "#aaa" }}>SZ {shoe.size}</span>
+      </div>
 
-        <div className="hf">
-          <div className="hc tl" /><div className="hc tr" /><div className="hc bl" /><div className="hc br" />
-          <div className={`sline ${scanning ? "run" : ""}`} />
-          {scanned && (
-            <>
-              <div className="hlbl" style={{ top: "28%", left: "12%" }}>SWOOSH — 98%</div>
-              <div className="hlbl" style={{ top: "55%", right: "10%" }}>MIDSOLE — 94%</div>
-            </>
-          )}
+      <div style={{ padding: "10px 12px 14px", flex: 1, display: "flex", flexDirection: "column", gap: 6 }}>
+        <h3 style={{ fontFamily: "'Oswald', sans-serif", fontSize: 16, fontWeight: 700, color: "#1a1818", margin: 0, lineHeight: 1.15 }}>{shoe.name}</h3>
+        <p style={{ fontFamily: "'Courier New', monospace", fontSize: 11, color: "#555", margin: 0 }}>{shoe.colorway}</p>
+
+        <div style={{ display: "flex", gap: 4, flexWrap: "wrap", marginTop: 2 }}>
+          {shoe.tags.map(t => (
+            <span key={t} style={{ fontFamily: "'Courier New', monospace", fontSize: 9, background: "#1a1818", color: "#f5a623", padding: "1px 6px", letterSpacing: "0.05em" }}>{t}</span>
+          ))}
         </div>
 
-        <div className="wmark">
-          <div className="wm1">SNAPSHOTZ SOLES</div>
-          <span className="wm2">AI SHOE RECOGNITION</span>
+        <div style={{ display: "flex", gap: 4, marginTop: 4 }}>
+          <StatPill label="Release" value={shoe.release} />
+          <StatPill label="Type" value={shoe.silhouette} />
         </div>
 
-        <div className="si">
-          <div className="sh">
-            <div className="sbdg"><div className={`sdot ${scanning ? "pulse" : ""}`} />{scanning ? "SCANNING..." : scanned ? "MATCH FOUND" : "MODE: STANDBY"}</div>
-            <div className="obdg">{scanned ? `[${shoe.retailers.length}] RETAILERS` : "[0] OBJECTS"}</div>
-          </div>
-
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginTop: "auto", paddingTop: 6 }}>
           <div>
-            {!scanned && (
-              <div className="capwrap">
-                <button className="capbtn" onClick={() => doScan()}>
-                  <div className="capinn">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
-                  </div>
-                </button>
-                <label className="uplbl" onClick={() => fileRef.current?.click()}>⬆ UPLOAD IMAGE</label>
-                <input ref={fileRef} type="file" accept="image/*" style={{ display: "none" }} onChange={handleFile} />
-              </div>
-            )}
-
-            {/* DRAWER */}
-            <div className={`drw ${drawerCollapsed ? "coll" : ""}`}>
-              <div className="hdl" onClick={() => setDrawerCollapsed(!drawerCollapsed)} />
-              <div className="stitle">{scanned ? shoe.name : "AWAITING SCAN..."}</div>
-              <div className="smeta">
-                <span>{scanned ? `${shoe.confidence}% MATCH` : "—% MATCH"}</span>
-                <span>ID: {scanned ? `SN-${Math.floor(Math.random() * 9000 + 1000)}` : "—"}</span>
-              </div>
-              <div className="cbar"><div className="cfill" style={{ width: scanned ? `${shoe.confidence}%` : "0%" }} /></div>
-
-              {scanned && (
-                <>
-                  <div className="sgrid">
-                    <div className="si2"><span className="sl">Silhouette</span><span className="sv">{shoe.silhouette}</span></div>
-                    <div className="si2"><span className="sl">Colorway</span><span className="sv">{shoe.colorway}</span></div>
-                    <div className="si2"><span className="sl">Release</span><span className="sv">{shoe.release}</span></div>
-                    <div className="si2"><span className="sl">Tech</span><span className="sv">{shoe.tech}</span></div>
-                  </div>
-
-                  <div className="sech">Designer</div>
-                  <div style={{ fontFamily: "var(--ft)", fontSize: 16, marginBottom: 5 }}>{shoe.designer}</div>
-
-                  <div className="sech">Inspiration & Story</div>
-                  <p style={{ fontFamily: "var(--fm)", fontSize: 11, lineHeight: 1.5, marginBottom: 12 }}>{shoe.inspiration}</p>
-
-                  <button className="btn-o" style={{ marginTop: 0, marginBottom: 7 }} onClick={saveToVault}>+ SAVE TO VAULT</button>
-
-                  <div className="sech">Where to Buy</div>
-                  <div className="rgrid">
-                    {shoe.retailers.map((r, i) => (
-                      <div className="sc" key={i} onClick={() => { setCheckoutOpen(true); setCkStep(0); setSelSize(""); }}>
-                        <div className="sct">
-                          <span className="scn">{r.name}</span>
-                          <span className={`scb ${r.badge}`}>{r.source}</span>
-                        </div>
-                        <div className="scs">LOWEST ASK</div>
-                        <div className="scp">{r.price}</div>
-                        <span className="sca">›</span>
-                      </div>
-                    ))}
-                  </div>
-
-                  <button className="btn-r" onClick={() => { setCheckoutOpen(true); setCkStep(0); setSelSize(""); }}>🛒 BUY NOW — CHECKOUT</button>
-                  <button className="btn-o" style={{ marginTop: 7 }} onClick={resetScan}>↻ SCAN AGAIN</button>
-                </>
-              )}
+            <div style={{ fontFamily: "'Courier New', monospace", fontSize: 9, color: "#c8102e", fontWeight: 700, textTransform: "uppercase" }}>RESALE</div>
+            <div style={{ fontFamily: "'Oswald', sans-serif", fontSize: 22, fontWeight: 700, color: "#1a1818", lineHeight: 1 }}>${shoe.resale}</div>
+          </div>
+          <div style={{ textAlign: "right" }}>
+            <div style={{ fontFamily: "'Courier New', monospace", fontSize: 9, color: "#888", textTransform: "uppercase" }}>RETAIL</div>
+            <div style={{ fontFamily: "'Courier New', monospace", fontSize: 13, color: "#888" }}>${shoe.retail}</div>
+            <div style={{ fontFamily: "'Courier New', monospace", fontSize: 11, color: profit >= 0 ? "#1a6b3c" : "#8a1a1a", fontWeight: 700, marginTop: 1 }}>
+              {profit >= 0 ? "▲" : "▼"} ${Math.abs(profit)} ({Math.abs(Number(profitPct))}%)
             </div>
           </div>
         </div>
       </div>
+    </div>
+  );
+}
 
-      {/* ── DROPS SCREEN ── */}
-      <div className={`screen ${tab === 1 ? "active" : ""}`} style={{ background: "var(--surface)" }}>
-        <div className="phdr">
-          <div className="phdr-logo">SNAPSHOTZ SOLES</div>
-          <h1 className="phdr-title">Drop Calendar</h1>
-          <div className="phdr-sub">UPCOMING RELEASES · SET ALERTS</div>
+// ─── SHOE CARD — LIST ─────────────────────────────────────────────────────────
+function ShoeCardList({ shoe, onRemove, onBuy }: { shoe: ShoeData; onRemove: (id: string) => void; onBuy: (shoe: ShoeData) => void }) {
+  const [hovered, setHovered] = useState(false);
+  const profit = shoe.resale - shoe.retail;
+  const profitPct = ((profit / shoe.retail) * 100).toFixed(0);
+  const cond = CONDITION_COLOR[shoe.condition] || { bg: "#333", text: "#fff" };
+
+  return (
+    <div
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{ display: "flex", alignItems: "center", gap: 0, border: "3px solid #1a1818", background: hovered ? "#ddd0b8" : "#f0e6d3", transition: "background 0.18s", position: "relative", cursor: "pointer", overflow: "hidden" }}
+      onClick={() => onBuy(shoe)}
+    >
+      <div style={{ width: 110, height: 90, flexShrink: 0 }}>
+        <ShoeImage shoeId={shoe.id} name={shoe.name} />
+      </div>
+
+      <div style={{ flex: 1, padding: "8px 12px", minWidth: 0 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <span style={{ fontFamily: "'Oswald', sans-serif", fontSize: 10, color: "#f5a623", background: "#1a1818", padding: "1px 6px", fontWeight: 700, letterSpacing: "0.08em" }}>{shoe.brand}</span>
+          <span style={{ fontFamily: "'Courier New', monospace", fontSize: 9, color: "#888" }}>SZ {shoe.size} · {shoe.sku}</span>
         </div>
-        <div className="dlist">
-          {DROPS.map((d, i) => (
-            <div className="dcard" key={i}>
-              <div className="dcimg" style={{ backgroundImage: `url(${d.img})` }}>
-                <div className="dcimgi">
-                  <div className="dcbr">{d.brand}</div>
-                  <div className="dcn">{d.name}</div>
-                </div>
-              </div>
-              <div className="dcbody">
-                <div className="dmr">
-                  <div className="ddate"><span className="ddlbl">DROP DATE</span>{d.date}</div>
-                  <div className="dret">{d.retail}</div>
-                  <span className={`dtag ${d.tagClass}`}>{d.tag}</span>
-                </div>
-                <button
-                  className={`dnbtn ${dropAlerts.has(i) ? "dnset" : "dnon"}`}
-                  onClick={() => dropAlerts.has(i) ? toggleAlert(i) : setAlertModal(i)}
-                >
-                  {dropAlerts.has(i) ? "✓ ALERT SET" : "🔔 SET DROP ALERT"}
-                </button>
-              </div>
-            </div>
-          ))}
+        <div style={{ fontFamily: "'Oswald', sans-serif", fontSize: 14, fontWeight: 700, color: "#1a1818", marginTop: 2, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{shoe.name}</div>
+        <div style={{ fontFamily: "'Courier New', monospace", fontSize: 10, color: "#555" }}>{shoe.colorway}</div>
+        <div style={{ display: "flex", gap: 4, marginTop: 3, alignItems: "center" }}>
+          <span style={{ fontSize: 9, fontFamily: "'Oswald', sans-serif", background: cond.bg, color: cond.text, padding: "1px 5px", fontWeight: 600 }}>{shoe.condition}</span>
+          {shoe.tags.map(t => <span key={t} style={{ fontSize: 8, fontFamily: "'Courier New', monospace", background: "#1a1818", color: "#f5a623", padding: "1px 4px" }}>{t}</span>)}
         </div>
       </div>
 
-      {/* ── MARKET SCREEN ── */}
-      <div className={`screen ${tab === 2 ? "active" : ""}`} style={{ background: "var(--surface)" }}>
-        <div className="phdr">
-          <div className="phdr-logo">SNAPSHOTZ SOLES</div>
-          <h1 className="phdr-title">Market</h1>
-          <div className="phdr-sub">LIVE RESALE PRICES · 8 RETAILERS</div>
+      <div style={{ padding: "8px 16px 8px 8px", textAlign: "right", flexShrink: 0 }}>
+        <div style={{ fontFamily: "'Courier New', monospace", fontSize: 9, color: "#c8102e", fontWeight: 700 }}>RESALE</div>
+        <div style={{ fontFamily: "'Oswald', sans-serif", fontSize: 18, fontWeight: 700, color: "#1a1818" }}>${shoe.resale}</div>
+        <div style={{ fontFamily: "'Courier New', monospace", fontSize: 10, color: profit >= 0 ? "#1a6b3c" : "#8a1a1a", fontWeight: 700, marginTop: 2 }}>
+          {profit >= 0 ? "▲" : "▼"} ${Math.abs(profit)} ({Math.abs(Number(profitPct))}%)
         </div>
-        <div className="mklist">
-          {MARKET.map((m, i) => (
-            <div className="mkcard" key={i}>
-              <div className="mkhdr">
-                <span className="mkbr">{m.brand}</span>
-                <span className={`mktr ${m.up ? "up" : "dn"}`}>{m.trend}</span>
-              </div>
-              <div className="mkbody">
-                <div className="mkname">{m.name}</div>
-                <div className="mkcw">{m.cw}</div>
-                <div className="mkp">
-                  {m.prices.map((p, j) => (
-                    <div className="mpb" key={j}>
-                      <span className="mps">{p.label}</span>
-                      <span className="mpn">{p.val}</span>
-                    </div>
-                  ))}
-                </div>
-                <div className="mkctas">
-                  <button className="mkcta" onClick={() => { setCheckoutOpen(true); setCkStep(0); setSelSize(""); }}>BUY NOW</button>
-                  <button className="mkcta sec">TRACK PRICE</button>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+        <div style={{ fontFamily: "'Courier New', monospace", fontSize: 9, color: "#888", marginTop: 2 }}>{shoe.match}% match</div>
       </div>
 
-      {/* ── VAULT SCREEN ── */}
-      <div className={`screen ${tab === 3 ? "active" : ""}`} style={{ background: "var(--surface)" }}>
-        <div className="phdr">
-          <div className="phdr-logo">SNAPSHOTZ SOLES</div>
-          <h1 className="phdr-title">My Vault</h1>
-          <div className="phdr-sub">COLLECTION · {vault.length} PAIRS</div>
-        </div>
-        <div className="vlist">
-          {vault.length === 0 ? (
-            <div className="empty">
-              <div style={{ fontSize: 40 }}>🔒</div>
-              <p>YOUR VAULT IS EMPTY.<br />SCAN A SHOE TO ADD IT.</p>
-            </div>
-          ) : vault.map((v, i) => (
-            <div className="vitem" key={i} onClick={() => setVaultDetail(v)}>
-              <div className="vthumb" style={v.photo ? { backgroundImage: `url(${v.photo})` } : {}} />
-              <div className="vinfo">
-                <div className="vname">{v.name}</div>
-                <div className="vsub">{v.colorway}</div>
-              </div>
-              <div className="vbdg">{v.retailers[0]?.price}</div>
-              <button className="vdel" onClick={(e) => { e.stopPropagation(); removeFromVault(i); }}>✕</button>
-            </div>
-          ))}
-        </div>
-      </div>
+      <button
+        onClick={(e) => { e.stopPropagation(); onRemove(shoe.id); }}
+        style={{ position: "absolute", top: 6, right: 8, background: "none", border: "2px solid #c8102e", color: "#c8102e", fontFamily: "'Oswald', sans-serif", fontSize: 10, padding: "2px 6px", cursor: "pointer", opacity: hovered ? 1 : 0, transition: "opacity 0.2s" }}
+      >✕</button>
+    </div>
+  );
+}
 
-      {/* ── SELL SCREEN ── */}
-      <div className={`screen ${tab === 4 ? "active" : ""}`} style={{ background: "var(--surface)" }}>
-        <div className="phdr">
-          <div className="phdr-logo">SNAPSHOTZ SOLES</div>
-          <h1 className="phdr-title">Sell</h1>
-          <div className="phdr-sub">LIST YOUR SNEAKERS</div>
-        </div>
-        <div className="sbody">
-          {!loggedIn ? (
-            <div className="login-gate">
-              <div style={{ fontSize: 40 }}>🏷️</div>
-              <h2>SELL YOUR KICKS</h2>
-              <p>Log in to list your sneakers on the marketplace</p>
-              <button className="btn-r" onClick={() => setAuthOpen(true)}>LOG IN TO SELL</button>
-            </div>
-          ) : (
-            <div className="lfm">
-              <div className="fsect">LISTING DETAILS</div>
-              <div className="fgrp"><label className="flbl">Shoe Name</label><input className="finp" placeholder="e.g. Air Jordan 1 Chicago" /></div>
-              <div className="frow">
-                <div className="fgrp"><label className="flbl">Size</label><input className="finp" placeholder="10" /></div>
-                <div className="fgrp"><label className="flbl">Price ($)</label><input className="finp" placeholder="250" type="number" /></div>
-              </div>
-              <div className="fgrp">
-                <label className="flbl">Condition</label>
-                <div className="cgrid">
-                  {sellConditions.map(c => (
-                    <button key={c} className={`cbtn ${selCondition === c ? "sel" : ""}`} onClick={() => setSelCondition(c)}>{c}</button>
-                  ))}
-                </div>
-              </div>
-              <div className="fgrp">
-                <label className="flbl">Photos</label>
-                <div className="izone"><div style={{ fontSize: 28 }}>📷</div><p>TAP TO ADD PHOTOS</p></div>
-              </div>
-              <button className="btn-r">LIST FOR SALE</button>
-            </div>
-          )}
-        </div>
-      </div>
+// ─── CHECKOUT MODAL ───────────────────────────────────────────────────────────
+function BuyModal({ shoe, onClose }: { shoe: ShoeData; onClose: () => void }) {
+  const [step, setStep] = useState(1);
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [addr, setAddr] = useState("");
+  const [city, setCity] = useState("");
+  const [zip, setZip] = useState("");
+  const [card, setCard] = useState("");
+  const [expiry, setExpiry] = useState("");
+  const [cvv, setCvv] = useState("");
+  const [cardName, setCardName] = useState("");
+  const [retailer, setRetailer] = useState("StockX");
+  const [orderNum, setOrderNum] = useState("");
 
-      {/* ── PROFILE SCREEN ── */}
-      <div className={`screen ${tab === 5 ? "active" : ""}`} style={{ background: "var(--surface)" }}>
-        <div className="phdr">
-          <div className="phdr-logo">SNAPSHOTZ SOLES</div>
-          <h1 className="phdr-title">My Profile</h1>
-          <div className="phdr-sub">{loggedIn ? `@${username}` : "NOT LOGGED IN"}</div>
-        </div>
-        <div className="idbody">
-          <div className="idcard">
-            <div className="idbig">SNAP{"\n"}SHOTZ</div>
-            <div style={{ fontFamily: "var(--fm)", fontSize: 10, color: "var(--red)", fontWeight: 700 }}>@{loggedIn ? username : "GUEST"}</div>
-            {loggedIn && <div className="mbdg">★ MEMBER</div>}
+  const fmtCard = (v: string) => v.replace(/\D/g, "").slice(0, 16).replace(/.{1,4}/g, "$& ").trim();
+  const fmtExp = (v: string) => { const d = v.replace(/\D/g, ""); return d.length >= 3 ? d.slice(0, 2) + "/" + d.slice(2, 4) : d; };
+
+  const goNext = () => {
+    if (step === 1 && (!name.trim() || !email.trim() || !addr.trim())) return;
+    if (step === 2) {
+      if (card.replace(/\s/g, "").length < 15 || !expiry.includes("/") || cvv.length < 3) return;
+      setOrderNum("SS-" + Math.random().toString(36).slice(2, 10).toUpperCase());
+    }
+    setStep(s => s + 1);
+  };
+
+  const inp: React.CSSProperties = { width: "100%", background: "#fff", border: "3px solid #1a1818", fontFamily: "'Courier New', monospace", fontSize: 13, padding: "9px 11px", outline: "none", color: "#1a1818", marginTop: 4 };
+  const lbl: React.CSSProperties = { fontFamily: "'Courier New', monospace", fontSize: 9, fontWeight: 700, color: "#c8102e", textTransform: "uppercase", letterSpacing: "0.08em", display: "block" };
+
+  return (
+    <div style={{ position: "fixed", inset: 0, zIndex: 9999, background: "rgba(13,13,13,0.85)", display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }} onClick={e => e.target === e.currentTarget && onClose()}>
+      <div style={{ background: "#f0e6d3", border: "4px solid #1a1818", maxWidth: 420, width: "100%", maxHeight: "90vh", overflow: "auto", padding: 24, position: "relative" }}>
+        <button onClick={onClose} style={{ position: "absolute", top: 10, right: 14, background: "none", border: "none", fontFamily: "'Oswald', sans-serif", fontSize: 12, color: "#c8102e", cursor: "pointer", letterSpacing: "0.08em" }}>✕ CLOSE</button>
+
+        <div style={{ display: "flex", gap: 12, alignItems: "center", marginBottom: 16, paddingRight: 60 }}>
+          <div style={{ width: 70, height: 55, flexShrink: 0, border: "2px solid #1a1818" }}>
+            <ShoeImage shoeId={shoe.id} name={shoe.name} />
           </div>
-
-          <div className="idcard">
-            <div className="idst">Stats</div>
-            <div className="idr"><span className="idk">TOTAL SCANS</span><span className="idv">{scanned ? "1" : "0"}</span></div>
-            <div className="idr"><span className="idk">VAULT SIZE</span><span className="idv">{vault.length} pairs</span></div>
-            <div className="idr"><span className="idk">LISTINGS</span><span className="idv">0 active</span></div>
-            <div className="idr"><span className="idk">TOP BRAND</span><span className="idv">{scanned ? "NIKE" : "—"}</span></div>
-            <div className="idr"><span className="idk">PLAN</span><span className="idv">FREE</span></div>
+          <div>
+            <div style={{ fontFamily: "'Oswald', sans-serif", fontSize: 15, fontWeight: 700, color: "#1a1818" }}>{shoe.name}</div>
+            <div style={{ fontFamily: "'Courier New', monospace", fontSize: 11, color: "#555" }}>{shoe.colorway} · SZ {shoe.size}</div>
           </div>
+        </div>
 
-          <div className="idcard">
-            <div className="idst">Interests</div>
-            <div className="tagrow">
-              {["JORDAN", "AIR MAX", "YEEZY", "LOW-TOP", "RETRO", "DUNK"].map(t => (
-                <span className="tag" key={t}>{t}</span>
+        <div style={{ display: "flex", justifyContent: "center", gap: 8, marginBottom: 16 }}>
+          {[1, 2, 3].map(i => <div key={i} style={{ width: 10, height: 10, borderRadius: "50%", background: step >= i ? "#c8102e" : "#ccc", transition: "background 0.2s" }} />)}
+        </div>
+
+        {step === 1 && (
+          <div>
+            <h3 style={{ fontFamily: "'Oswald', sans-serif", fontSize: 18, color: "#1a1818", margin: "0 0 12px", letterSpacing: "0.06em" }}>SHIPPING INFO</h3>
+            <div style={{ marginBottom: 10 }}>
+              <label style={lbl}>Buy From</label>
+              <div style={{ display: "flex", gap: 4, flexWrap: "wrap", marginTop: 4 }}>
+                {RETAILERS.map(r => <button key={r} onClick={() => setRetailer(r)} style={{ background: retailer === r ? "#1a1818" : "#f0e6d3", color: retailer === r ? "#f5a623" : "#1a1818", border: "2px solid #1a1818", fontFamily: "'Oswald', sans-serif", fontSize: 12, padding: "5px 11px", cursor: "pointer", transition: "all 0.15s" }}>{r}</button>)}
+              </div>
+            </div>
+            <label style={lbl}>Full Name<input style={inp} value={name} onChange={e => setName(e.target.value)} placeholder="Jordan Smith" /></label>
+            <label style={{ ...lbl, marginTop: 8 }}>Email<input style={inp} value={email} onChange={e => setEmail(e.target.value)} placeholder="jordan@email.com" /></label>
+            <label style={{ ...lbl, marginTop: 8 }}>Shipping Address<input style={inp} value={addr} onChange={e => setAddr(e.target.value)} placeholder="123 Sneaker Ave" /></label>
+            <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
+              <label style={{ ...lbl, flex: 1 }}>City<input style={inp} value={city} onChange={e => setCity(e.target.value)} placeholder="Charlotte" /></label>
+              <label style={{ ...lbl, width: 90 }}>ZIP<input style={inp} value={zip} onChange={e => setZip(e.target.value.slice(0, 5))} placeholder="28001" /></label>
+            </div>
+            <button onClick={goNext} style={{ width: "100%", background: "#c8102e", color: "#fff", border: "none", fontFamily: "'Oswald', sans-serif", fontSize: 15, padding: 13, cursor: "pointer", marginTop: 16, letterSpacing: "0.08em" }}>CONTINUE TO PAYMENT →</button>
+          </div>
+        )}
+
+        {step === 2 && (
+          <div>
+            <h3 style={{ fontFamily: "'Oswald', sans-serif", fontSize: 18, color: "#1a1818", margin: "0 0 12px", letterSpacing: "0.06em" }}>PAYMENT</h3>
+            <label style={lbl}>Card Number<input style={inp} value={card} onChange={e => setCard(fmtCard(e.target.value))} placeholder="1234 5678 9012 3456" maxLength={19} /></label>
+            <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
+              <label style={{ ...lbl, flex: 1 }}>Expiry<input style={inp} value={expiry} onChange={e => setExpiry(fmtExp(e.target.value))} placeholder="MM/YY" maxLength={5} /></label>
+              <label style={{ ...lbl, width: 90 }}>CVV<input style={inp} value={cvv} onChange={e => setCvv(e.target.value.slice(0, 4))} placeholder="•••" /></label>
+            </div>
+            <label style={{ ...lbl, marginTop: 8 }}>Name on Card<input style={inp} value={cardName} onChange={e => setCardName(e.target.value)} placeholder="Jordan Smith" /></label>
+            <div style={{ fontFamily: "'Courier New', monospace", fontSize: 12, marginTop: 16, borderTop: "2px solid #1a1818", paddingTop: 10 }}>
+              <div style={{ display: "flex", justifyContent: "space-between" }}><span>Subtotal</span><span>${shoe.resale}</span></div>
+              <div style={{ display: "flex", justifyContent: "space-between", marginTop: 4 }}><span>Shipping via {retailer}</span><span>$9.99</span></div>
+              <div style={{ display: "flex", justifyContent: "space-between", marginTop: 6, fontWeight: 700, fontSize: 14 }}><span>TOTAL</span><span>${(shoe.resale + 9.99).toFixed(2)}</span></div>
+            </div>
+            <button onClick={goNext} style={{ width: "100%", background: "#c8102e", color: "#fff", border: "none", fontFamily: "'Oswald', sans-serif", fontSize: 15, padding: 13, cursor: "pointer", marginTop: 16, letterSpacing: "0.08em" }}>🔒 PLACE ORDER</button>
+            <button onClick={() => setStep(1)} style={{ width: "100%", background: "none", color: "#1a1818", border: "3px solid #1a1818", fontFamily: "'Oswald', sans-serif", fontSize: 14, padding: 11, cursor: "pointer", marginTop: 8 }}>← BACK</button>
+          </div>
+        )}
+
+        {step === 3 && (
+          <div style={{ textAlign: "center", padding: "20px 0" }}>
+            <div style={{ fontSize: 48 }}>✅</div>
+            <h3 style={{ fontFamily: "'Oswald', sans-serif", fontSize: 22, color: "#1a6b3c", margin: "10px 0 4px" }}>ORDER PLACED!</h3>
+            <p style={{ fontFamily: "'Courier New', monospace", fontSize: 13, margin: 4 }}>Order #{orderNum}</p>
+            <p style={{ fontFamily: "'Courier New', monospace", fontSize: 11, color: "#555", margin: 4 }}>via {retailer}</p>
+            <p style={{ fontFamily: "'Courier New', monospace", fontSize: 11, color: "#888", margin: 4 }}>Confirmation → {email}</p>
+            <button onClick={onClose} style={{ background: "#1a1818", color: "#f5a623", border: "none", fontFamily: "'Oswald', sans-serif", fontSize: 15, padding: "11px 40px", cursor: "pointer", marginTop: 16, letterSpacing: "0.08em" }}>CLOSE</button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─── MAIN ────────────────────────────────────────────────────────────────────
+const Index = () => {
+  const [vault, setVault] = useState<ShoeData[]>(INITIAL_VAULT);
+  const [view, setView] = useState<"grid" | "list">("grid");
+  const [sort, setSort] = useState("saved");
+  const [filter, setFilter] = useState("ALL");
+  const [buyShoe, setBuyShoe] = useState<ShoeData | null>(null);
+  const [search, setSearch] = useState("");
+  const [toastMsg, setToastMsg] = useState<string | null>(null);
+
+  const showToast = (msg: string) => { setToastMsg(msg); setTimeout(() => setToastMsg(null), 2500); };
+  const removeShoe = (id: string) => { setVault(v => v.filter(s => s.id !== id)); showToast("Removed from vault"); };
+
+  const brands = ["ALL", ...Array.from(new Set(INITIAL_VAULT.map(s => s.brand)))];
+
+  const sorted = [...vault]
+    .filter(s => filter === "ALL" || s.brand === filter)
+    .filter(s => !search || s.name.toLowerCase().includes(search.toLowerCase()) || s.colorway.toLowerCase().includes(search.toLowerCase()))
+    .sort((a, b) => {
+      if (sort === "resale") return b.resale - a.resale;
+      if (sort === "match") return b.match - a.match;
+      if (sort === "brand") return a.brand.localeCompare(b.brand);
+      return 0;
+    });
+
+  const totalResale = vault.reduce((s, v) => s + v.resale, 0);
+  const totalRetail = vault.reduce((s, v) => s + v.retail, 0);
+  const totalProfit = totalResale - totalRetail;
+
+  return (
+    <div style={{ minHeight: "100vh", background: "#0d0d0d", color: "#1a1818", fontFamily: "'Oswald', sans-serif" }}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Playfair+Display:ital,wght@1,700&display=swap');
+        * { box-sizing: border-box; }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: #1a1818; }
+        input::placeholder { color: #aaa; font-size: 12px; }
+        input:focus { outline: none; border-color: #c8102e !important; }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+      `}</style>
+
+      {/* HEADER */}
+      <div style={{ background: "#f0e6d3", borderBottom: "4px solid #1a1818" }}>
+        <div style={{ maxWidth: 1200, margin: "0 auto", padding: "20px 16px 18px" }}>
+          <h1 style={{ fontFamily: "'Playfair Display', serif", fontStyle: "italic", fontSize: 28, fontWeight: 700, color: "#c8102e", margin: 0, letterSpacing: "-0.02em" }}>SNAPSHOTZ SOLES</h1>
+          <div style={{ marginTop: 10 }}>
+            <div style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
+              <h2 style={{ fontFamily: "'Oswald', sans-serif", fontSize: 22, fontWeight: 700, margin: 0, color: "#1a1818" }}>My Vault</h2>
+              <span style={{ fontFamily: "'Courier New', monospace", fontSize: 11, color: "#888" }}>{vault.length} PAIRS · AI-SCANNED COLLECTION</span>
+            </div>
+            <div style={{ display: "flex", gap: 16, marginTop: 10, flexWrap: "wrap" }}>
+              {[
+                { l: "Vault Value", v: `$${totalResale.toLocaleString()}` },
+                { l: "Paid Retail", v: `$${totalRetail.toLocaleString()}` },
+                { l: "Net Gain", v: `${totalProfit >= 0 ? "+" : ""}$${totalProfit.toLocaleString()}`, green: totalProfit >= 0 },
+              ].map(({ l, v, green }) => (
+                <div key={l} style={{ background: "#fff", border: "2px solid #1a1818", padding: "6px 14px" }}>
+                  <div style={{ fontFamily: "'Courier New', monospace", fontSize: 9, color: "#c8102e", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em" }}>{l}</div>
+                  <div style={{ fontFamily: "'Oswald', sans-serif", fontSize: 18, fontWeight: 700, color: green ? "#1a6b3c" : "#1a1818" }}>{v}</div>
+                </div>
               ))}
             </div>
           </div>
-
-          <button className="btn-g" onClick={() => setMemberOpen(true)}>★ UPGRADE MEMBERSHIP</button>
-          {!loggedIn ? (
-            <button className="btn-r" onClick={() => setAuthOpen(true)}>LOG IN / CREATE ACCOUNT</button>
-          ) : (
-            <button className="btn-o" onClick={() => { setLoggedIn(false); setUsername("GUEST"); showToast("LOGGED OUT"); }}>LOG OUT</button>
-          )}
         </div>
       </div>
 
-      {/* ── TAB BAR ── */}
-      <nav className="tabbar">
-        {["Scan", "Drops", "Market", "Vault", "Sell", "Profile"].map((label, i) => (
-          <button key={label} className={`tabbtn ${tab === i ? "active" : ""}`} onClick={() => setTab(i)}>
-            <div className="tabico" />
-            {label}
-            {i === 1 && <span className="tnotif">5</span>}
-          </button>
-        ))}
-      </nav>
+      {/* CONTROLS */}
+      <div style={{ background: "#e8dcc8", borderBottom: "3px solid #1a1818", padding: "10px 16px" }}>
+        <div style={{ maxWidth: 1200, margin: "0 auto", display: "flex", flexWrap: "wrap", gap: 8, alignItems: "center" }}>
+          <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search by name or colorway..." style={{ background: "#fff", border: "3px solid #1a1818", fontFamily: "'Courier New', monospace", fontSize: 13, padding: "7px 12px", flex: 1, minWidth: 160, outline: "none", color: "#1a1818" }} />
 
-      {/* ── CHECKOUT MODAL ── */}
-      <div className={`mo ${checkoutOpen ? "open" : ""}`}>
-        <div className="mb">
-          <button className="mclose" onClick={() => setCheckoutOpen(false)}>✕ CLOSE</button>
-          <div className="mtitle">Checkout</div>
-
-          <div className="cksteps">
-            {[0, 1, 2, 3].map(s => (
-              <div key={s} className={`ckstep ${s < ckStep ? "done" : s === ckStep ? "act" : ""}`} />
+          <div style={{ display: "flex", gap: 4 }}>
+            {brands.map(b => (
+              <button key={b} onClick={() => setFilter(b)} style={{ background: filter === b ? "#1a1818" : "transparent", color: filter === b ? "#f5a623" : "#1a1818", border: "2px solid #1a1818", fontFamily: "'Oswald', sans-serif", fontSize: 12, padding: "5px 10px", cursor: "pointer", letterSpacing: "0.05em", transition: "all 0.15s" }}>{b}</button>
             ))}
           </div>
 
-          {/* Step 1: Size */}
-          <div className={`cksec ${ckStep === 0 ? "act" : ""}`}>
-            <div className="cktitle">01 — SELECT SIZE</div>
-            <div className="szgrid">
-              {SIZES.map(s => (
-                <button key={s} className={`szbtn ${selSize === s ? "sel" : ""}`} onClick={() => setSelSize(s)}>{s}</button>
-              ))}
-            </div>
-            <button className="btn-r" onClick={() => selSize && setCkStep(1)} style={{ opacity: selSize ? 1 : 0.4 }}>CONTINUE TO SHIPPING ›</button>
-          </div>
+          <select value={sort} onChange={e => setSort(e.target.value)} style={{ background: "#fff", border: "3px solid #1a1818", fontFamily: "'Courier New', monospace", fontSize: 12, padding: "7px 10px", cursor: "pointer", color: "#1a1818", outline: "none" }}>
+            <option value="saved">Sort: Saved</option>
+            <option value="resale">Sort: Resale ↓</option>
+            <option value="match">Sort: Match %</option>
+            <option value="brand">Sort: Brand</option>
+          </select>
 
-          {/* Step 2: Shipping */}
-          <div className={`cksec ${ckStep === 1 ? "act" : ""}`}>
-            <div className="cktitle">02 — SHIPPING INFO</div>
-            <div className="aform">
-              <div className="fgrp"><label className="flbl">Full Name</label><input className="finp" placeholder="John Doe" /></div>
-              <div className="fgrp"><label className="flbl">Email</label><input className="finp" placeholder="you@email.com" type="email" /></div>
-              <div className="fgrp"><label className="flbl">Street Address</label><input className="finp" placeholder="123 Sneaker St" /></div>
-              <div className="ckinrow">
-                <div className="fgrp"><label className="flbl">City</label><input className="finp" placeholder="New York" /></div>
-                <div className="fgrp"><label className="flbl">ZIP</label><input className="finp" placeholder="10001" /></div>
-              </div>
-            </div>
-            <button className="btn-r" onClick={() => setCkStep(2)}>CONTINUE TO PAYMENT ›</button>
-            <button className="btn-o" onClick={() => setCkStep(0)}>‹ BACK</button>
-          </div>
-
-          {/* Step 3: Payment */}
-          <div className={`cksec ${ckStep === 2 ? "act" : ""}`}>
-            <div className="cktitle">03 — PAYMENT</div>
-            <div className="aform">
-              <div className="fgrp"><label className="flbl">Name on Card</label><input className="finp" /></div>
-              <div className="fgrp"><label className="flbl">Card Number</label><input className="finp" placeholder="4242 4242 4242 4242" /></div>
-              <div className="ckinrow">
-                <div className="fgrp"><label className="flbl">Expiry (MM/YY)</label><input className="finp" placeholder="12/27" /></div>
-                <div className="fgrp"><label className="flbl">CVV</label><input className="finp" placeholder="***" /></div>
-              </div>
-              <div style={{ fontFamily: "var(--fm)", fontSize: 9, color: "var(--red)", textAlign: "center", padding: "5px 0" }}>🔒 256-BIT ENCRYPTED · SECURE CHECKOUT</div>
-            </div>
-            <div className="osm">
-              <div className="osr"><span>SUBTOTAL</span><span>{shoe.retailers[0]?.price}</span></div>
-              <div className="osr"><span>SHIPPING</span><span>$14.99</span></div>
-              <div className="osr"><span>TAX</span><span>$31.20</span></div>
-              <div className="osr tot"><span>TOTAL</span><span>$433.19</span></div>
-            </div>
-            <button className="btn-r" onClick={() => setCkStep(3)}>PLACE ORDER 🛒</button>
-            <button className="btn-o" onClick={() => setCkStep(1)}>‹ BACK</button>
-          </div>
-
-          {/* Step 4: Success */}
-          <div className={`cksec ${ckStep === 3 ? "act" : ""}`}>
-            <div className="succ">
-              <div className="succ-ico">✅</div>
-              <div className="succ-title">ORDER PLACED!</div>
-              <div className="succ-sub">YOUR KICKS ARE ON THE WAY.</div>
-              <div className="succ-sub" style={{ marginTop: 4 }}>CHECK YOUR EMAIL FOR CONFIRMATION</div>
-            </div>
-            <button className="btn-r" onClick={() => setCheckoutOpen(false)}>CLOSE</button>
+          <div style={{ display: "flex", gap: 0 }}>
+            {([["grid", "⊞"], ["list", "≡"]] as const).map(([v, icon]) => (
+              <button key={v} onClick={() => setView(v)} style={{ background: view === v ? "#1a1818" : "transparent", color: view === v ? "#f5a623" : "#1a1818", border: "none", fontFamily: "'Oswald', sans-serif", fontSize: 17, padding: "5px 14px", cursor: "pointer", transition: "all 0.15s" }}>{icon}</button>
+            ))}
           </div>
         </div>
       </div>
 
-      {/* ── MEMBERSHIP MODAL ── */}
-      <div className={`mo ${memberOpen ? "open" : ""}`}>
-        <div className="mb">
-          <button className="mclose" onClick={() => setMemberOpen(false)}>✕ CLOSE</button>
-          <div className="mtitle">Choose Your Plan</div>
-          <div className="mplans">
-            {[
-              { name: "FREE", price: "$0", per: "/month", feats: [["y", "AI Shoe Scanning"], ["y", "Save up to 10 pairs"], ["y", "Market price viewing"], ["n", "Drop Alerts"], ["n", "Sell your shoes"], ["n", "Early access drops"]] },
-              { name: "SNEAKER HEAD", price: "$9.99", per: "/month", popular: true, feats: [["y", "Everything in Free"], ["y", "Unlimited vault storage"], ["y", "🔔 Drop Alerts (all releases)"], ["y", "Sell up to 10 pairs/month"], ["n", "No seller fees"], ["n", "Early access drops"], ["n", "Priority checkout"]] },
-              { name: "SOLE PRO ★", price: "$24.99", per: "/month", feats: [["y", "Everything in Sneaker Head"], ["y", "⚡ Early access to drops"], ["y", "Priority checkout (skip queue)"], ["y", "Unlimited selling"], ["y", "Seller analytics dashboard"], ["y", "Pro badge on listings"]] },
-            ].map((plan, i) => (
-              <div key={i} className={`mplan ${selPlan === i ? "sel2" : ""} ${plan.popular ? "feat" : ""}`} onClick={() => setSelPlan(i)}>
-                {plan.popular && <div className="ppop">MOST POPULAR</div>}
-                <div className="pname">{plan.name}</div>
-                <div className="pprice">{plan.price}</div>
-                <div className="pper">{plan.per}</div>
-                <div className="pfeats">
-                  {plan.feats.map(([type, text], j) => (
-                    <div key={j} className={`pfeat ${type}`}>{text}</div>
-                  ))}
-                </div>
+      {/* VAULT GRID / LIST */}
+      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "20px 16px 40px" }}>
+        {sorted.length === 0 ? (
+          <div style={{ textAlign: "center", padding: "60px 20px" }}>
+            <h3 style={{ fontFamily: "'Oswald', sans-serif", fontSize: 20, color: "#f0e6d3" }}>Vault is empty</h3>
+            <p style={{ fontFamily: "'Courier New', monospace", fontSize: 12, color: "#888" }}>{search || filter !== "ALL" ? "No shoes match your filters." : "Scan a shoe to add it to your vault."}</p>
+          </div>
+        ) : view === "grid" ? (
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: 16 }}>
+            {sorted.map((shoe, i) => (
+              <div key={shoe.id} style={{ animation: `fadeUp 0.35s ${i * 0.06}s both` }}>
+                <ShoeCardGrid shoe={shoe} onRemove={removeShoe} onBuy={setBuyShoe} />
               </div>
             ))}
           </div>
-          <button className="btn-g" onClick={() => { setMemberOpen(false); showToast("PLAN SELECTED ✓"); }}>SELECT PLAN ›</button>
-          <div style={{ fontFamily: "var(--fm)", fontSize: 9, color: "var(--red)", textAlign: "center", marginTop: 9, fontWeight: 700 }}>CANCEL ANYTIME · SECURE BILLING</div>
-        </div>
-      </div>
-
-      {/* ── AUTH MODAL ── */}
-      <div className={`mo ${authOpen ? "open" : ""}`}>
-        <div className="mb">
-          <button className="mclose" onClick={() => setAuthOpen(false)}>✕ CLOSE</button>
-          <div className="mtitle">Account</div>
-          <div className="atabs">
-            <button className={`atab ${authTab === 0 ? "act" : ""}`} onClick={() => setAuthTab(0)}>LOG IN</button>
-            <button className={`atab ${authTab === 1 ? "act" : ""}`} onClick={() => setAuthTab(1)}>SIGN UP</button>
+        ) : (
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            {sorted.map((shoe, i) => (
+              <div key={shoe.id} style={{ animation: `fadeUp 0.3s ${i * 0.05}s both` }}>
+                <ShoeCardList shoe={shoe} onRemove={removeShoe} onBuy={setBuyShoe} />
+              </div>
+            ))}
           </div>
-          {authTab === 0 ? (
-            <div className="aform">
-              <div className="fgrp"><label className="flbl">Email</label><input className="finp" placeholder="you@email.com" type="email" /></div>
-              <div className="fgrp"><label className="flbl">Password</label><input className="finp" type="password" /></div>
-              <button className="btn-r" onClick={() => doLogin()}>LOG IN</button>
-              <button className="btn-o">G  CONTINUE WITH GOOGLE</button>
-            </div>
-          ) : (
-            <div className="aform">
-              <div className="fgrp"><label className="flbl">Username</label><input className="finp" placeholder="@sneakerhead99" /></div>
-              <div className="fgrp"><label className="flbl">Email</label><input className="finp" placeholder="you@email.com" type="email" /></div>
-              <div className="fgrp"><label className="flbl">Password</label><input className="finp" type="password" /></div>
-              <button className="btn-r" onClick={() => doLogin("SNEAKERHEAD99")}>CREATE ACCOUNT</button>
-              <button className="btn-o">G  CONTINUE WITH GOOGLE</button>
-            </div>
-          )}
-        </div>
+        )}
       </div>
 
-      {/* ── ALERT MODAL ── */}
-      <div className={`mo ${alertModal !== null ? "open" : ""}`}>
-        <div className="mb">
-          <button className="mclose" onClick={() => setAlertModal(null)}>✕ CLOSE</button>
-          <div className="mtitle">Set Drop Alert</div>
-          {alertModal !== null && <div style={{ fontFamily: "var(--ft)", fontSize: 18, marginBottom: 11 }}>{DROPS[alertModal]?.name}</div>}
-          <button className="btn-g" onClick={() => alertModal !== null && toggleAlert(alertModal)}>🔔 NOTIFY ME ON DROP DAY</button>
-          <button className="btn-o" onClick={() => setAlertModal(null)}>NOT NOW</button>
-        </div>
-      </div>
+      {buyShoe && <BuyModal shoe={buyShoe} onClose={() => setBuyShoe(null)} />}
 
-      {/* ── VAULT DETAIL MODAL ── */}
-      <div className={`mo ${vaultDetail ? "open" : ""}`}>
-        <div className="mb">
-          <button className="mclose" onClick={() => setVaultDetail(null)}>✕ CLOSE</button>
-          {vaultDetail && (
-            <>
-              {vaultDetail.photo && (
-                <div style={{ width: "100%", height: 220, backgroundImage: `url(${vaultDetail.photo})`, backgroundSize: "cover", backgroundPosition: "center", border: "3px solid var(--border)", marginBottom: 14 }} />
-              )}
-              <div className="stitle" style={{ fontSize: 28 }}>{vaultDetail.name}</div>
-              <div className="smeta">
-                <span>{vaultDetail.brand}</span>
-                <span>{vaultDetail.colorway}</span>
-                <span>{vaultDetail.confidence}% MATCH</span>
-              </div>
-
-              <div className="sgrid">
-                <div className="si2"><span className="sl">Silhouette</span><span className="sv">{vaultDetail.silhouette}</span></div>
-                <div className="si2"><span className="sl">Colorway</span><span className="sv">{vaultDetail.colorway}</span></div>
-                <div className="si2"><span className="sl">Release</span><span className="sv">{vaultDetail.release}</span></div>
-                <div className="si2"><span className="sl">Tech</span><span className="sv">{vaultDetail.tech}</span></div>
-              </div>
-
-              <div className="sech">Designer</div>
-              <div style={{ fontFamily: "var(--ft)", fontSize: 16, marginBottom: 5 }}>{vaultDetail.designer}</div>
-
-              <div className="sech">Inspiration & Story</div>
-              <p style={{ fontFamily: "var(--fm)", fontSize: 11, lineHeight: 1.5, marginBottom: 12 }}>{vaultDetail.inspiration}</p>
-
-              <div className="sech">Estimated Value</div>
-              <div style={{ fontFamily: "var(--ft)", fontSize: 28, color: "var(--red)", fontWeight: 700, marginBottom: 12 }}>{vaultDetail.estimatedPrice}</div>
-
-              <button className="btn-r" onClick={() => { setVaultDetail(null); setCheckoutOpen(true); setCkStep(0); setSelSize(""); }}>🛒 BUY NOW</button>
-              <button className="btn-o" onClick={() => setVaultDetail(null)}>CLOSE</button>
-            </>
-          )}
-        </div>
-      </div>
-
-      {/* TOAST */}
-      <div className={`toast ${toast ? "show" : ""}`}>{toast}</div>
-    </>
+      {toastMsg && (
+        <div style={{ position: "fixed", bottom: 24, left: "50%", transform: "translateX(-50%)", background: "#1a1818", color: "#f5a623", fontFamily: "'Oswald', sans-serif", fontSize: 14, padding: "10px 28px", border: "2px solid #f5a623", zIndex: 10000, letterSpacing: "0.06em", animation: "fadeUp 0.3s" }}>{toastMsg}</div>
+      )}
+    </div>
   );
 };
 
