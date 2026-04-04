@@ -813,32 +813,123 @@ const Index = () => {
         <div className="phdr">
           <div className="phdr-logo">SNAPSHOTZ SOLES</div>
           <div className="phdr-title">My Vault</div>
-          <div className="phdr-sub">COLLECTION · {vault.length} PAIRS</div>
+          <div className="phdr-sub">{vaultShoes.length + vault.length} PAIRS · AI-SCANNED COLLECTION</div>
         </div>
-        {vault.length === 0 ? (
-          <div className="empty">
-            <div style={{ fontSize: 42 }}>👟</div>
-            <h3 style={{ fontFamily: "var(--ft)", fontSize: 22 }}>YOUR VAULT IS EMPTY.</h3>
-            <p>SCAN A SHOE TO ADD IT.</p>
-          </div>
-        ) : (
-          <div className="vlist">
-            {vault.map((v, i) => (
-              <div key={i} className="vitem" onClick={() => {/* could open detail */}}>
-                <div className="vthumb">
-                  {v.photo && <img src={v.photo} alt={v.name} />}
+
+        {/* Vault summary stats */}
+        {(() => {
+          const totalResale = vaultShoes.reduce((s, v) => s + v.resale, 0);
+          const totalRetail = vaultShoes.reduce((s, v) => s + v.retail, 0);
+          const totalProfit = totalResale - totalRetail;
+          return (
+            <div style={{ display: "flex", gap: 3, padding: "10px 14px 0", background: "var(--border)" }}>
+              {[
+                { l: "Vault Value", v: `$${totalResale.toLocaleString()}` },
+                { l: "Paid Retail", v: `$${totalRetail.toLocaleString()}` },
+                { l: "Net Gain", v: `${totalProfit >= 0 ? "+" : ""}$${totalProfit.toLocaleString()}`, green: totalProfit >= 0 },
+              ].map(({ l, v, green }) => (
+                <div key={l} style={{ flex: 1, background: "var(--surface)", padding: "7px 9px", textAlign: "center" }}>
+                  <div style={{ fontFamily: "var(--fm)", fontSize: 8, color: "var(--red)", fontWeight: 700, textTransform: "uppercase" }}>{l}</div>
+                  <div style={{ fontFamily: "var(--ft)", fontSize: 18, color: green ? "var(--green)" : "var(--txt)", fontWeight: 700 }}>{v}</div>
                 </div>
-                <div className="vinfo">
-                  <div className="vname">{v.name}</div>
-                  <div className="vsub">{v.brand} · {v.colorway}</div>
-                </div>
-                <div className="vbdg">{v.estimatedPrice || "—"}</div>
-                <button className="vdel" onClick={e => { e.stopPropagation(); removeFromVault(i); }}>✕</button>
-              </div>
-            ))}
+              ))}
+            </div>
+          );
+        })()}
+
+        {/* Vault controls */}
+        <div style={{ padding: "10px 14px", display: "flex", flexDirection: "column", gap: 8, borderBottom: "3px solid var(--border)" }}>
+          <div style={{ display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" }}>
+            <input value={vaultSearch} onChange={e => setVaultSearch(e.target.value)} placeholder="Search by name or colorway..." className="finp" style={{ flex: 1, minWidth: 140, fontSize: 12, padding: "6px 10px" }} />
+            <div style={{ display: "flex", gap: 4 }}>
+              {["ALL", ...Array.from(new Set(INITIAL_VAULT_SHOES.map(s => s.brand)))].map(b => (
+                <button key={b} onClick={() => setVaultFilter(b)} style={{ background: vaultFilter === b ? "var(--border)" : "transparent", color: vaultFilter === b ? "var(--gold)" : "var(--border)", border: "2px solid var(--border)", fontFamily: "var(--ft)", fontSize: 11, padding: "4px 8px", cursor: "pointer", letterSpacing: "0.05em" }}>{b}</button>
+              ))}
+            </div>
           </div>
-        )}
+          <div style={{ display: "flex", gap: 6, justifyContent: "space-between", alignItems: "center" }}>
+            <select value={vaultSort} onChange={e => setVaultSort(e.target.value)} className="fsel" style={{ fontSize: 11, padding: "5px 8px", width: "auto" }}>
+              <option value="saved">Sort: Saved</option>
+              <option value="resale">Sort: Resale ↓</option>
+              <option value="match">Sort: Match %</option>
+              <option value="brand">Sort: Brand</option>
+            </select>
+            <div style={{ display: "flex", gap: 2 }}>
+              {([["grid", "⊞"], ["list", "≡"]] as const).map(([v, icon]) => (
+                <button key={v} onClick={() => setVaultView(v as "grid" | "list")} style={{ background: vaultView === v ? "var(--border)" : "transparent", color: vaultView === v ? "var(--gold)" : "var(--border)", border: "none", fontFamily: "var(--ft)", fontSize: 17, padding: "4px 12px", cursor: "pointer" }}>{icon}</button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Vault content */}
+        <div className="vlist">
+          {(() => {
+            const sorted = [...vaultShoes]
+              .filter(s => vaultFilter === "ALL" || s.brand === vaultFilter)
+              .filter(s => !vaultSearch || s.name.toLowerCase().includes(vaultSearch.toLowerCase()) || s.colorway.toLowerCase().includes(vaultSearch.toLowerCase()))
+              .sort((a, b) => {
+                if (vaultSort === "resale") return b.resale - a.resale;
+                if (vaultSort === "match") return b.match - a.match;
+                if (vaultSort === "brand") return a.brand.localeCompare(b.brand);
+                return 0;
+              });
+
+            if (sorted.length === 0 && vault.length === 0) {
+              return (
+                <div className="empty">
+                  <div style={{ fontSize: 42 }}>👟</div>
+                  <h3 style={{ fontFamily: "var(--ft)", fontSize: 22 }}>VAULT IS EMPTY</h3>
+                  <p>{vaultSearch || vaultFilter !== "ALL" ? "No shoes match your filters." : "Scan a shoe to add it to your vault."}</p>
+                </div>
+              );
+            }
+
+            return (
+              <>
+                {vaultView === "grid" ? (
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 12, padding: 14 }}>
+                    {sorted.map((shoe, i) => (
+                      <div key={shoe.id} style={{ animation: `fadeUp 0.4s ease ${i * 0.06}s both` }}>
+                        <ShoeCardGrid shoe={shoe} onRemove={id => { setVaultShoes(v => v.filter(s => s.id !== id)); showToast("Removed from vault"); }} onBuy={s => setVaultBuyShoe(s)} />
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div style={{ display: "flex", flexDirection: "column", gap: 8, padding: 14 }}>
+                    {sorted.map((shoe, i) => (
+                      <div key={shoe.id} style={{ animation: `fadeUp 0.4s ease ${i * 0.06}s both` }}>
+                        <ShoeCardList shoe={shoe} onRemove={id => { setVaultShoes(v => v.filter(s => s.id !== id)); showToast("Removed from vault"); }} onBuy={s => setVaultBuyShoe(s)} />
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Also show scanned vault items */}
+                {vault.length > 0 && (
+                  <>
+                    <div style={{ fontFamily: "var(--ft)", fontSize: 12, letterSpacing: "0.1em", color: "var(--red)", textTransform: "uppercase", padding: "10px 14px", borderTop: "3px solid var(--border)" }}>SCANNED SHOES</div>
+                    {vault.map((v, i) => (
+                      <div key={i} className="vitem" style={{ margin: "0 14px 8px" }}>
+                        <div className="vthumb">{v.photo && <img src={v.photo} alt={v.name} />}</div>
+                        <div className="vinfo">
+                          <div className="vname">{v.name}</div>
+                          <div className="vsub">{v.brand} · {v.colorway}</div>
+                        </div>
+                        <div className="vbdg">{v.estimatedPrice || "—"}</div>
+                        <button className="vdel" onClick={e => { e.stopPropagation(); removeFromVault(i); }}>✕</button>
+                      </div>
+                    ))}
+                  </>
+                )}
+              </>
+            );
+          })()}
+        </div>
       </div>
+
+      {/* Vault Buy Modal */}
+      {vaultBuyShoe && <VaultBuyModal shoe={vaultBuyShoe} onClose={() => setVaultBuyShoe(null)} />}
 
       {/* ═══════════════════ SELL SCREEN ═══════════════════ */}
       <div className={`screen ${activeScreen === "sell" ? "active" : ""}`} style={{ background: "var(--surface)" }}>
