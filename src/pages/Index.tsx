@@ -214,11 +214,12 @@ const Index = () => {
     if (e.target.files?.length) {
       const reader = new FileReader();
       reader.onload = (ev) => {
-        setCapturedImage(ev.target?.result as string);
+        const imgData = ev.target?.result as string;
+        setCapturedImage(imgData);
         stopCamera();
+        doScan(imgData);
       };
       reader.readAsDataURL(e.target.files[0]);
-      doScan();
     }
   }, [doScan, stopCamera]);
 
