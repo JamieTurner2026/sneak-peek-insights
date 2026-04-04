@@ -203,8 +203,15 @@ const Index = () => {
 
       {/* ── SCAN SCREEN ── */}
       <div className={`screen ${tab === 0 ? "active" : ""}`} style={{ position: "relative" }}>
-        <div className="jbg" style={{ backgroundImage: "url(https://images.unsplash.com/photo-1556906781-9a412961c28c?w=800)" }} />
-        <div className={`cam-scanned ${scanned ? "vis" : ""}`} style={{ backgroundImage: "url(https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800)" }} />
+        {/* Live camera feed */}
+        <video ref={videoRef} className="jbg" style={{ objectFit: "cover", background: "#111" }} playsInline muted autoPlay />
+        <canvas ref={canvasRef} style={{ display: "none" }} />
+        {/* Fallback background when no camera */}
+        {!cameraActive && !capturedImage && (
+          <div className="jbg" style={{ backgroundImage: "url(https://images.unsplash.com/photo-1556906781-9a412961c28c?w=800)" }} />
+        )}
+        {/* Captured frame */}
+        <div className={`cam-scanned ${capturedImage || scanned ? "vis" : ""}`} style={{ backgroundImage: capturedImage ? `url(${capturedImage})` : "url(https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800)" }} />
 
         <div className="hf">
           <div className="hc tl" /><div className="hc tr" /><div className="hc bl" /><div className="hc br" />
