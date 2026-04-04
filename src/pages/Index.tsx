@@ -64,6 +64,7 @@ const Index = () => {
   const [memberOpen, setMemberOpen] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
   const [alertModal, setAlertModal] = useState<number | null>(null);
+  const [vaultDetail, setVaultDetail] = useState<ShoeResult | null>(null);
 
   // Auth
   const [loggedIn, setLoggedIn] = useState(false);
