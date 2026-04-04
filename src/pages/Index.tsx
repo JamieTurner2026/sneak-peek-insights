@@ -87,7 +87,7 @@ const Index = () => {
   const [cameraActive, setCameraActive] = useState(false);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
 
-  const shoe = SHOE_DB[shoeIdx];
+  const shoe = aiShoe || SHOE_DB[0];
 
   const showToast = useCallback((msg: string) => {
     setToast(msg);
