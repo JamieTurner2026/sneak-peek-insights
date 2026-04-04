@@ -452,7 +452,7 @@ const Index = () => {
               <p>YOUR VAULT IS EMPTY.<br />SCAN A SHOE TO ADD IT.</p>
             </div>
           ) : vault.map((v, i) => (
-            <div className="vitem" key={i}>
+            <div className="vitem" key={i} onClick={() => setVaultDetail(v)}>
               <div className="vthumb" style={v.photo ? { backgroundImage: `url(${v.photo})` } : {}} />
               <div className="vinfo">
                 <div className="vname">{v.name}</div>
