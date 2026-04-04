@@ -574,7 +574,7 @@ const Index = () => {
     { key: "scan", label: "Scan", notif: null },
     { key: "drops", label: "Drops", notif: drops.filter(d => d.hype === "HIGH").length || null },
     { key: "market", label: "Market", notif: null },
-    { key: "vault", label: "Vault", notif: vault.length || null },
+    { key: "vault", label: "Vault", notif: (vaultShoes.length + vault.length) || null },
     { key: "sell", label: "Sell", notif: null },
     { key: "id", label: "Profile", notif: null },
   ];
