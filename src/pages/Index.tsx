@@ -70,19 +70,19 @@ const RETAILERS = ["StockX", "GOAT", "Flight Club", "Stadium Goods", "eBay"];
 
 // ─── SHOE IMAGE COMPONENT ─────────────────────────────────────────────────────
 function ShoeImage({ shoeId, name, style = {} }: { shoeId: string; name: string; style?: React.CSSProperties }) {
-  const imgData = SHOE_IMAGES[shoeId] || {};
-  const [src, setSrc] = useState(imgData.primary || imgData.fallback || "");
+  const imgData = SHOE_IMAGES[shoeId];
+  const [src, setSrc] = useState(imgData?.primary || imgData?.fallback || "");
   const [tried, setTried] = useState(0);
 
   const handleError = () => {
-    if (tried === 0 && imgData.fallback) {
+    if (tried === 0 && imgData?.fallback) {
       setSrc(imgData.fallback);
       setTried(1);
     }
   };
 
   return (
-    <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", background: imgData.bg || "#e0d6c2", ...style }}>
+    <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", background: imgData?.bg || "#e0d6c2", ...style }}>
       {src ? (
         <img src={src} alt={name} onError={handleError} style={{ width: "85%", height: "85%", objectFit: "contain", filter: "drop-shadow(3px 4px 6px rgba(0,0,0,0.18))" }} />
       ) : (
