@@ -66,6 +66,11 @@ const Index = () => {
   const [selCondition, setSelCondition] = useState("");
 
   const fileRef = useRef<HTMLInputElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+  const [cameraActive, setCameraActive] = useState(false);
+  const [capturedImage, setCapturedImage] = useState<string | null>(null);
 
   const shoe = SHOE_DB[shoeIdx];
 
@@ -74,7 +79,52 @@ const Index = () => {
     setTimeout(() => setToast(""), 2000);
   }, []);
 
+  // Camera management
+  const startCamera = useCallback(async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 720 } }
+      });
+      streamRef.current = stream;
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        videoRef.current.play();
+      }
+      setCameraActive(true);
+      setCapturedImage(null);
+    } catch {
+      showToast("CAMERA ACCESS DENIED");
+    }
+  }, [showToast]);
+
+  const stopCamera = useCallback(() => {
+    streamRef.current?.getTracks().forEach(t => t.stop());
+    streamRef.current = null;
+    setCameraActive(false);
+  }, []);
+
+  // Start/stop camera when scan tab is active
+  useEffect(() => {
+    if (tab === 0 && !scanned) {
+      startCamera();
+    } else {
+      stopCamera();
+    }
+    return () => { stopCamera(); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tab, scanned]);
+
   const doScan = useCallback(() => {
+    // Capture frame from video
+    if (videoRef.current && canvasRef.current && cameraActive) {
+      const video = videoRef.current;
+      const canvas = canvasRef.current;
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      canvas.getContext("2d")?.drawImage(video, 0, 0);
+      setCapturedImage(canvas.toDataURL("image/jpeg"));
+      stopCamera();
+    }
     setScanning(true);
     setScanned(false);
     setDrawerCollapsed(true);
@@ -85,13 +135,25 @@ const Index = () => {
       setScanned(true);
       setDrawerCollapsed(false);
     }, 2800);
+  }, [cameraActive, stopCamera]);
+
+  const resetScan = useCallback(() => {
+    setScanned(false);
+    setCapturedImage(null);
+    setDrawerCollapsed(true);
   }, []);
 
   const handleFile = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files?.length) {
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        setCapturedImage(ev.target?.result as string);
+        stopCamera();
+      };
+      reader.readAsDataURL(e.target.files[0]);
       doScan();
     }
-  }, [doScan]);
+  }, [doScan, stopCamera]);
 
   const saveToVault = useCallback(() => {
     if (vault.find(v => v.name === shoe.name)) {
