@@ -229,9 +229,9 @@ const Index = () => {
       showToast("ALREADY IN VAULT");
       return;
     }
-    setVault(prev => [...prev, shoe]);
+    setVault(prev => [...prev, { ...shoe, photo: capturedImage || undefined }]);
     showToast("SAVED TO VAULT ✓");
-  }, [vault, shoe, showToast]);
+  }, [vault, shoe, capturedImage, showToast]);
 
   const removeFromVault = useCallback((idx: number) => {
     setVault(prev => prev.filter((_, i) => i !== idx));
