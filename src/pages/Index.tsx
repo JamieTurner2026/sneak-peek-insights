@@ -45,6 +45,7 @@ interface ShoeResult {
   estimatedPrice: string;
   brand: string;
   retailers: { name: string; badge: string; price: string; source: string }[];
+  photo?: string;
 }
 
 // ── Component ──
