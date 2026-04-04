@@ -28,10 +28,24 @@ const MARKET = [
 const SIZES = ["7", "7.5", "8", "8.5", "9", "9.5", "10", "10.5", "11", "11.5", "12", "13"];
 
 const SHOE_DB = [
-  { name: "Air Jordan 1 Retro High OG", silhouette: "Jordan 1 High", colorway: "Chicago / Red-White-Black", release: "1985 / 2015 Retro", tech: "Air Sole Unit", confidence: 94, retailers: [{ name: "StockX", badge: "bb", price: "$387", source: "STOCKX" }, { name: "GOAT", badge: "ba", price: "$395", source: "GOAT" }, { name: "Nike SNKRS", badge: "bn", price: "$180", source: "RETAIL" }, { name: "eBay Auth.", badge: "bs", price: "$360", source: "EBAY" }] },
-  { name: "Nike Dunk Low Panda", silhouette: "Dunk Low", colorway: "White/Black", release: "2021", tech: "Foam Midsole", confidence: 91, retailers: [{ name: "StockX", badge: "bb", price: "$119", source: "STOCKX" }, { name: "GOAT", badge: "ba", price: "$125", source: "GOAT" }, { name: "Nike", badge: "bn", price: "$110", source: "RETAIL" }, { name: "Foot Locker", badge: "bd", price: "$110", source: "RETAIL" }] },
-  { name: "Yeezy Boost 350 V2", silhouette: "Yeezy 350", colorway: "Bone / Off-White", release: "2022", tech: "Boost Midsole / Primeknit", confidence: 88, retailers: [{ name: "StockX", badge: "bb", price: "$241", source: "STOCKX" }, { name: "GOAT", badge: "ba", price: "$250", source: "GOAT" }, { name: "Adidas", badge: "bn", price: "$230", source: "RETAIL" }, { name: "Flight Club", badge: "bs", price: "$255", source: "RESALE" }] },
+  { name: "Air Jordan 1 Retro High OG", silhouette: "Jordan 1 High", colorway: "Chicago / Red-White-Black", release: "1985 / 2015 Retro", tech: "Air Sole Unit", confidence: 94, designer: "Peter Moore", inspiration: "Designed by Peter Moore in 1985 for Michael Jordan, the AJ1 broke NBA uniform rules with its bold colorway, earning fines every game. It became a cultural icon bridging basketball, fashion, and hip-hop.", estimatedPrice: "$387", brand: "NIKE", retailers: [{ name: "StockX", badge: "bb", price: "$387", source: "STOCKX" }, { name: "GOAT", badge: "ba", price: "$395", source: "GOAT" }, { name: "Nike SNKRS", badge: "bn", price: "$180", source: "RETAIL" }, { name: "eBay Auth.", badge: "bs", price: "$360", source: "EBAY" }] },
+  { name: "Nike Dunk Low Panda", silhouette: "Dunk Low", colorway: "White/Black", release: "2021", tech: "Foam Midsole", confidence: 91, designer: "Nike Design Team", inspiration: "Originally created in 1985 as a college basketball shoe, the Dunk was designed to rep university colors. The Panda colorway became a modern classic with its clean black-and-white simplicity.", estimatedPrice: "$119", brand: "NIKE", retailers: [{ name: "StockX", badge: "bb", price: "$119", source: "STOCKX" }, { name: "GOAT", badge: "ba", price: "$125", source: "GOAT" }, { name: "Nike", badge: "bn", price: "$110", source: "RETAIL" }, { name: "Foot Locker", badge: "bd", price: "$110", source: "RETAIL" }] },
+  { name: "Yeezy Boost 350 V2", silhouette: "Yeezy 350", colorway: "Bone / Off-White", release: "2022", tech: "Boost Midsole / Primeknit", confidence: 88, designer: "Kanye West & adidas Design Team", inspiration: "Kanye West's vision of futuristic minimalism meets comfort. The 350 V2 features a distinctive side stripe and Primeknit upper, representing the intersection of high fashion and athletic performance.", estimatedPrice: "$241", brand: "ADIDAS", retailers: [{ name: "StockX", badge: "bb", price: "$241", source: "STOCKX" }, { name: "GOAT", badge: "ba", price: "$250", source: "GOAT" }, { name: "Adidas", badge: "bn", price: "$230", source: "RETAIL" }, { name: "Flight Club", badge: "bs", price: "$255", source: "RESALE" }] },
 ];
+
+interface ShoeResult {
+  name: string;
+  silhouette: string;
+  colorway: string;
+  release: string;
+  tech: string;
+  confidence: number;
+  designer: string;
+  inspiration: string;
+  estimatedPrice: string;
+  brand: string;
+  retailers: { name: string; badge: string; price: string; source: string }[];
+}
 
 // ── Component ──
 const Index = () => {
