@@ -84,8 +84,8 @@ const VAULT_RETAILERS = ["StockX", "GOAT", "Flight Club", "Stadium Goods", "eBay
 
 // ─── SHOE IMAGE COMPONENT ─────────────────────────────────────────────────────
 function ShoeImage({ shoeId, name, style = {} }: { shoeId: string; name: string; style?: React.CSSProperties }) {
-  const imgData = SHOE_IMAGES[shoeId] || {};
-  const [src, setSrc] = useState(imgData.primary || imgData.fallback || "");
+  const imgData = SHOE_IMAGES[shoeId] as { primary: string; fallback: string; bg: string } | undefined;
+  const [src, setSrc] = useState(imgData?.primary || imgData?.fallback || "");
   const [tried, setTried] = useState(0);
 
   const handleError = () => {
