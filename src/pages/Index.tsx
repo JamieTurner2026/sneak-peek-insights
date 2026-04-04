@@ -16,6 +16,274 @@ interface ShoeResult {
   photo?: string;
 }
 
+// ─── SHOE IMAGE MAP ──────────────────────────────────────────────────────────
+const SHOE_IMAGES: Record<string, { primary: string; fallback: string; bg: string }> = {
+  "AJ1-CHI": {
+    primary: "https://image.goat.com/750/attachments/product_template_pictures/images/011/824/726/original/9978_00.png.png",
+    fallback: "https://images.unsplash.com/photo-1600269452121-4f2416e55c28?auto=format&fit=crop&q=80&w=600",
+    bg: "#e8d5d5",
+  },
+  "AJ3-BLC": {
+    primary: "https://image.goat.com/750/attachments/product_template_pictures/images/014/519/258/original/306292_00.png.png",
+    fallback: "https://images.unsplash.com/photo-1605348532760-6753d2c43329?auto=format&fit=crop&q=80&w=600",
+    bg: "#d5d5d5",
+  },
+  "DUNK-PND": {
+    primary: "https://image.goat.com/750/attachments/product_template_pictures/images/046/880/925/original/921573_00.png.png",
+    fallback: "https://images.unsplash.com/photo-1607522370275-f6fd4197767c?auto=format&fit=crop&q=80&w=600",
+    bg: "#f0f0f0",
+  },
+  "YZY-ZBR": {
+    primary: "https://image.goat.com/750/attachments/product_template_pictures/images/012/475/614/original/502874_00.png.png",
+    fallback: "https://images.unsplash.com/photo-1584735175315-9d5df23be6e0?auto=format&fit=crop&q=80&w=600",
+    bg: "#ebebeb",
+  },
+  "NB-550": {
+    primary: "https://image.goat.com/750/attachments/product_template_pictures/images/047/745/438/original/875348_00.png.png",
+    fallback: "https://images.unsplash.com/photo-1539185441755-769473a23570?auto=format&fit=crop&q=80&w=600",
+    bg: "#dff0e8",
+  },
+};
+
+interface VaultShoe {
+  id: string;
+  name: string;
+  brand: string;
+  colorway: string;
+  size: string;
+  condition: string;
+  match: number;
+  retail: number;
+  resale: number;
+  release: string;
+  silhouette: string;
+  tech: string;
+  sku: string;
+  tags: string[];
+  saved: string;
+  photo?: string;
+}
+
+const INITIAL_VAULT_SHOES: VaultShoe[] = [
+  { id: "AJ1-CHI", name: "Air Jordan 1 Retro High OG", brand: "JORDAN", colorway: "Chicago", size: "10", condition: "Deadstock", match: 98.4, retail: 170, resale: 298, release: "Feb 2022", silhouette: "HIGH-TOP", tech: "Air Sole", sku: "DZ5485-612", tags: ["Jordan", "Retro", "Limited"], saved: "Mar 12, 2026" },
+  { id: "AJ3-BLC", name: "Air Jordan 3 Retro", brand: "JORDAN", colorway: "Black Cement", size: "10.5", condition: "Like New", match: 96.1, retail: 190, resale: 245, release: "Jan 2018", silhouette: "MID-TOP", tech: "Air Sole", sku: "854262-001", tags: ["Jordan", "Cement", "OG"], saved: "Mar 20, 2026" },
+  { id: "DUNK-PND", name: "Nike Dunk Low", brand: "NIKE", colorway: "Panda", size: "11", condition: "New in Box", match: 97.5, retail: 110, resale: 118, release: "Mar 2021", silhouette: "LOW-TOP", tech: "Cushlon", sku: "DD1391-100", tags: ["Nike", "Dunk", "Classic"], saved: "Apr 1, 2026" },
+  { id: "YZY-ZBR", name: "Yeezy Boost 350 V2", brand: "ADIDAS", colorway: "Zebra", size: "9.5", condition: "Deadstock", match: 94.3, retail: 220, resale: 240, release: "Feb 2017", silhouette: "LOW-TOP", tech: "Boost", sku: "CP9654", tags: ["Yeezy", "Adidas", "Boost"], saved: "Apr 2, 2026" },
+  { id: "NB-550", name: "New Balance 550", brand: "NEW BALANCE", colorway: "White / Green", size: "10", condition: "Used — Great", match: 92.6, retail: 110, resale: 95, release: "Nov 2020", silhouette: "LOW-TOP", tech: "Encap", sku: "BB550WT1", tags: ["New Balance", "Court", "Retro"], saved: "Apr 3, 2026" },
+];
+
+const CONDITION_COLOR: Record<string, { bg: string; text: string }> = {
+  "Deadstock": { bg: "#1a6b3c", text: "#fff" },
+  "New in Box": { bg: "#0e4f8a", text: "#fff" },
+  "Like New": { bg: "#5a3d8a", text: "#fff" },
+  "Used — Great": { bg: "#8a5a1a", text: "#fff" },
+  "Used — Good": { bg: "#6b2a2a", text: "#fff" },
+};
+
+const VAULT_RETAILERS = ["StockX", "GOAT", "Flight Club", "Stadium Goods", "eBay"];
+
+// ─── SHOE IMAGE COMPONENT ─────────────────────────────────────────────────────
+function ShoeImage({ shoeId, name, style = {} }: { shoeId: string; name: string; style?: React.CSSProperties }) {
+  const imgData = SHOE_IMAGES[shoeId] || {};
+  const [src, setSrc] = useState(imgData.primary || imgData.fallback || "");
+  const [tried, setTried] = useState(0);
+
+  const handleError = () => {
+    if (tried === 0 && imgData.fallback) {
+      setSrc(imgData.fallback);
+      setTried(1);
+    }
+  };
+
+  return (
+    <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", background: imgData.bg || "var(--sa)", ...style }}>
+      {src ? (
+        <img src={src} alt={name} onError={handleError} style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+      ) : (
+        <svg width="60" height="40" viewBox="0 0 60 40" fill="none">
+          <path d="M5 30 Q10 10 25 15 Q35 5 45 12 Q55 8 58 20 L55 30 Z" fill="var(--sa)" stroke="var(--border)" strokeWidth="1.5" />
+          <circle cx="15" cy="32" r="5" fill="var(--border)" /><circle cx="45" cy="32" r="5" fill="var(--border)" />
+        </svg>
+      )}
+    </div>
+  );
+}
+
+// ─── SHOE CARD — GRID ─────────────────────────────────────────────────────────
+function ShoeCardGrid({ shoe, onRemove, onBuy }: { shoe: VaultShoe; onRemove: (id: string) => void; onBuy: (shoe: VaultShoe) => void }) {
+  const [hovered, setHovered] = useState(false);
+  const profit = shoe.resale - shoe.retail;
+  const profitPct = ((profit / shoe.retail) * 100).toFixed(0);
+  const cond = CONDITION_COLOR[shoe.condition] || { bg: "#333", text: "#fff" };
+
+  return (
+    <div
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{ border: "3px solid var(--border)", background: "var(--surface)", display: "flex", flexDirection: "column", cursor: "pointer", transition: "transform 0.18s, box-shadow 0.18s", transform: hovered ? "translateY(-5px)" : "translateY(0)", boxShadow: hovered ? "7px 7px 0 var(--border)" : "none", position: "relative", overflow: "hidden" }}
+      onClick={() => onBuy(shoe)}
+    >
+      <div style={{ height: 160, position: "relative", overflow: "hidden" }}>
+        <ShoeImage shoeId={shoe.id} name={shoe.name} />
+        <div style={{ position: "absolute", top: 7, left: 7, background: "rgba(13,13,13,.82)", color: "var(--gold)", border: "1.5px solid var(--gold)", fontFamily: "var(--fm)", fontSize: 10, fontWeight: 700, padding: "2px 7px", letterSpacing: "0.06em" }}>{shoe.match}% MATCH</div>
+        <div style={{ position: "absolute", bottom: 7, left: 7, background: cond.bg, color: cond.text, fontFamily: "var(--fm)", fontSize: 9, fontWeight: 700, padding: "2px 7px" }}>{shoe.condition.toUpperCase()}</div>
+        <div style={{ position: "absolute", bottom: 7, right: 7, fontFamily: "var(--fm)", fontSize: 8, color: "rgba(255,255,255,.6)" }}>{shoe.sku}</div>
+        <button onClick={e => { e.stopPropagation(); onRemove(shoe.id); }} style={{ position: "absolute", top: 7, right: 7, background: "rgba(200,16,46,0.92)", border: "none", color: "#fff", fontFamily: "var(--ft)", fontSize: 13, width: 28, height: 28, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", opacity: hovered ? 1 : 0, transition: "opacity 0.2s" }}>✕</button>
+      </div>
+      <div style={{ background: "var(--border)", color: "var(--surface)", fontFamily: "var(--ft)", fontSize: 11, letterSpacing: "0.1em", padding: "5px 10px", display: "flex", justifyContent: "space-between" }}>
+        <span>{shoe.brand}</span><span>SZ {shoe.size}</span>
+      </div>
+      <div style={{ padding: "10px 10px 12px" }}>
+        <div style={{ fontFamily: "var(--ft)", fontSize: 17, lineHeight: 1.1, marginBottom: 3 }}>{shoe.name}</div>
+        <div style={{ fontFamily: "var(--fm)", fontSize: 10, color: "var(--red)", fontWeight: 700, marginBottom: 6 }}>{shoe.colorway}</div>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 4, marginBottom: 8 }}>
+          {shoe.tags.map(t => <span key={t} style={{ background: "var(--border)", color: "var(--surface)", fontFamily: "var(--fm)", fontSize: 8, fontWeight: 700, padding: "2px 6px" }}>{t}</span>)}
+        </div>
+        <div style={{ display: "flex", gap: 5, marginBottom: 8 }}>
+          <div style={{ flex: 1, border: "2px solid var(--border)", padding: "4px 7px" }}><span style={{ fontFamily: "var(--fm)", fontSize: 8, color: "var(--red)", fontWeight: 700, display: "block" }}>SILHOUETTE</span><span style={{ fontFamily: "var(--ft)", fontSize: 13 }}>{shoe.silhouette}</span></div>
+          <div style={{ flex: 1, border: "2px solid var(--border)", padding: "4px 7px" }}><span style={{ fontFamily: "var(--fm)", fontSize: 8, color: "var(--red)", fontWeight: 700, display: "block" }}>RELEASE</span><span style={{ fontFamily: "var(--ft)", fontSize: 13 }}>{shoe.release}</span></div>
+        </div>
+        <div style={{ display: "flex", justifyContent: "space-between" }}>
+          <div><div style={{ fontFamily: "var(--fm)", fontSize: 8, color: "var(--red)", fontWeight: 700 }}>RESALE</div><div style={{ fontFamily: "var(--ft)", fontSize: 22, color: "var(--red)", fontWeight: 700 }}>${shoe.resale}</div></div>
+          <div style={{ textAlign: "right" }}><div style={{ fontFamily: "var(--fm)", fontSize: 8, color: "var(--red)", fontWeight: 700 }}>RETAIL</div><div style={{ fontFamily: "var(--ft)", fontSize: 16, opacity: 0.6 }}>${shoe.retail}</div><div style={{ fontFamily: "var(--fm)", fontSize: 10, color: profit >= 0 ? "var(--green)" : "#8a1a1a", fontWeight: 700, marginTop: 1 }}>{profit >= 0 ? "▲" : "▼"} ${Math.abs(profit)} ({Math.abs(Number(profitPct))}%)</div></div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── SHOE CARD — LIST ─────────────────────────────────────────────────────────
+function ShoeCardList({ shoe, onRemove, onBuy }: { shoe: VaultShoe; onRemove: (id: string) => void; onBuy: (shoe: VaultShoe) => void }) {
+  const [hovered, setHovered] = useState(false);
+  const profit = shoe.resale - shoe.retail;
+  const profitPct = ((profit / shoe.retail) * 100).toFixed(0);
+  const cond = CONDITION_COLOR[shoe.condition] || { bg: "#333", text: "#fff" };
+
+  return (
+    <div
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{ display: "flex", alignItems: "center", gap: 0, border: "3px solid var(--border)", background: hovered ? "var(--sa)" : "var(--surface)", transition: "background 0.18s", position: "relative", cursor: "pointer", overflow: "hidden" }}
+      onClick={() => onBuy(shoe)}
+    >
+      <div style={{ width: 90, height: 90, flexShrink: 0, borderRight: "3px solid var(--border)" }}><ShoeImage shoeId={shoe.id} name={shoe.name} /></div>
+      <div style={{ flex: 1, padding: "8px 10px", minWidth: 0 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 2 }}>
+          <span style={{ fontFamily: "var(--ft)", fontSize: 10, letterSpacing: "0.06em", color: "var(--red)" }}>{shoe.brand}</span>
+          <span style={{ fontFamily: "var(--fm)", fontSize: 8, color: "var(--red)" }}>SZ {shoe.size} · {shoe.sku}</span>
+        </div>
+        <div style={{ fontFamily: "var(--ft)", fontSize: 16, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{shoe.name}</div>
+        <div style={{ fontFamily: "var(--fm)", fontSize: 9, color: "var(--red)", fontWeight: 700 }}>{shoe.colorway}</div>
+        <div style={{ display: "flex", gap: 4, marginTop: 3 }}>
+          <span style={{ background: cond.bg, color: cond.text, fontFamily: "var(--fm)", fontSize: 8, fontWeight: 700, padding: "1px 5px" }}>{shoe.condition}</span>
+          {shoe.tags.map(t => <span key={t} style={{ background: "var(--border)", color: "var(--surface)", fontFamily: "var(--fm)", fontSize: 7, fontWeight: 700, padding: "1px 5px" }}>{t}</span>)}
+        </div>
+      </div>
+      <div style={{ padding: "8px 12px", textAlign: "right", flexShrink: 0 }}>
+        <div style={{ fontFamily: "var(--fm)", fontSize: 8, color: "var(--red)", fontWeight: 700 }}>RESALE</div>
+        <div style={{ fontFamily: "var(--ft)", fontSize: 20, color: "var(--red)", fontWeight: 700 }}>${shoe.resale}</div>
+        <div style={{ fontFamily: "var(--fm)", fontSize: 10, color: profit >= 0 ? "var(--green)" : "#8a1a1a", fontWeight: 700, marginTop: 2 }}>{profit >= 0 ? "▲" : "▼"} ${Math.abs(profit)} ({Math.abs(Number(profitPct))}%)</div>
+        <div style={{ fontFamily: "var(--fm)", fontSize: 9, color: "var(--red)", marginTop: 2 }}>{shoe.match}% match</div>
+      </div>
+      <button onClick={e => { e.stopPropagation(); onRemove(shoe.id); }} style={{ position: "absolute", top: 6, right: 8, background: "none", border: "2px solid var(--red)", color: "var(--red)", fontFamily: "var(--ft)", fontSize: 10, padding: "2px 6px", cursor: "pointer", opacity: hovered ? 1 : 0, transition: "opacity 0.2s" }}>✕</button>
+    </div>
+  );
+}
+
+// ─── VAULT BUY MODAL ──────────────────────────────────────────────────────────
+function VaultBuyModal({ shoe, onClose }: { shoe: VaultShoe; onClose: () => void }) {
+  const [step, setStep] = useState(1);
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [addr, setAddr] = useState("");
+  const [city, setCity] = useState("");
+  const [zip, setZip] = useState("");
+  const [card, setCard] = useState("");
+  const [expiry, setExpiry] = useState("");
+  const [cvv, setCvv] = useState("");
+  const [cardName, setCardName] = useState("");
+  const [retailer, setRetailer] = useState("StockX");
+  const [orderNum, setOrderNum] = useState("");
+
+  const fmtCard = (v: string) => v.replace(/\D/g, "").slice(0, 16).replace(/.{1,4}/g, "$& ").trim();
+  const fmtExp = (v: string) => { const d = v.replace(/\D/g, ""); return d.length >= 3 ? d.slice(0, 2) + "/" + d.slice(2, 4) : d; };
+
+  const goNext = () => {
+    if (step === 1 && (!name.trim() || !email.trim() || !addr.trim())) return;
+    if (step === 2) {
+      if (card.replace(/\s/g, "").length < 15 || !expiry.includes("/") || cvv.length < 3) return;
+      setOrderNum("SS-" + Math.random().toString(36).slice(2, 10).toUpperCase());
+    }
+    setStep(s => s + 1);
+  };
+
+  return (
+    <div className="mo open" onClick={e => e.target === e.currentTarget && onClose()}>
+      <div className="mb">
+        <button className="mclose" onClick={onClose}>✕ CLOSE</button>
+        <div style={{ display: "flex", gap: 12, alignItems: "center", marginBottom: 14 }}>
+          <div style={{ width: 60, height: 60, border: "3px solid var(--border)", flexShrink: 0 }}><ShoeImage shoeId={shoe.id} name={shoe.name} /></div>
+          <div><div style={{ fontFamily: "var(--ft)", fontSize: 18 }}>{shoe.name}</div><div style={{ fontFamily: "var(--fm)", fontSize: 10, color: "var(--red)", fontWeight: 700 }}>{shoe.colorway} · SZ {shoe.size}</div></div>
+        </div>
+        <div style={{ display: "flex", gap: 6, marginBottom: 14 }}>
+          {[1, 2, 3].map(i => <div key={i} style={{ flex: 1, height: 4, background: step >= i ? (step > i ? "var(--green)" : "var(--red)") : "var(--sa)" }} />)}
+        </div>
+        {step === 1 && (
+          <div>
+            <div className="cktitle">SHIPPING INFO</div>
+            <div className="fgrp" style={{ marginBottom: 8 }}>
+              <label className="flbl">Buy From</label>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 5, marginTop: 4 }}>
+                {VAULT_RETAILERS.map(r => <button key={r} onClick={() => setRetailer(r)} style={{ background: retailer === r ? "var(--border)" : "var(--surface)", color: retailer === r ? "var(--gold)" : "var(--border)", border: "2px solid var(--border)", fontFamily: "var(--ft)", fontSize: 12, padding: "5px 11px", cursor: "pointer" }}>{r}</button>)}
+              </div>
+            </div>
+            <div className="aform">
+              <div className="fgrp"><label className="flbl">Full Name</label><input className="finp" value={name} onChange={e => setName(e.target.value)} placeholder="Jordan Smith" /></div>
+              <div className="fgrp"><label className="flbl">Email</label><input className="finp" value={email} onChange={e => setEmail(e.target.value)} placeholder="jordan@email.com" /></div>
+              <div className="fgrp"><label className="flbl">Shipping Address</label><input className="finp" value={addr} onChange={e => setAddr(e.target.value)} placeholder="123 Sneaker Ave" /></div>
+              <div className="ckinrow">
+                <div className="fgrp"><label className="flbl">City</label><input className="finp" value={city} onChange={e => setCity(e.target.value)} placeholder="Charlotte" /></div>
+                <div className="fgrp"><label className="flbl">ZIP</label><input className="finp" value={zip} onChange={e => setZip(e.target.value.slice(0, 5))} placeholder="28001" /></div>
+              </div>
+            </div>
+            <button className="btn-r" onClick={goNext}>CONTINUE TO PAYMENT →</button>
+          </div>
+        )}
+        {step === 2 && (
+          <div>
+            <div className="cktitle">PAYMENT</div>
+            <div className="aform">
+              <div className="fgrp"><label className="flbl">Card Number</label><input className="finp" value={card} onChange={e => setCard(fmtCard(e.target.value))} placeholder="1234 5678 9012 3456" maxLength={19} /></div>
+              <div className="ckinrow">
+                <div className="fgrp"><label className="flbl">Expiry</label><input className="finp" value={expiry} onChange={e => setExpiry(fmtExp(e.target.value))} placeholder="MM/YY" maxLength={5} /></div>
+                <div className="fgrp"><label className="flbl">CVV</label><input className="finp" value={cvv} onChange={e => setCvv(e.target.value.slice(0, 4))} placeholder="•••" /></div>
+              </div>
+              <div className="fgrp"><label className="flbl">Name on Card</label><input className="finp" value={cardName} onChange={e => setCardName(e.target.value)} placeholder="Jordan Smith" /></div>
+            </div>
+            <div className="osm" style={{ marginTop: 12 }}>
+              <div className="osr"><span>Subtotal</span><span>${shoe.resale}</span></div>
+              <div className="osr"><span>Shipping via {retailer}</span><span>$9.99</span></div>
+              <div className="osr tot"><span>TOTAL</span><span>${(shoe.resale + 9.99).toFixed(2)}</span></div>
+            </div>
+            <button className="btn-r" onClick={goNext}>🔒 PLACE ORDER</button>
+            <button className="btn-o" onClick={() => setStep(1)}>← BACK</button>
+          </div>
+        )}
+        {step === 3 && (
+          <div style={{ textAlign: "center", padding: "18px 0" }}>
+            <div style={{ fontSize: 46, marginBottom: 8 }}>✅</div>
+            <div style={{ fontFamily: "var(--ft)", fontSize: 28 }}>ORDER PLACED!</div>
+            <div style={{ fontFamily: "var(--fm)", fontSize: 11, color: "var(--red)", fontWeight: 700 }}>Order #{orderNum}</div>
+            <div style={{ fontFamily: "var(--fm)", fontSize: 10, marginTop: 4 }}>via {retailer}</div>
+            <div style={{ fontFamily: "var(--fm)", fontSize: 10, color: "var(--red)", marginTop: 4 }}>Confirmation → {email}</div>
+            <button className="btn-r" style={{ marginTop: 14 }} onClick={onClose}>CLOSE</button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 interface VaultItem extends ShoeResult {
   savedAt: string;
 }
