@@ -362,8 +362,15 @@ const Index = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
 
-  // Vault
+  // Vault (scanned shoes)
   const [vault, setVault] = useState<VaultItem[]>([]);
+  // Vault collection (pre-loaded shoes with images)
+  const [vaultShoes, setVaultShoes] = useState<VaultShoe[]>(INITIAL_VAULT_SHOES);
+  const [vaultView, setVaultView] = useState<"grid" | "list">("grid");
+  const [vaultSort, setVaultSort] = useState("saved");
+  const [vaultFilter, setVaultFilter] = useState("ALL");
+  const [vaultSearch, setVaultSearch] = useState("");
+  const [vaultBuyShoe, setVaultBuyShoe] = useState<VaultShoe | null>(null);
 
   // Drops
   const [drops, setDrops] = useState<DropItem[]>(INITIAL_DROPS);
