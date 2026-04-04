@@ -129,32 +129,84 @@ const Index = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tab, scanned]);
 
-  const doScan = useCallback(() => {
-    // Capture frame from video
-    if (videoRef.current && canvasRef.current && cameraActive) {
+  const doScan = useCallback(async (imageDataUrl?: string) => {
+    let imgData = imageDataUrl || null;
+    
+    // Capture frame from video if no image provided
+    if (!imgData && videoRef.current && canvasRef.current && cameraActive) {
       const video = videoRef.current;
       const canvas = canvasRef.current;
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
       canvas.getContext("2d")?.drawImage(video, 0, 0);
-      setCapturedImage(canvas.toDataURL("image/jpeg"));
+      imgData = canvas.toDataURL("image/jpeg", 0.8);
+      setCapturedImage(imgData);
       stopCamera();
     }
+    
     setScanning(true);
     setScanned(false);
+    setAiShoe(null);
     setDrawerCollapsed(true);
-    const idx = Math.floor(Math.random() * SHOE_DB.length);
-    setShoeIdx(idx);
-    setTimeout(() => {
-      setScanning(false);
-      setScanned(true);
-      setDrawerCollapsed(false);
-    }, 2800);
-  }, [cameraActive, stopCamera]);
+
+    if (imgData) {
+      try {
+        const { data, error } = await supabase.functions.invoke("identify-shoe", {
+          body: { imageBase64: imgData },
+        });
+        
+        if (error) throw error;
+        
+        // Build shoe result with retailer defaults
+        const result: ShoeResult = {
+          name: data.name || "Unknown Shoe",
+          silhouette: data.silhouette || "Unknown",
+          colorway: data.colorway || "Unknown",
+          release: data.release || "Unknown",
+          tech: data.tech || "Unknown",
+          confidence: data.confidence || 50,
+          designer: data.designer || "Unknown",
+          inspiration: data.inspiration || "No information available.",
+          estimatedPrice: data.estimatedPrice || "$0",
+          brand: data.brand || "UNKNOWN",
+          retailers: [
+            { name: "StockX", badge: "bb", price: data.estimatedPrice || "$—", source: "STOCKX" },
+            { name: "GOAT", badge: "ba", price: data.estimatedPrice || "$—", source: "GOAT" },
+            { name: `${data.brand || "Brand"} Direct`, badge: "bn", price: data.estimatedPrice || "$—", source: "RETAIL" },
+            { name: "eBay Auth.", badge: "bs", price: data.estimatedPrice || "$—", source: "EBAY" },
+          ],
+        };
+        
+        setAiShoe(result);
+        setScanning(false);
+        setScanned(true);
+        setDrawerCollapsed(false);
+      } catch (err) {
+        console.error("AI scan failed:", err);
+        showToast("AI SCAN FAILED — USING FALLBACK");
+        // Fallback to random shoe from DB
+        const fallback = SHOE_DB[Math.floor(Math.random() * SHOE_DB.length)];
+        setAiShoe(fallback);
+        setScanning(false);
+        setScanned(true);
+        setDrawerCollapsed(false);
+      }
+    } else {
+      // No image available, use fallback
+      const fallback = SHOE_DB[Math.floor(Math.random() * SHOE_DB.length)];
+      setAiShoe(fallback);
+      setTimeout(() => {
+        setScanning(false);
+        setScanned(true);
+        setDrawerCollapsed(false);
+      }, 2800);
+    }
+  }, [cameraActive, stopCamera, showToast]);
 
   const resetScan = useCallback(() => {
     setScanned(false);
     setCapturedImage(null);
+    setAiShoe(null);
     setDrawerCollapsed(true);
   }, []);
 
