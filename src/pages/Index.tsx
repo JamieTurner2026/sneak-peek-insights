@@ -285,6 +285,7 @@ const Index = () => {
                   </div>
 
                   <button className="btn-r" onClick={() => { setCheckoutOpen(true); setCkStep(0); setSelSize(""); }}>🛒 BUY NOW — CHECKOUT</button>
+                  <button className="btn-o" style={{ marginTop: 7 }} onClick={resetScan}>↻ SCAN AGAIN</button>
                 </>
               )}
             </div>
