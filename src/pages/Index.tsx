@@ -335,6 +335,12 @@ const Index = () => {
                     <div className="si2"><span className="sl">Tech</span><span className="sv">{shoe.tech}</span></div>
                   </div>
 
+                  <div className="sech">Designer</div>
+                  <div style={{ fontFamily: "var(--ft)", fontSize: 16, marginBottom: 5 }}>{shoe.designer}</div>
+
+                  <div className="sech">Inspiration & Story</div>
+                  <p style={{ fontFamily: "var(--fm)", fontSize: 11, lineHeight: 1.5, marginBottom: 12 }}>{shoe.inspiration}</p>
+
                   <button className="btn-o" style={{ marginTop: 0, marginBottom: 7 }} onClick={saveToVault}>+ SAVE TO VAULT</button>
 
                   <div className="sech">Where to Buy</div>
