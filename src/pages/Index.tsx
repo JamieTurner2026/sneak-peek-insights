@@ -1,6 +1,10 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import SneakerImage, { getSneakerImageData } from "@/components/SneakerImage";
+import aj4BredImg from "@/assets/aj4-bred.png";
+import aj1RoyalImg from "@/assets/aj1-royal.png";
+import aj3FearImg from "@/assets/aj3-fear.png";
+import aj11CoolGreyImg from "@/assets/aj11-cool-grey.png";
 
 // ─── TYPES ───────────────────────────────────────────────────────────────────
 interface ShoeResult {
@@ -511,10 +515,10 @@ interface DropItem {
 const DROP_BRANDS = ["ALL", "JORDAN", "NIKE", "NIKE SB", "ADIDAS", "NEW BALANCE", "ASICS"] as const;
 
 const INITIAL_DROPS = ([
-  { id: "d1", name: "Air Jordan 4 Retro", brand: "JORDAN", brandFilter: "JORDAN", colorway: "Bred Reimagined", date: buildDropDate(2), dateLabel: "", retail: 210, image: "https://images.unsplash.com/photo-1600269452121-4f2416e55c28?auto=format&fit=crop&q=80&w=600", hype: "SELLOUT" as const, alert: false, sku: "FV5029-006", retailer: "Nike SNKRS" },
-  { id: "d2", name: "Air Jordan 1 High OG", brand: "JORDAN", brandFilter: "JORDAN", colorway: "Royal Toe", date: buildDropDate(5), dateLabel: "", retail: 180, image: "https://images.unsplash.com/photo-1597045566677-8cf032ed6634?auto=format&fit=crop&q=80&w=600", hype: "HIGH" as const, alert: false, sku: "555088-041", retailer: "Nike SNKRS" },
-  { id: "d3", name: "Air Jordan 3 Retro", brand: "JORDAN", brandFilter: "JORDAN", colorway: "Fear", date: buildDropDate(9), dateLabel: "", retail: 200, image: "https://images.unsplash.com/photo-1605348532760-6753d2c43329?auto=format&fit=crop&q=80&w=600", hype: "HIGH" as const, alert: false, sku: "CT8532-080", retailer: "Nike SNKRS" },
-  { id: "d4", name: "Air Jordan 11 Retro", brand: "JORDAN", brandFilter: "JORDAN", colorway: "Cool Grey", date: buildDropDate(14), dateLabel: "", retail: 225, image: "https://images.unsplash.com/photo-1551107696-a4b0c5a0d9a2?auto=format&fit=crop&q=80&w=600", hype: "SELLOUT" as const, alert: false, sku: "CT8012-005", retailer: "Foot Locker" },
+  { id: "d1", name: "Air Jordan 4 Retro", brand: "JORDAN", brandFilter: "JORDAN", colorway: "Bred Reimagined", date: buildDropDate(2), dateLabel: "", retail: 210, image: aj4BredImg, hype: "SELLOUT" as const, alert: false, sku: "FV5029-006", retailer: "Nike SNKRS" },
+  { id: "d2", name: "Air Jordan 1 High OG", brand: "JORDAN", brandFilter: "JORDAN", colorway: "Royal Toe", date: buildDropDate(5), dateLabel: "", retail: 180, image: aj1RoyalImg, hype: "HIGH" as const, alert: false, sku: "555088-041", retailer: "Nike SNKRS" },
+  { id: "d3", name: "Air Jordan 3 Retro", brand: "JORDAN", brandFilter: "JORDAN", colorway: "Fear", date: buildDropDate(9), dateLabel: "", retail: 200, image: aj3FearImg, hype: "HIGH" as const, alert: false, sku: "CT8532-080", retailer: "Nike SNKRS" },
+  { id: "d4", name: "Air Jordan 11 Retro", brand: "JORDAN", brandFilter: "JORDAN", colorway: "Cool Grey", date: buildDropDate(14), dateLabel: "", retail: 225, image: aj11CoolGreyImg, hype: "SELLOUT" as const, alert: false, sku: "CT8012-005", retailer: "Foot Locker" },
   { id: "d5", name: "Nike Dunk Low", brand: "NIKE", brandFilter: "NIKE", colorway: "University Blue", date: buildDropDate(3), dateLabel: "", retail: 115, image: "https://images.unsplash.com/photo-1607522370275-f6fd4197767c?auto=format&fit=crop&q=80&w=600", hype: "HIGH" as const, alert: false, sku: "DD1391-102", retailer: "Nike SNKRS" },
   { id: "d6", name: "Nike Air Force 1 Low", brand: "NIKE", brandFilter: "NIKE", colorway: "Triple White", date: buildDropDate(7), dateLabel: "", retail: 110, image: "https://images.unsplash.com/photo-1600185365926-3a2ce3cdb9eb?auto=format&fit=crop&q=80&w=600", hype: "LIMITED" as const, alert: false, sku: "CW2288-111", retailer: "Nike.com" },
   { id: "d7", name: "Nike SB Dunk Low", brand: "NIKE SB", brandFilter: "NIKE SB", colorway: "Court Purple", date: buildDropDate(11), dateLabel: "", retail: 120, image: "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?auto=format&fit=crop&q=80&w=600", hype: "SELLOUT" as const, alert: false, sku: "BQ6817-500", retailer: "Skate shops" },
