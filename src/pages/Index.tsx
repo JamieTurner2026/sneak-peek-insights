@@ -118,6 +118,22 @@ const VAULT_RETAILERS: RetailerInfo[] = [
   { name: "Sneaker Con", badge: "EVENT", shipping: 0, verified: true },
 ];
 
+const INITIAL_VAULT_SHOES: VaultShoe[] = [
+  { id: "AJ1-CHI", name: "Air Jordan 1 Retro High OG", brand: "JORDAN", colorway: "Chicago", size: "10", condition: "Deadstock", match: 98.4, retail: 170, resale: 298, release: "Feb 2022", silhouette: "HIGH-TOP", tech: "Air Sole", sku: "DZ5485-612", tags: ["Jordan", "Retro", "Limited"], saved: "Mar 12, 2026" },
+  { id: "AJ3-BLC", name: "Air Jordan 3 Retro", brand: "JORDAN", colorway: "Black Cement", size: "10.5", condition: "Like New", match: 96.1, retail: 190, resale: 245, release: "Jan 2018", silhouette: "MID-TOP", tech: "Air Sole", sku: "854262-001", tags: ["Jordan", "Cement", "OG"], saved: "Mar 20, 2026" },
+  { id: "DUNK-PND", name: "Nike Dunk Low", brand: "NIKE", colorway: "Panda", size: "11", condition: "New in Box", match: 97.5, retail: 110, resale: 118, release: "Mar 2021", silhouette: "LOW-TOP", tech: "Cushlon", sku: "DD1391-100", tags: ["Nike", "Dunk", "Classic"], saved: "Apr 1, 2026" },
+  { id: "YZY-ZBR", name: "Yeezy Boost 350 V2", brand: "ADIDAS", colorway: "Zebra", size: "9.5", condition: "Deadstock", match: 94.3, retail: 220, resale: 240, release: "Feb 2017", silhouette: "LOW-TOP", tech: "Boost", sku: "CP9654", tags: ["Yeezy", "Adidas", "Boost"], saved: "Apr 2, 2026" },
+  { id: "NB-550", name: "New Balance 550", brand: "NEW BALANCE", colorway: "White / Green", size: "10", condition: "Used — Great", match: 92.6, retail: 110, resale: 95, release: "Nov 2020", silhouette: "LOW-TOP", tech: "Encap", sku: "BB550WT1", tags: ["New Balance", "Court", "Retro"], saved: "Apr 3, 2026" },
+];
+
+const CONDITION_COLOR: Record<string, { bg: string; text: string }> = {
+  "Deadstock": { bg: "#1a6b3c", text: "#fff" },
+  "New in Box": { bg: "#0e4f8a", text: "#fff" },
+  "Like New": { bg: "#5a3d8a", text: "#fff" },
+  "Used — Great": { bg: "#8a5a1a", text: "#fff" },
+  "Used — Good": { bg: "#6b2a2a", text: "#fff" },
+};
+
 
 // ─── SHOE CARD — GRID ─────────────────────────────────────────────────────────
 function ShoeCardGrid({ shoe, onRemove, onBuy }: { shoe: VaultShoe; onRemove: (id: string) => void; onBuy: (shoe: VaultShoe) => void }) {
