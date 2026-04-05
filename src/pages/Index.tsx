@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import SneakerImage, { getSneakerImageData } from "@/components/SneakerImage";
 
 // ─── TYPES ───────────────────────────────────────────────────────────────────
 interface ShoeResult {
