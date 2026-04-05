@@ -1221,53 +1221,99 @@ const Index = () => {
         <div className="mo open">
           <div className="mb">
             <button className="mclose" onClick={() => setMemberModal(false)}>✕ CLOSE</button>
-            <div className="mtitle">Choose Your Plan</div>
-            <div className="mplans">
-              <div className={`mplan ${selectedPlan === "free" ? "sel2" : ""}`} onClick={() => setSelectedPlan("free")}>
-                <div className="pname">FREE</div>
-                <div className="pprice">$0<span className="pper">/month</span></div>
-                <div className="pfeats">
-                  <div className="pfeat y">AI Shoe Scanning</div>
-                  <div className="pfeat y">Save up to 10 pairs</div>
-                  <div className="pfeat y">Market price viewing</div>
-                  <div className="pfeat n">Drop Alerts</div>
-                  <div className="pfeat n">Sell your shoes</div>
-                  <div className="pfeat n">Early access drops</div>
+            <div className="mtitle">{memberStep === "plans" ? "Choose Your Plan" : memberStep === "payment" ? "Payment Details" : "Welcome!"}</div>
+
+            {memberStep === "plans" && (
+              <>
+                <div className="mplans">
+                  <div className={`mplan ${selectedPlan === "free" ? "sel2" : ""}`} onClick={() => setSelectedPlan("free")}>
+                    <div className="pname">FREE</div>
+                    <div className="pprice">$0<span className="pper">/month</span></div>
+                    <div className="pfeats">
+                      <div className="pfeat y">AI Shoe Scanning</div>
+                      <div className="pfeat y">Save up to 10 pairs</div>
+                      <div className="pfeat y">Market price viewing</div>
+                      <div className="pfeat n">Drop Alerts</div>
+                      <div className="pfeat n">Sell your shoes</div>
+                      <div className="pfeat n">Early access drops</div>
+                    </div>
+                  </div>
+                  <div className={`mplan feat ${selectedPlan === "sneakerhead" ? "sel2" : ""}`} onClick={() => setSelectedPlan("sneakerhead")}>
+                    <div className="ppop">MOST POPULAR</div>
+                    <div className="pname">SNEAKER HEAD</div>
+                    <div className="pprice">$9.99<span className="pper">/month</span></div>
+                    <div className="pfeats">
+                      <div className="pfeat y">Everything in Free</div>
+                      <div className="pfeat y">Unlimited vault storage</div>
+                      <div className="pfeat y">🔔 Drop Alerts (all releases)</div>
+                      <div className="pfeat y">Sell up to 10 pairs/month</div>
+                      <div className="pfeat y">No seller fees</div>
+                      <div className="pfeat n">Early access drops</div>
+                      <div className="pfeat n">Priority checkout</div>
+                    </div>
+                  </div>
+                  <div className={`mplan ${selectedPlan === "solepro" ? "sel2" : ""}`} onClick={() => setSelectedPlan("solepro")}>
+                    <div className="pname">SOLE PRO ★</div>
+                    <div className="pprice">$24.99<span className="pper">/month</span></div>
+                    <div className="pfeats">
+                      <div className="pfeat y">Everything in Sneaker Head</div>
+                      <div className="pfeat y">⚡ Early access to drops</div>
+                      <div className="pfeat y">Priority checkout (skip queue)</div>
+                      <div className="pfeat y">Unlimited selling</div>
+                      <div className="pfeat y">Seller analytics dashboard</div>
+                      <div className="pfeat y">Pro badge on listings</div>
+                    </div>
+                  </div>
                 </div>
-              </div>
-              <div className={`mplan feat ${selectedPlan === "sneakerhead" ? "sel2" : ""}`} onClick={() => setSelectedPlan("sneakerhead")}>
-                <div className="ppop">MOST POPULAR</div>
-                <div className="pname">SNEAKER HEAD</div>
-                <div className="pprice">$9.99<span className="pper">/month</span></div>
-                <div className="pfeats">
-                  <div className="pfeat y">Everything in Free</div>
-                  <div className="pfeat y">Unlimited vault storage</div>
-                  <div className="pfeat y">🔔 Drop Alerts (all releases)</div>
-                  <div className="pfeat y">Sell up to 10 pairs/month</div>
-                  <div className="pfeat y">No seller fees</div>
-                  <div className="pfeat n">Early access drops</div>
-                  <div className="pfeat n">Priority checkout</div>
+                <button className="btn-r" onClick={() => {
+                  if (selectedPlan === "free") {
+                    setMemberPlan("FREE");
+                    setMemberModal(false);
+                    showToast("Plan updated!");
+                  } else {
+                    setMemberCardNum(""); setMemberCardExp(""); setMemberCardCvv(""); setMemberCardName("");
+                    setMemberStep("payment");
+                  }
+                }}>
+                  {selectedPlan === "free" ? "SELECT FREE PLAN" : "CONTINUE TO PAYMENT ›"}
+                </button>
+                <p style={{ fontFamily: "var(--fm)", fontSize: 9, textAlign: "center", marginTop: 8, color: "var(--red)" }}>CANCEL ANYTIME · SECURE BILLING</p>
+              </>
+            )}
+
+            {memberStep === "payment" && (
+              <>
+                <div style={{ border: "3px solid var(--border)", padding: 12, marginBottom: 14, textAlign: "center" }}>
+                  <div style={{ fontFamily: "var(--ft)", fontSize: 18 }}>{selectedPlan === "sneakerhead" ? "SNEAKER HEAD" : "SOLE PRO ★"}</div>
+                  <div style={{ fontFamily: "var(--ft)", fontSize: 28, color: "var(--red)", fontWeight: 700 }}>{selectedPlan === "sneakerhead" ? "$9.99" : "$24.99"}<span style={{ fontFamily: "var(--fm)", fontSize: 10 }}>/month</span></div>
                 </div>
-              </div>
-              <div className={`mplan ${selectedPlan === "solepro" ? "sel2" : ""}`} onClick={() => setSelectedPlan("solepro")}>
-                <div className="pname">SOLE PRO ★</div>
-                <div className="pprice">$24.99<span className="pper">/month</span></div>
-                <div className="pfeats">
-                  <div className="pfeat y">Everything in Sneaker Head</div>
-                  <div className="pfeat y">⚡ Early access to drops</div>
-                  <div className="pfeat y">Priority checkout (skip queue)</div>
-                  <div className="pfeat y">Unlimited selling</div>
-                  <div className="pfeat y">Seller analytics dashboard</div>
-                  <div className="pfeat y">Pro badge on listings</div>
+                <div className="aform">
+                  <div className="fgrp"><label className="flbl">Name on Card</label><input className="finp" value={memberCardName} onChange={e => setMemberCardName(e.target.value)} placeholder="Jordan Smith" /></div>
+                  <div className="fgrp"><label className="flbl">Card Number</label><input className="finp" value={memberCardNum} onChange={e => setMemberCardNum(fmtCard(e.target.value))} placeholder="1234 5678 9012 3456" maxLength={19} /></div>
+                  <div className="ckinrow">
+                    <div className="fgrp"><label className="flbl">Expiry (MM/YY)</label><input className="finp" value={memberCardExp} onChange={e => setMemberCardExp(fmtExp(e.target.value))} placeholder="MM/YY" maxLength={5} /></div>
+                    <div className="fgrp"><label className="flbl">CVV</label><input className="finp" value={memberCardCvv} onChange={e => setMemberCardCvv(e.target.value.replace(/\D/g, "").slice(0, 4))} placeholder="•••" /></div>
+                  </div>
+                  <p style={{ fontFamily: "var(--fm)", fontSize: 9, color: "var(--red)", textAlign: "center", marginTop: 4 }}>🔒 256-BIT ENCRYPTED · SECURE BILLING</p>
                 </div>
+                <button className="btn-r" onClick={() => {
+                  if (!memberCardName || memberCardNum.replace(/\s/g, "").length < 15 || !memberCardExp.includes("/") || memberCardCvv.length < 3) return;
+                  setMemberPlan(selectedPlan === "sneakerhead" ? "SNEAKER HEAD" : "SOLE PRO");
+                  setMemberStep("success");
+                }}>SUBSCRIBE NOW 🔒</button>
+                <button className="btn-o" onClick={() => setMemberStep("plans")}>‹ BACK TO PLANS</button>
+              </>
+            )}
+
+            {memberStep === "success" && (
+              <div style={{ textAlign: "center", padding: "18px 0" }}>
+                <div style={{ fontSize: 46, marginBottom: 8 }}>🎉</div>
+                <div style={{ fontFamily: "var(--ft)", fontSize: 28 }}>WELCOME TO {memberPlan}!</div>
+                <div style={{ fontFamily: "var(--fm)", fontSize: 11, color: "var(--red)", fontWeight: 700, marginTop: 6 }}>YOUR MEMBERSHIP IS NOW ACTIVE</div>
+                <p style={{ fontFamily: "var(--fm)", fontSize: 10, marginTop: 8, opacity: 0.7 }}>All premium features have been unlocked.</p>
+                <button className="btn-r" style={{ marginTop: 14 }} onClick={() => setMemberModal(false)}>LET'S GO!</button>
               </div>
-            </div>
-            <button className="btn-r" onClick={() => {
-              setMemberPlan(selectedPlan === "free" ? "FREE" : selectedPlan === "sneakerhead" ? "SNEAKER HEAD" : "SOLE PRO");
-              setMemberModal(false);
-              showToast("Plan updated!");
-            }}>SELECT PLAN ›</button>
-            <p style={{ fontFamily: "var(--fm)", fontSize: 9, textAlign: "center", marginTop: 8, color: "var(--red)" }}>CANCEL ANYTIME · SECURE BILLING</p>
+            )}
           </div>
         </div>
       )}
