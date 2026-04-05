@@ -1,14 +1,12 @@
 import { useState } from "react";
+import aj1Chicago from "@/assets/aj1-chicago.png";
 import aj3BlackCement from "@/assets/aj3-black-cement.png";
+import dunkPanda from "@/assets/dunk-panda.png";
+import yeezyZebra from "@/assets/yeezy-zebra.png";
 
 // ─── VERIFIED SHOE IMAGE DATABASE ────────────────────────────────────────────
-// Each entry has 3 progressively more reliable fallback sources:
-// 1. Unsplash - lifestyle shots (always loads, correct shoe vibe)
-// 2. Secondary Unsplash - alternative angle
-// 3. Solid color bg with shoe silhouette SVG as last resort
-//
-// Background colors are tuned per shoe colorway so even if images load
-// partially the card always looks intentional.
+// Each entry has progressively more reliable fallback sources.
+// Local assets are prioritized for reliability.
 
 export const SNEAKER_IMAGE_DATA: Record<
   string,
@@ -17,8 +15,8 @@ export const SNEAKER_IMAGE_DATA: Record<
   // Air Jordan 1 Retro High OG 'Chicago' — red/white/black
   "AJ1-CHI": {
     srcs: [
+      aj1Chicago,
       "https://images.unsplash.com/photo-1600269452121-4f2416e55c28?auto=format&fit=crop&q=85&w=800&h=600",
-      "https://images.unsplash.com/photo-1584735175315-9d5df23be6e0?auto=format&fit=crop&q=80&w=600",
     ],
     bg: "#f5e8e8",
     accent: "#c8102e",
@@ -37,8 +35,8 @@ export const SNEAKER_IMAGE_DATA: Record<
   // Nike Dunk Low 'Panda' — white/black
   "DUNK-PND": {
     srcs: [
+      dunkPanda,
       "https://images.unsplash.com/photo-1607522370275-f6fd4197767c?auto=format&fit=crop&q=85&w=800&h=600",
-      "https://images.unsplash.com/photo-1556906781-9a412961a28c?auto=format&fit=crop&q=80&w=600",
     ],
     bg: "#f2f2f2",
     accent: "#1a1818",
@@ -47,8 +45,8 @@ export const SNEAKER_IMAGE_DATA: Record<
   // Yeezy Boost 350 V2 'Zebra' — white/black primeknit
   "YZY-ZBR": {
     srcs: [
+      yeezyZebra,
       "https://images.unsplash.com/photo-1584735175315-9d5df23be6e0?auto=format&fit=crop&q=85&w=800&h=600",
-      "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&q=80&w=600",
     ],
     bg: "#ececec",
     accent: "#222",
