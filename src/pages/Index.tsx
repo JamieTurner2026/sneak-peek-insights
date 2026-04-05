@@ -975,43 +975,79 @@ const Index = () => {
         <div className="phdr">
           <div className="phdr-logo">SNAPSHOTZ SOLES</div>
           <div className="phdr-title">Drop Calendar</div>
-          <div className="phdr-sub">UPCOMING RELEASES · SET ALERTS</div>
+          <div className="phdr-sub">{drops.filter(d => d.alert).length} ALERTS SET · {drops.length} UPCOMING</div>
         </div>
-        <div className="dlist">
-          {drops.map(drop => (
-            <div key={drop.id} className="dcard">
-              <div className="dcimg" style={{ backgroundImage: `url(${drop.image})` }}>
-                <div className="dcimgi">
-                  <div className="dcbr">{drop.brand}</div>
-                  <div className="dcn">{drop.name}</div>
-                </div>
-              </div>
-              <div className="dcbody">
-                <div className="dmr">
-                  <div className="ddate"><span className="ddlbl">Drop Date</span>{drop.dateLabel}</div>
-                  <div className="dret">${drop.retail}</div>
-                </div>
-                <div style={{ display: "flex", gap: 5, marginBottom: 9 }}>
-                  <span className="dtag th">{drop.hype}</span>
-                  <span className="dtag ts">{drop.colorway}</span>
-                </div>
-                <div className="cdown">⏱ COUNTDOWN ACTIVE</div>
-                <button
-                  className={`dnbtn ${drop.alert ? "dnset" : "dnon"}`}
-                  onClick={() => {
-                    if (!drop.alert) {
-                      setAlertModal(drop);
-                    } else {
-                      setDrops(prev => prev.map(d => d.id === drop.id ? { ...d, alert: false } : d));
-                      showToast("Alert removed");
-                    }
-                  }}
-                >
-                  {drop.alert ? "✓ ALERT SET" : "🔔 SET DROP ALERT"}
-                </button>
-              </div>
-            </div>
+
+        {/* Brand filter bar */}
+        <div style={{ display: "flex", gap: 4, padding: "10px 14px", overflowX: "auto", borderBottom: "3px solid var(--border)" }}>
+          {DROP_BRANDS.map(b => (
+            <button key={b} onClick={() => setDropBrandFilter(b)} style={{
+              background: dropBrandFilter === b ? "var(--border)" : "transparent",
+              color: dropBrandFilter === b ? "var(--gold)" : "var(--border)",
+              border: "2px solid var(--border)",
+              fontFamily: "var(--ft)",
+              fontSize: 10,
+              padding: "5px 10px",
+              cursor: "pointer",
+              letterSpacing: "0.05em",
+              whiteSpace: "nowrap",
+              flexShrink: 0,
+            }}>{b}</button>
           ))}
+        </div>
+
+        <div className="dlist">
+          {drops
+            .filter(d => dropBrandFilter === "ALL" || d.brandFilter === dropBrandFilter)
+            .map(drop => {
+              const hypeColor: Record<string, string> = { SELLOUT: "#c8102e", HIGH: "#f5a623", LIMITED: "#0e4f8a" };
+              return (
+                <div key={drop.id} className="dcard" style={{ overflow: "hidden" }}>
+                  <div style={{ height: 160, position: "relative", overflow: "hidden" }}>
+                    <img src={drop.image} alt={drop.name} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+                    <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.7) 100%)" }} />
+                    <div style={{ position: "absolute", bottom: 10, left: 10, right: 10 }}>
+                      <div style={{ fontFamily: "var(--fm)", fontSize: 9, color: "rgba(255,255,255,0.7)", fontWeight: 700, letterSpacing: "0.08em" }}>{drop.brand}</div>
+                      <div style={{ fontFamily: "var(--ft)", fontSize: 18, color: "#fff", lineHeight: 1.1 }}>{drop.name}</div>
+                      <div style={{ fontFamily: "var(--fm)", fontSize: 10, color: "rgba(255,255,255,0.8)", marginTop: 2 }}>{drop.colorway} · {drop.sku}</div>
+                    </div>
+                    <div style={{ position: "absolute", top: 8, right: 8, display: "flex", gap: 4 }}>
+                      <span style={{ background: hypeColor[drop.hype] || "#333", color: "#fff", fontFamily: "var(--fm)", fontSize: 8, fontWeight: 700, padding: "2px 7px", letterSpacing: "0.06em" }}>{drop.hype}</span>
+                      {drop.alert && <span style={{ background: "var(--green)", color: "#fff", fontFamily: "var(--fm)", fontSize: 8, fontWeight: 700, padding: "2px 7px" }}>🔔 ON</span>}
+                    </div>
+                  </div>
+                  <div className="dcbody">
+                    <div className="dmr">
+                      <div>
+                        <div style={{ fontFamily: "var(--fm)", fontSize: 8, color: "var(--red)", fontWeight: 700, letterSpacing: "0.06em" }}>DROP DATE</div>
+                        <div style={{ fontFamily: "var(--ft)", fontSize: 14 }}>{drop.dateLabel}</div>
+                      </div>
+                      <div style={{ textAlign: "right" }}>
+                        <div style={{ fontFamily: "var(--fm)", fontSize: 8, color: "var(--red)", fontWeight: 700 }}>RETAIL</div>
+                        <div style={{ fontFamily: "var(--ft)", fontSize: 18, fontWeight: 700 }}>${drop.retail}</div>
+                      </div>
+                    </div>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8, padding: "6px 0", borderTop: "1px solid rgba(13,13,13,0.1)", borderBottom: "1px solid rgba(13,13,13,0.1)" }}>
+                      <CountdownDisplay target={drop.date} />
+                      <span style={{ fontFamily: "var(--fm)", fontSize: 8, color: "var(--red)", fontWeight: 700 }}>{drop.retailer}</span>
+                    </div>
+                    <button
+                      className={`dnbtn ${drop.alert ? "dnset" : "dnon"}`}
+                      onClick={() => {
+                        if (!drop.alert) {
+                          setAlertModal(drop);
+                        } else {
+                          setDrops(prev => prev.map(d => d.id === drop.id ? { ...d, alert: false } : d));
+                          showToast("Alert removed");
+                        }
+                      }}
+                    >
+                      {drop.alert ? "✓ ALERT SET" : "🔔 SET DROP ALERT"}
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
         </div>
       </div>
 
