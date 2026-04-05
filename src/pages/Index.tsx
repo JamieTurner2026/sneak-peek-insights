@@ -814,7 +814,7 @@ const Index = () => {
 
   const tabItems = [
     { key: "scan", label: "Scan", notif: null },
-    { key: "drops", label: "Drops", notif: drops.filter(d => d.hype === "HIGH").length || null },
+    { key: "drops", label: "Drops", notif: drops.filter(d => d.alert).length || null },
     { key: "market", label: "Market", notif: null },
     { key: "vault", label: "Vault", notif: (vaultShoes.length + vault.length) || null },
     { key: "sell", label: "Sell", notif: null },
