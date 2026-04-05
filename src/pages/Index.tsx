@@ -740,8 +740,17 @@ const Index = () => {
 
   // ─── AUTH ────────────────────────────────────────────────────────────────
   const handleAuth = () => {
+    setAuthError("");
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(authEmail)) { setAuthError("Please enter a valid email address."); return; }
+    if (authPass.length < 6) { setAuthError("Password must be at least 6 characters."); return; }
+    if (authTab === "signup") {
+      if (authPassConfirm !== authPass) { setAuthError("Passwords do not match."); return; }
+      if (!authUser.trim()) { setAuthError("Please choose a username."); return; }
+    }
     setLoggedIn(true);
     setAuthModal(false);
+    setAuthError("");
     showToast(authTab === "login" ? "Logged in!" : "Account created!");
   };
 
