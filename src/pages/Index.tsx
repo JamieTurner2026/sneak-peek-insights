@@ -510,23 +510,52 @@ interface DropItem {
 
 const DROP_BRANDS = ["ALL", "JORDAN", "NIKE", "NIKE SB", "ADIDAS", "NEW BALANCE", "ASICS"] as const;
 
-const INITIAL_DROPS: DropItem[] = [
-  { id: "d1", name: "Air Jordan 4 Retro", brand: "JORDAN", brandFilter: "JORDAN", colorway: "Bred Reimagined", date: buildDropDate(2), dateLabel: "", retail: 210, image: "https://images.unsplash.com/photo-1600269452121-4f2416e55c28?auto=format&fit=crop&q=80&w=600", hype: "SELLOUT", alert: false, sku: "FV5029-006", retailer: "Nike SNKRS" },
-  { id: "d2", name: "Air Jordan 1 High OG", brand: "JORDAN", brandFilter: "JORDAN", colorway: "Royal Toe", date: buildDropDate(5), dateLabel: "", retail: 180, image: "https://images.unsplash.com/photo-1597045566677-8cf032ed6634?auto=format&fit=crop&q=80&w=600", hype: "HIGH", alert: false, sku: "555088-041", retailer: "Nike SNKRS" },
-  { id: "d3", name: "Air Jordan 3 Retro", brand: "JORDAN", brandFilter: "JORDAN", colorway: "Fear", date: buildDropDate(9), dateLabel: "", retail: 200, image: "https://images.unsplash.com/photo-1605348532760-6753d2c43329?auto=format&fit=crop&q=80&w=600", hype: "HIGH", alert: false, sku: "CT8532-080", retailer: "Nike SNKRS" },
-  { id: "d4", name: "Air Jordan 11 Retro", brand: "JORDAN", brandFilter: "JORDAN", colorway: "Cool Grey", date: buildDropDate(14), dateLabel: "", retail: 225, image: "https://images.unsplash.com/photo-1551107696-a4b0c5a0d9a2?auto=format&fit=crop&q=80&w=600", hype: "SELLOUT", alert: false, sku: "CT8012-005", retailer: "Foot Locker" },
-  { id: "d5", name: "Nike Dunk Low", brand: "NIKE", brandFilter: "NIKE", colorway: "University Blue", date: buildDropDate(3), dateLabel: "", retail: 115, image: "https://images.unsplash.com/photo-1607522370275-f6fd4197767c?auto=format&fit=crop&q=80&w=600", hype: "HIGH", alert: false, sku: "DD1391-102", retailer: "Nike SNKRS" },
-  { id: "d6", name: "Nike Air Force 1 Low", brand: "NIKE", brandFilter: "NIKE", colorway: "Triple White", date: buildDropDate(7), dateLabel: "", retail: 110, image: "https://images.unsplash.com/photo-1600185365926-3a2ce3cdb9eb?auto=format&fit=crop&q=80&w=600", hype: "LIMITED", alert: false, sku: "CW2288-111", retailer: "Nike.com" },
-  { id: "d7", name: "Nike SB Dunk Low", brand: "NIKE SB", brandFilter: "NIKE SB", colorway: "Court Purple", date: buildDropDate(11), dateLabel: "", retail: 120, image: "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?auto=format&fit=crop&q=80&w=600", hype: "SELLOUT", alert: false, sku: "BQ6817-500", retailer: "Skate shops" },
-  { id: "d8", name: "Yeezy Slide", brand: "ADIDAS", brandFilter: "ADIDAS", colorway: "Onyx", date: buildDropDate(6), dateLabel: "", retail: 70, image: "https://images.unsplash.com/photo-1584735175315-9d5df23be6e0?auto=format&fit=crop&q=80&w=600", hype: "LIMITED", alert: false, sku: "HQ6448", retailer: "adidas Confirmed" },
-  { id: "d9", name: "adidas Samba OG", brand: "ADIDAS", brandFilter: "ADIDAS", colorway: "Cloud White / Core Black", date: buildDropDate(18), dateLabel: "", retail: 100, image: "https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?auto=format&fit=crop&q=80&w=600", hype: "HIGH", alert: false, sku: "B75806", retailer: "adidas.com" },
-  { id: "d10", name: "New Balance 9060", brand: "NEW BALANCE", brandFilter: "NEW BALANCE", colorway: "Sea Salt", date: buildDropDate(10), dateLabel: "", retail: 150, image: "https://images.unsplash.com/photo-1539185441755-769473a23570?auto=format&fit=crop&q=80&w=600", hype: "HIGH", alert: false, sku: "U9060HSB", retailer: "New Balance" },
-  { id: "d11", name: "New Balance 550", brand: "NEW BALANCE", brandFilter: "NEW BALANCE", colorway: "Tri-Color", date: buildDropDate(21), dateLabel: "", retail: 110, image: "https://images.unsplash.com/photo-1556906781-9a412961a28c?auto=format&fit=crop&q=80&w=600", hype: "LIMITED", alert: false, sku: "BB550HR1", retailer: "Kith" },
-  { id: "d12", name: "Asics Gel-Kayano 14", brand: "ASICS", brandFilter: "ASICS", colorway: "White/Midnight", date: buildDropDate(16), dateLabel: "", retail: 150, image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&q=80&w=600", hype: "HIGH", alert: false, sku: "1201A019-115", retailer: "ASICS.com" },
-].map(d => ({ ...d, dateLabel: d.date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) }))
+const INITIAL_DROPS = ([
+  { id: "d1", name: "Air Jordan 4 Retro", brand: "JORDAN", brandFilter: "JORDAN", colorway: "Bred Reimagined", date: buildDropDate(2), dateLabel: "", retail: 210, image: "https://images.unsplash.com/photo-1600269452121-4f2416e55c28?auto=format&fit=crop&q=80&w=600", hype: "SELLOUT" as const, alert: false, sku: "FV5029-006", retailer: "Nike SNKRS" },
+  { id: "d2", name: "Air Jordan 1 High OG", brand: "JORDAN", brandFilter: "JORDAN", colorway: "Royal Toe", date: buildDropDate(5), dateLabel: "", retail: 180, image: "https://images.unsplash.com/photo-1597045566677-8cf032ed6634?auto=format&fit=crop&q=80&w=600", hype: "HIGH" as const, alert: false, sku: "555088-041", retailer: "Nike SNKRS" },
+  { id: "d3", name: "Air Jordan 3 Retro", brand: "JORDAN", brandFilter: "JORDAN", colorway: "Fear", date: buildDropDate(9), dateLabel: "", retail: 200, image: "https://images.unsplash.com/photo-1605348532760-6753d2c43329?auto=format&fit=crop&q=80&w=600", hype: "HIGH" as const, alert: false, sku: "CT8532-080", retailer: "Nike SNKRS" },
+  { id: "d4", name: "Air Jordan 11 Retro", brand: "JORDAN", brandFilter: "JORDAN", colorway: "Cool Grey", date: buildDropDate(14), dateLabel: "", retail: 225, image: "https://images.unsplash.com/photo-1551107696-a4b0c5a0d9a2?auto=format&fit=crop&q=80&w=600", hype: "SELLOUT" as const, alert: false, sku: "CT8012-005", retailer: "Foot Locker" },
+  { id: "d5", name: "Nike Dunk Low", brand: "NIKE", brandFilter: "NIKE", colorway: "University Blue", date: buildDropDate(3), dateLabel: "", retail: 115, image: "https://images.unsplash.com/photo-1607522370275-f6fd4197767c?auto=format&fit=crop&q=80&w=600", hype: "HIGH" as const, alert: false, sku: "DD1391-102", retailer: "Nike SNKRS" },
+  { id: "d6", name: "Nike Air Force 1 Low", brand: "NIKE", brandFilter: "NIKE", colorway: "Triple White", date: buildDropDate(7), dateLabel: "", retail: 110, image: "https://images.unsplash.com/photo-1600185365926-3a2ce3cdb9eb?auto=format&fit=crop&q=80&w=600", hype: "LIMITED" as const, alert: false, sku: "CW2288-111", retailer: "Nike.com" },
+  { id: "d7", name: "Nike SB Dunk Low", brand: "NIKE SB", brandFilter: "NIKE SB", colorway: "Court Purple", date: buildDropDate(11), dateLabel: "", retail: 120, image: "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?auto=format&fit=crop&q=80&w=600", hype: "SELLOUT" as const, alert: false, sku: "BQ6817-500", retailer: "Skate shops" },
+  { id: "d8", name: "Yeezy Slide", brand: "ADIDAS", brandFilter: "ADIDAS", colorway: "Onyx", date: buildDropDate(6), dateLabel: "", retail: 70, image: "https://images.unsplash.com/photo-1584735175315-9d5df23be6e0?auto=format&fit=crop&q=80&w=600", hype: "LIMITED" as const, alert: false, sku: "HQ6448", retailer: "adidas Confirmed" },
+  { id: "d9", name: "adidas Samba OG", brand: "ADIDAS", brandFilter: "ADIDAS", colorway: "Cloud White / Core Black", date: buildDropDate(18), dateLabel: "", retail: 100, image: "https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?auto=format&fit=crop&q=80&w=600", hype: "HIGH" as const, alert: false, sku: "B75806", retailer: "adidas.com" },
+  { id: "d10", name: "New Balance 9060", brand: "NEW BALANCE", brandFilter: "NEW BALANCE", colorway: "Sea Salt", date: buildDropDate(10), dateLabel: "", retail: 150, image: "https://images.unsplash.com/photo-1539185441755-769473a23570?auto=format&fit=crop&q=80&w=600", hype: "HIGH" as const, alert: false, sku: "U9060HSB", retailer: "New Balance" },
+  { id: "d11", name: "New Balance 550", brand: "NEW BALANCE", brandFilter: "NEW BALANCE", colorway: "Tri-Color", date: buildDropDate(21), dateLabel: "", retail: 110, image: "https://images.unsplash.com/photo-1556906781-9a412961a28c?auto=format&fit=crop&q=80&w=600", hype: "LIMITED" as const, alert: false, sku: "BB550HR1", retailer: "Kith" },
+  { id: "d12", name: "Asics Gel-Kayano 14", brand: "ASICS", brandFilter: "ASICS", colorway: "White/Midnight", date: buildDropDate(16), dateLabel: "", retail: 150, image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&q=80&w=600", hype: "HIGH" as const, alert: false, sku: "1201A019-115", retailer: "ASICS.com" },
+] as DropItem[]).map(d => ({ ...d, dateLabel: d.date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) }))
 .sort((a, b) => a.date.getTime() - b.date.getTime());
 
-const INITIAL_MARKET: MarketItem[] = [
+interface MarketItem {
+  id: string;
+  name: string;
+  brand: string;
+  colorway: string;
+  trend: "up" | "down";
+  trendPct: string;
+  prices: { label: string; value: string }[];
+}
+
+interface Listing {
+  id: string;
+  name: string;
+  colorway: string;
+  price: number;
+  status: "live" | "sold" | "pending";
+  image?: string;
+}
+
+// ─── DATA ────────────────────────────────────────────────────────────────────
+const TICKER_ITEMS = [
+  { text: "AJ1 CHICAGO", price: "$298" },
+  { text: "DUNK LOW PANDA", price: "$118" },
+  { text: "YEEZY 350 ZEBRA", price: "$240" },
+  { text: "NB 550 GREEN", price: "$95" },
+  { text: "AJ4 BRED", price: "$420" },
+  { text: "AF1 WHITE", price: "$90" },
+  { text: "AJ11 CONCORD", price: "$380" },
+  { text: "DUNK SB TRAVIS", price: "$1,850" },
+];
   { id: "m1", name: "Air Jordan 1 High OG", brand: "JORDAN", colorway: "Chicago · DZ5485-612", trend: "up", trendPct: "+12%", prices: [{ label: "StockX", value: "$298" }, { label: "GOAT", value: "$305" }, { label: "Flight Club", value: "$310" }, { label: "eBay", value: "$285" }] },
   { id: "m2", name: "Nike Dunk Low", brand: "NIKE", colorway: "Panda · DD1391-100", trend: "down", trendPct: "-3%", prices: [{ label: "StockX", value: "$118" }, { label: "GOAT", value: "$120" }, { label: "Flight Club", value: "$125" }, { label: "eBay", value: "$112" }] },
   { id: "m3", name: "Yeezy Boost 350 V2", brand: "ADIDAS", colorway: "Zebra · CP9654", trend: "up", trendPct: "+8%", prices: [{ label: "StockX", value: "$240" }, { label: "GOAT", value: "$245" }, { label: "Flight Club", value: "$255" }, { label: "eBay", value: "$230" }] },
