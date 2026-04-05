@@ -1018,17 +1018,91 @@ const Index = () => {
           <div className="phdr-sub">{loggedIn ? authUser || authEmail : "NOT LOGGED IN"}</div>
         </div>
         <div className="idbody">
+          {/* Big name block */}
           <div className="idbig">SNAP{"\n"}SHOTZ{"\n"}{loggedIn ? `@${authUser || "USER"}` : "@GUEST"}</div>
-          {loggedIn && <div className="mbdg">★ MEMBER</div>}
+          {loggedIn && <div className="mbdg">★ {memberPlan}</div>}
 
+          {/* Username edit */}
+          {loggedIn && (
+            <div className="idcard">
+              <div className="idst">Username</div>
+              {editingUsername ? (
+                <div style={{ display: "flex", gap: 6 }}>
+                  <input className="finp" style={{ flex: 1, fontSize: 14, padding: "7px 10px" }} value={editUsernameVal} onChange={e => setEditUsernameVal(e.target.value)} placeholder="New username" />
+                  <button className="btn-r" style={{ width: "auto", padding: "7px 14px", marginTop: 0 }} onClick={() => { if (editUsernameVal.trim()) setAuthUser(editUsernameVal.trim()); setEditingUsername(false); showToast("Username updated!"); }}>SAVE</button>
+                  <button className="btn-o" style={{ width: "auto", padding: "7px 14px", marginTop: 0 }} onClick={() => setEditingUsername(false)}>CANCEL</button>
+                </div>
+              ) : (
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span style={{ fontFamily: "var(--ft)", fontSize: 18 }}>@{authUser || "USER"}</span>
+                  <button style={{ background: "none", border: "2px solid var(--border)", fontFamily: "var(--ft)", fontSize: 10, padding: "3px 10px", cursor: "pointer", letterSpacing: "0.05em" }} onClick={() => { setEditUsernameVal(authUser); setEditingUsername(true); }}>EDIT</button>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Stats — live from vault data */}
+          {(() => {
+            const allPairs = vaultShoes.length + vault.length;
+            const totalVal = vaultShoes.reduce((s, v) => s + v.resale, 0);
+            const totalRet = vaultShoes.reduce((s, v) => s + v.retail, 0);
+            const netGain = totalVal - totalRet;
+            const brandCounts: Record<string, number> = {};
+            vaultShoes.forEach(s => { brandCounts[s.brand] = (brandCounts[s.brand] || 0) + 1; });
+            const topBrand = Object.entries(brandCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || "—";
+            return (
+              <div className="idcard">
+                <div className="idst">Stats</div>
+                <div className="idr"><span className="idk">TOTAL SCANS</span><span className="idv">{totalScans}</span></div>
+                <div className="idr"><span className="idk">VAULT SIZE</span><span className="idv">{allPairs} pairs</span></div>
+                <div className="idr"><span className="idk">VAULT VALUE</span><span className="idv">${totalVal.toLocaleString()}</span></div>
+                <div className="idr"><span className="idk">RETAIL PAID</span><span className="idv">${totalRet.toLocaleString()}</span></div>
+                <div className="idr"><span className="idk">NET GAIN</span><span className="idv" style={{ color: netGain >= 0 ? "var(--green)" : "var(--red)" }}>{netGain >= 0 ? "+" : ""}${netGain.toLocaleString()}</span></div>
+                <div className="idr"><span className="idk">TOP BRAND</span><span className="idv">{topBrand}</span></div>
+                <div className="idr"><span className="idk">LISTINGS</span><span className="idv">{listings.length} active</span></div>
+                <div className="idr"><span className="idk">PLAN</span><span className="idv">{memberPlan}</span></div>
+              </div>
+            );
+          })()}
+
+          {/* Membership mini preview */}
           <div className="idcard">
-            <div className="idst">Stats</div>
-            <div className="idr"><span className="idk">TOTAL SCANS</span><span className="idv">{totalScans}</span></div>
-            <div className="idr"><span className="idk">VAULT SIZE</span><span className="idv">{vault.length} pairs</span></div>
-            <div className="idr"><span className="idk">LISTINGS</span><span className="idv">{listings.length} active</span></div>
-            <div className="idr"><span className="idk">PLAN</span><span className="idv">{memberPlan}</span></div>
+            <div className="idst">Membership</div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 5 }}>
+              {([
+                { key: "FREE", label: "BASIC", price: "$0" },
+                { key: "SNEAKER HEAD", label: "GOLD", price: "$9.99" },
+                { key: "SOLE PRO", label: "PRO", price: "$24.99" },
+              ] as const).map(p => (
+                <div key={p.key} style={{ border: memberPlan === p.key ? "3px solid var(--red)" : "3px solid var(--border)", background: memberPlan === p.key ? "rgba(200,16,46,0.06)" : "var(--surface)", padding: "8px 6px", textAlign: "center" }}>
+                  <div style={{ fontFamily: "var(--ft)", fontSize: 12, letterSpacing: "0.05em" }}>{p.label}</div>
+                  <div style={{ fontFamily: "var(--ft)", fontSize: 18, color: "var(--red)", fontWeight: 700 }}>{p.price}</div>
+                  {memberPlan === p.key && <div style={{ fontFamily: "var(--fm)", fontSize: 8, fontWeight: 700, color: "var(--green)", marginTop: 2 }}>ACTIVE</div>}
+                </div>
+              ))}
+            </div>
+            <button className="btn-o" style={{ marginTop: 8 }} onClick={() => { setMemberStep("plans"); setMemberModal(true); }}>VIEW ALL PLANS & UPGRADE</button>
           </div>
 
+          {/* Notifications */}
+          <div className="idcard">
+            <div className="idst">Notifications</div>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "6px 0", borderBottom: "1px solid rgba(13,13,13,0.12)" }}>
+              <span style={{ fontFamily: "var(--fm)", fontSize: 11, fontWeight: 700 }}>Drop Alerts</span>
+              <button onClick={() => setDropAlerts(!dropAlerts)} style={{ width: 40, height: 22, borderRadius: 11, border: "none", background: dropAlerts ? "var(--green)" : "var(--sa)", cursor: "pointer", position: "relative", transition: "background 0.2s" }}>
+                <div style={{ width: 16, height: 16, borderRadius: "50%", background: "#fff", position: "absolute", top: 3, left: dropAlerts ? 21 : 3, transition: "left 0.2s", boxShadow: "0 1px 3px rgba(0,0,0,0.3)" }} />
+              </button>
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "6px 0" }}>
+              <span style={{ fontFamily: "var(--fm)", fontSize: 11, fontWeight: 700 }}>Resale Price Alerts</span>
+              <button onClick={() => setResaleAlerts(!resaleAlerts)} style={{ width: 40, height: 22, borderRadius: 11, border: "none", background: resaleAlerts ? "var(--green)" : "var(--sa)", cursor: "pointer", position: "relative", transition: "background 0.2s" }}>
+                <div style={{ width: 16, height: 16, borderRadius: "50%", background: "#fff", position: "absolute", top: 3, left: resaleAlerts ? 21 : 3, transition: "left 0.2s", boxShadow: "0 1px 3px rgba(0,0,0,0.3)" }} />
+              </button>
+            </div>
+            <button className="btn-o" style={{ marginTop: 6 }} onClick={() => showToast("Notification preferences saved!")}>SAVE PREFERENCES</button>
+          </div>
+
+          {/* Interests */}
           <div className="idcard">
             <div className="idst">Interests</div>
             <div className="tagrow">
@@ -1038,12 +1112,20 @@ const Index = () => {
             </div>
           </div>
 
-          <button className="btn-g" onClick={() => setMemberModal(true)}>★ UPGRADE MEMBERSHIP</button>
-          {!loggedIn ? (
-            <button className="btn-o" onClick={() => setAuthModal(true)}>LOG IN / CREATE ACCOUNT</button>
-          ) : (
-            <button className="btn-o" onClick={() => { setLoggedIn(false); showToast("Logged out"); }}>LOG OUT</button>
-          )}
+          {/* Account section */}
+          <div className="idcard">
+            <div className="idst">Account</div>
+            {loggedIn ? (
+              <>
+                <button className="btn-o" style={{ marginTop: 0 }} onClick={() => { setEditUsernameVal(authUser); setEditingUsername(true); window.scrollTo(0, 0); }}>CHANGE USERNAME</button>
+                <button className="btn-r" style={{ background: "var(--border)" }} onClick={() => { setLoggedIn(false); showToast("Logged out"); }}>SIGN OUT</button>
+              </>
+            ) : (
+              <button className="btn-r" onClick={() => setAuthModal(true)}>LOG IN / CREATE ACCOUNT</button>
+            )}
+          </div>
+
+          <button className="btn-g" onClick={() => { setMemberStep("plans"); setMemberModal(true); }}>★ UPGRADE MEMBERSHIP</button>
         </div>
       </div>
 
