@@ -6,6 +6,8 @@ import aj1RoyalImg from "@/assets/aj1-royal.png";
 import aj3FearImg from "@/assets/aj3-fear.png";
 import aj11CoolGreyImg from "@/assets/aj11-cool-grey.png";
 import yeezySlideOnyxImg from "@/assets/yeezy-slide-onyx.png";
+import nb550TricolorImg from "@/assets/nb-550-tricolor.png";
+import dunkLowUbImg from "@/assets/dunk-low-ub.png";
 
 // ─── TYPES ───────────────────────────────────────────────────────────────────
 interface ShoeResult {
@@ -520,13 +522,13 @@ const INITIAL_DROPS = ([
   { id: "d2", name: "Air Jordan 1 High OG", brand: "JORDAN", brandFilter: "JORDAN", colorway: "Royal Toe", date: buildDropDate(5), dateLabel: "", retail: 180, image: aj1RoyalImg, hype: "HIGH" as const, alert: false, sku: "555088-041", retailer: "Nike SNKRS" },
   { id: "d3", name: "Air Jordan 3 Retro", brand: "JORDAN", brandFilter: "JORDAN", colorway: "Fear", date: buildDropDate(9), dateLabel: "", retail: 200, image: aj3FearImg, hype: "HIGH" as const, alert: false, sku: "CT8532-080", retailer: "Nike SNKRS" },
   { id: "d4", name: "Air Jordan 11 Retro", brand: "JORDAN", brandFilter: "JORDAN", colorway: "Cool Grey", date: buildDropDate(14), dateLabel: "", retail: 225, image: aj11CoolGreyImg, hype: "SELLOUT" as const, alert: false, sku: "CT8012-005", retailer: "Foot Locker" },
-  { id: "d5", name: "Nike Dunk Low", brand: "NIKE", brandFilter: "NIKE", colorway: "University Blue", date: buildDropDate(3), dateLabel: "", retail: 115, image: "https://images.unsplash.com/photo-1607522370275-f6fd4197767c?auto=format&fit=crop&q=80&w=600", hype: "HIGH" as const, alert: false, sku: "DD1391-102", retailer: "Nike SNKRS" },
+  { id: "d5", name: "Nike Dunk Low", brand: "NIKE", brandFilter: "NIKE", colorway: "University Blue", date: buildDropDate(3), dateLabel: "", retail: 115, image: dunkLowUbImg, hype: "HIGH" as const, alert: false, sku: "DD1391-102", retailer: "Nike SNKRS" },
   { id: "d6", name: "Nike Air Force 1 Low", brand: "NIKE", brandFilter: "NIKE", colorway: "Triple White", date: buildDropDate(7), dateLabel: "", retail: 110, image: "https://images.unsplash.com/photo-1600185365926-3a2ce3cdb9eb?auto=format&fit=crop&q=80&w=600", hype: "LIMITED" as const, alert: false, sku: "CW2288-111", retailer: "Nike.com" },
   { id: "d7", name: "Nike SB Dunk Low", brand: "NIKE SB", brandFilter: "NIKE SB", colorway: "Court Purple", date: buildDropDate(11), dateLabel: "", retail: 120, image: "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?auto=format&fit=crop&q=80&w=600", hype: "SELLOUT" as const, alert: false, sku: "BQ6817-500", retailer: "Skate shops" },
   { id: "d8", name: "Yeezy Slide", brand: "ADIDAS", brandFilter: "ADIDAS", colorway: "Onyx", date: buildDropDate(6), dateLabel: "", retail: 70, image: yeezySlideOnyxImg, hype: "LIMITED" as const, alert: false, sku: "HQ6448", retailer: "adidas Confirmed" },
   { id: "d9", name: "adidas Samba OG", brand: "ADIDAS", brandFilter: "ADIDAS", colorway: "Cloud White / Core Black", date: buildDropDate(18), dateLabel: "", retail: 100, image: "https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?auto=format&fit=crop&q=80&w=600", hype: "HIGH" as const, alert: false, sku: "B75806", retailer: "adidas.com" },
   { id: "d10", name: "New Balance 9060", brand: "NEW BALANCE", brandFilter: "NEW BALANCE", colorway: "Sea Salt", date: buildDropDate(10), dateLabel: "", retail: 150, image: "https://images.unsplash.com/photo-1539185441755-769473a23570?auto=format&fit=crop&q=80&w=600", hype: "HIGH" as const, alert: false, sku: "U9060HSB", retailer: "New Balance" },
-  { id: "d11", name: "New Balance 550", brand: "NEW BALANCE", brandFilter: "NEW BALANCE", colorway: "Tri-Color", date: buildDropDate(21), dateLabel: "", retail: 110, image: "https://images.unsplash.com/photo-1556906781-9a412961a28c?auto=format&fit=crop&q=80&w=600", hype: "LIMITED" as const, alert: false, sku: "BB550HR1", retailer: "Kith" },
+  { id: "d11", name: "New Balance 550", brand: "NEW BALANCE", brandFilter: "NEW BALANCE", colorway: "Tri-Color", date: buildDropDate(21), dateLabel: "", retail: 110, image: nb550TricolorImg, hype: "LIMITED" as const, alert: false, sku: "BB550HR1", retailer: "Kith" },
   { id: "d12", name: "Asics Gel-Kayano 14", brand: "ASICS", brandFilter: "ASICS", colorway: "White/Midnight", date: buildDropDate(16), dateLabel: "", retail: 150, image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&q=80&w=600", hype: "HIGH" as const, alert: false, sku: "1201A019-115", retailer: "ASICS.com" },
 ] as DropItem[]).map(d => ({ ...d, dateLabel: d.date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) }))
 .sort((a, b) => a.date.getTime() - b.date.getTime());
