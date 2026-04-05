@@ -83,32 +83,6 @@ const CONDITION_COLOR: Record<string, { bg: string; text: string }> = {
 
 const VAULT_RETAILERS = ["StockX", "GOAT", "Flight Club", "Stadium Goods", "eBay"];
 
-// ─── SHOE IMAGE COMPONENT ─────────────────────────────────────────────────────
-function ShoeImage({ shoeId, name, style = {} }: { shoeId: string; name: string; style?: React.CSSProperties }) {
-  const imgData = SHOE_IMAGES[shoeId] as { primary: string; fallback: string; bg: string } | undefined;
-  const [src, setSrc] = useState(imgData?.primary || imgData?.fallback || "");
-  const [tried, setTried] = useState(0);
-
-  const handleError = () => {
-    if (tried === 0 && imgData?.fallback) {
-      setSrc(imgData.fallback);
-      setTried(1);
-    }
-  };
-
-  return (
-    <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", background: imgData?.bg || "var(--sa)", ...style }}>
-      {src ? (
-        <img src={src} alt={name} onError={handleError} style={{ width: "100%", height: "100%", objectFit: "contain" }} />
-      ) : (
-        <svg width="60" height="40" viewBox="0 0 60 40" fill="none">
-          <path d="M5 30 Q10 10 25 15 Q35 5 45 12 Q55 8 58 20 L55 30 Z" fill="var(--sa)" stroke="var(--border)" strokeWidth="1.5" />
-          <circle cx="15" cy="32" r="5" fill="var(--border)" /><circle cx="45" cy="32" r="5" fill="var(--border)" />
-        </svg>
-      )}
-    </div>
-  );
-}
 
 // ─── SHOE CARD — GRID ─────────────────────────────────────────────────────────
 function ShoeCardGrid({ shoe, onRemove, onBuy }: { shoe: VaultShoe; onRemove: (id: string) => void; onBuy: (shoe: VaultShoe) => void }) {
