@@ -987,7 +987,7 @@ const Index = () => {
               </div>
               <div className="dcbody">
                 <div className="dmr">
-                  <div className="ddate"><span className="ddlbl">Drop Date</span>{drop.date}</div>
+                  <div className="ddate"><span className="ddlbl">Drop Date</span>{drop.dateLabel}</div>
                   <div className="dret">${drop.retail}</div>
                 </div>
                 <div style={{ display: "flex", gap: 5, marginBottom: 9 }}>
@@ -1594,7 +1594,7 @@ const Index = () => {
           <div className="mb">
             <button className="mclose" onClick={() => setAlertModal(null)}>✕ CLOSE</button>
             <div className="mtitle">Set Drop Alert</div>
-            <p style={{ fontFamily: "var(--fm)", fontSize: 11, marginBottom: 12 }}>{alertModal.name} — {alertModal.colorway}<br />{alertModal.date}</p>
+            <p style={{ fontFamily: "var(--fm)", fontSize: 11, marginBottom: 12 }}>{alertModal.name} — {alertModal.colorway}<br />{alertModal.dateLabel}</p>
             <button className="btn-r" onClick={() => {
               setDrops(prev => prev.map(d => d.id === alertModal.id ? { ...d, alert: true } : d));
               setAlertModal(null);
