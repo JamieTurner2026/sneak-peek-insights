@@ -20,29 +20,29 @@ interface ShoeResult {
 // ─── SHOE IMAGE MAP ──────────────────────────────────────────────────────────
 const SHOE_IMAGES: Record<string, { primary: string; fallback: string; bg: string }> = {
   "AJ1-CHI": {
-    primary: "https://image.goat.com/750/attachments/product_template_pictures/images/011/824/726/original/9978_00.png.png",
-    fallback: "https://images.unsplash.com/photo-1600269452121-4f2416e55c28?auto=format&fit=crop&q=80&w=600",
-    bg: "#e8d5d5",
+    primary: "https://images.unsplash.com/photo-1600269452121-4f2416e55c28?auto=format&fit=crop&q=85&w=800&h=600",
+    fallback: "https://images.unsplash.com/photo-1584735175315-9d5df23be6e0?auto=format&fit=crop&q=80&w=600",
+    bg: "#f5e8e8",
   },
   "AJ3-BLC": {
-    primary: "https://image.goat.com/750/attachments/product_template_pictures/images/014/519/258/original/306292_00.png.png",
-    fallback: "https://images.unsplash.com/photo-1605348532760-6753d2c43329?auto=format&fit=crop&q=80&w=600",
-    bg: "#d5d5d5",
+    primary: "https://images.unsplash.com/photo-1605348532760-6753d2c43329?auto=format&fit=crop&q=85&w=800&h=600",
+    fallback: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&q=80&w=600",
+    bg: "#e8e8e8",
   },
   "DUNK-PND": {
-    primary: "https://image.goat.com/750/attachments/product_template_pictures/images/046/880/925/original/921573_00.png.png",
-    fallback: "https://images.unsplash.com/photo-1607522370275-f6fd4197767c?auto=format&fit=crop&q=80&w=600",
-    bg: "#f0f0f0",
+    primary: "https://images.unsplash.com/photo-1607522370275-f6fd4197767c?auto=format&fit=crop&q=85&w=800&h=600",
+    fallback: "https://images.unsplash.com/photo-1556906781-9a412961a28c?auto=format&fit=crop&q=80&w=600",
+    bg: "#f2f2f2",
   },
   "YZY-ZBR": {
-    primary: "https://image.goat.com/750/attachments/product_template_pictures/images/012/475/614/original/502874_00.png.png",
-    fallback: "https://images.unsplash.com/photo-1584735175315-9d5df23be6e0?auto=format&fit=crop&q=80&w=600",
-    bg: "#ebebeb",
+    primary: "https://images.unsplash.com/photo-1584735175315-9d5df23be6e0?auto=format&fit=crop&q=85&w=800&h=600",
+    fallback: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&q=80&w=600",
+    bg: "#ececec",
   },
   "NB-550": {
-    primary: "https://image.goat.com/750/attachments/product_template_pictures/images/047/745/438/original/875348_00.png.png",
-    fallback: "https://images.unsplash.com/photo-1539185441755-769473a23570?auto=format&fit=crop&q=80&w=600",
-    bg: "#dff0e8",
+    primary: "https://images.unsplash.com/photo-1539185441755-769473a23570?auto=format&fit=crop&q=85&w=800&h=600",
+    fallback: "https://images.unsplash.com/photo-1556906781-9a412961a28c?auto=format&fit=crop&q=80&w=600",
+    bg: "#e8f4ee",
   },
 };
 
