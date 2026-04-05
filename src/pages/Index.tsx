@@ -1087,7 +1087,7 @@ const Index = () => {
                   <div style={{ display: "flex", flexDirection: "column", gap: 8, padding: 14 }}>
                     {sorted.map((shoe, i) => (
                       <div key={shoe.id} style={{ animation: `fadeUp 0.4s ease ${i * 0.06}s both` }}>
-                        <ShoeCardList shoe={shoe} onRemove={id => { setVaultShoes(v => v.filter(s => s.id !== id)); showToast("Removed from vault"); }} onBuy={s => setVaultBuyShoe(s)} />
+                        <ShoeCardList shoe={shoe} onRemove={id => { setVaultShoes(v => v.filter(s => s.id !== id)); showToast("Removed from vault"); }} onBuy={s => setVaultDetailShoe(s)} />
                       </div>
                     ))}
                   </div>
