@@ -400,6 +400,7 @@ const Index = () => {
   const [authPass, setAuthPass] = useState("");
   const [authUser, setAuthUser] = useState("");
 
+  const [memberModal, setMemberModal] = useState(false);
   const [memberStep, setMemberStep] = useState<"plans" | "payment" | "success">("plans");
   const [memberCardNum, setMemberCardNum] = useState("");
   const [memberCardExp, setMemberCardExp] = useState("");
