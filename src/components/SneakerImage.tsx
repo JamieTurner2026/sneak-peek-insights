@@ -4,27 +4,27 @@ import { useState } from "react";
 // Maps shoe IDs to reliable image sources with automatic fallback
 const SNEAKER_IMAGES: Record<string, { primary: string; fallback: string; bg: string }> = {
   "AJ1-CHI": {
-    primary: "https://www.flightclub.com/media/catalog/product/cache/1/image/1600x1140/9df78eab33525d08d6e5fb8d27136e95/0/8/08.21.17-Air-Jordan-1-Retro-High-OG-Chicago-555088-101-1.png",
+    primary: "https://image.goat.com/750/attachments/product_template_pictures/images/011/824/726/original/9978_00.png.png",
     fallback: "https://images.unsplash.com/photo-1600269452121-4f2416e55c28?auto=format&fit=crop&q=80&w=600",
     bg: "#e8d5d5",
   },
   "AJ3-BLC": {
-    primary: "https://www.flightclub.com/media/catalog/product/cache/1/image/1600x1140/9df78eab33525d08d6e5fb8d27136e95/8/0/800236_01.jpg",
+    primary: "https://image.goat.com/750/attachments/product_template_pictures/images/014/519/258/original/306292_00.png.png",
     fallback: "https://images.unsplash.com/photo-1605348532760-6753d2c43329?auto=format&fit=crop&q=80&w=600",
     bg: "#d5d5d5",
   },
   "DUNK-PND": {
-    primary: "https://www.flightclub.com/media/catalog/product/cache/1/image/1600x1140/9df78eab33525d08d6e5fb8d27136e95/d/u/dunk-low-retro-white-black-dd1391-100-1.png",
+    primary: "https://image.goat.com/750/attachments/product_template_pictures/images/046/880/925/original/921573_00.png.png",
     fallback: "https://images.unsplash.com/photo-1607522370275-f6fd4197767c?auto=format&fit=crop&q=80&w=600",
     bg: "#f0f0f0",
   },
   "YZY-ZBR": {
-    primary: "https://www.flightclub.com/media/catalog/product/cache/1/image/1600x1140/9df78eab33525d08d6e5fb8d27136e95/8/0/800586_01.jpg",
+    primary: "https://image.goat.com/750/attachments/product_template_pictures/images/012/475/614/original/502874_00.png.png",
     fallback: "https://images.unsplash.com/photo-1584735175315-9d5df23be6e0?auto=format&fit=crop&q=80&w=600",
     bg: "#ebebeb",
   },
   "NB-550": {
-    primary: "https://www.flightclub.com/media/catalog/product/cache/1/image/1600x1140/9df78eab33525d08d6e5fb8d27136e95/n/e/new-balance-550-white-green-bb550wt1-1.png",
+    primary: "https://image.goat.com/750/attachments/product_template_pictures/images/047/745/438/original/875348_00.png.png",
     fallback: "https://images.unsplash.com/photo-1539185441755-769473a23570?auto=format&fit=crop&q=80&w=600",
     bg: "#dff0e8",
   },
