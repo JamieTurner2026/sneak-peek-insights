@@ -1079,7 +1079,7 @@ const Index = () => {
                   <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 12, padding: 14 }}>
                     {sorted.map((shoe, i) => (
                       <div key={shoe.id} style={{ animation: `fadeUp 0.4s ease ${i * 0.06}s both` }}>
-                        <ShoeCardGrid shoe={shoe} onRemove={id => { setVaultShoes(v => v.filter(s => s.id !== id)); showToast("Removed from vault"); }} onBuy={s => setVaultBuyShoe(s)} />
+                        <ShoeCardGrid shoe={shoe} onRemove={id => { setVaultShoes(v => v.filter(s => s.id !== id)); showToast("Removed from vault"); }} onBuy={s => setVaultDetailShoe(s)} />
                       </div>
                     ))}
                   </div>
