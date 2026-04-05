@@ -1,13 +1,6 @@
-import { useState, useRef, useEffect, useCallback, useMemo } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import SneakerImage, { getSneakerImageData } from "@/components/SneakerImage";
-import aj4BredImg from "@/assets/aj4-bred.png";
-import aj1RoyalImg from "@/assets/aj1-royal.png";
-import aj3FearImg from "@/assets/aj3-fear.png";
-import aj11CoolGreyImg from "@/assets/aj11-cool-grey.png";
-import yeezySlideOnyxImg from "@/assets/yeezy-slide-onyx.png";
-import nb550TricolorImg from "@/assets/nb-550-tricolor.png";
-import dunkLowUbImg from "@/assets/dunk-low-ub.png";
 
 // ─── TYPES ───────────────────────────────────────────────────────────────────
 interface ShoeResult {
@@ -76,33 +69,33 @@ interface VaultShoe {
 const SHOE_STORIES: Record<string, { story: string; colorwayInspiration: string; funFact: string; designer: string }> = {
   "AJ1-CHI": {
     designer: "Peter Moore",
-    story: "The Air Jordan 1 'Chicago' is the shoe that started it all. In 1985, Nike signed a rookie Michael Jordan to an unprecedented deal, and Peter Moore designed a shoe that broke every NBA uniform rule. The league fined Jordan $5,000 per game for wearing them — and Nike happily paid, turning the controversy into the most successful marketing campaign in sneaker history. The Chicago colorway, matching the Bulls' red, white, and black, became the definitive Jordan 1.",
-    colorwayInspiration: "The red, white, and black colorway was directly inspired by the Chicago Bulls' team colors. The bold varsity red panels against the white leather and black accents perfectly captured the energy of 1980s Chicago basketball.",
-    funFact: "The NBA fined Michael Jordan $5,000 every game he wore the original Air Jordan 1 because they violated the league's uniform policy. Nike paid every fine and turned it into the legendary 'Banned' marketing campaign."
+    story: "The Air Jordan 1 'Chicago' is the shoe that started it all. In 1985, Nike signed a rookie Michael Jordan to an unprecedented deal, and Peter Moore designed a shoe that broke every NBA uniform rule. The league fined Jordan $5,000 per game for wearing them — and Nike happily paid, turning the controversy into the most successful marketing campaign in sneaker history.",
+    colorwayInspiration: "The red, white, and black colorway was directly inspired by the Chicago Bulls' team colors.",
+    funFact: "The NBA fined Michael Jordan $5,000 every game he wore the original Air Jordan 1 because they violated the league's uniform policy."
   },
   "AJ3-BLC": {
     designer: "Tinker Hatfield",
-    story: "The Air Jordan 3 'Black Cement' saved the Jordan line. By 1988, Michael Jordan was ready to leave Nike for Adidas. Enter Tinker Hatfield, who redesigned the entire silhouette with elephant print panels, a visible Air unit, and the now-iconic Jumpman logo. Jordan fell in love and stayed with Nike. The Black Cement colorway debuted during the 1988 Slam Dunk Contest, where MJ launched from the free-throw line for his legendary dunk.",
-    colorwayInspiration: "The cement grey elephant print texture was inspired by safari patterns, giving the shoe a rugged, textured look. The black leather base with fire red accents created a timeless combination that Tinker Hatfield called 'sophisticated street.'",
-    funFact: "This was the first Jordan to feature the Jumpman logo instead of the Nike Wings. It was also the shoe MJ wore when he took off from the free-throw line at the 1988 Slam Dunk Contest — arguably the most iconic dunk in basketball history."
+    story: "The Air Jordan 3 'Black Cement' saved the Jordan line. By 1988, Michael Jordan was ready to leave Nike for Adidas. Enter Tinker Hatfield, who redesigned the entire silhouette with elephant print panels, a visible Air unit, and the now-iconic Jumpman logo.",
+    colorwayInspiration: "The cement grey elephant print texture was inspired by safari patterns, giving the shoe a rugged, textured look.",
+    funFact: "This was the first Jordan to feature the Jumpman logo instead of the Nike Wings."
   },
   "DUNK-PND": {
     designer: "Nike Design Team",
-    story: "Originally designed in 1985 as a college basketball shoe, the Nike Dunk was created for Nike's 'Be True to Your School' campaign, featuring colorways for top NCAA programs. The shoe faded from mainstream attention for decades before being rediscovered by skaters and streetwear enthusiasts. The 'Panda' colorway — simple black and white — became a viral sensation in 2021, becoming one of the most sought-after sneakers of the decade and a staple of everyday style.",
-    colorwayInspiration: "The 'Panda' name comes from its striking black and white contrast, mimicking the iconic coloring of a giant panda. The simplicity of the two-tone design is what makes it so versatile and universally appealing.",
-    funFact: "The Panda Dunk became so popular that Nike couldn't keep up with demand, leading to dozens of restocks throughout 2021-2023. At one point, it was the #1 most-traded sneaker on StockX for over 50 consecutive weeks."
+    story: "Originally designed in 1985 as a college basketball shoe, the Nike Dunk was created for Nike's 'Be True to Your School' campaign. The 'Panda' colorway became a viral sensation in 2021.",
+    colorwayInspiration: "The 'Panda' name comes from its striking black and white contrast, mimicking the iconic coloring of a giant panda.",
+    funFact: "The Panda Dunk became so popular that Nike couldn't keep up with demand, leading to dozens of restocks throughout 2021-2023."
   },
   "YZY-ZBR": {
     designer: "Kanye West & adidas Design Team",
-    story: "The Yeezy Boost 350 V2 'Zebra' was teased by Kanye West himself on Twitter in 2016, causing an internet frenzy. When it finally released in February 2017, it sold out in seconds. The distinctive black and white Primeknit pattern with the signature SPLY-350 branding became one of the most recognizable sneakers of the 2010s. The Zebra represented the peak of Yeezy hype, when getting a pair felt like winning the lottery.",
-    colorwayInspiration: "The alternating white and black Primeknit stripes were designed to mimic a zebra's natural pattern, creating an organic, almost hypnotic visual effect. The red 'SPLY-350' text adds a bold pop against the monochrome upper.",
-    funFact: "Kanye West first revealed the Zebra colorway with a simple tweet showing just the shoe on a table. That single image generated over 300,000 retweets and essentially invented the modern 'sneaker leak' format on social media."
+    story: "The Yeezy Boost 350 V2 'Zebra' was teased by Kanye West himself on Twitter in 2016, causing an internet frenzy. The distinctive black and white Primeknit pattern became one of the most recognizable sneakers of the 2010s.",
+    colorwayInspiration: "The alternating white and black Primeknit stripes were designed to mimic a zebra's natural pattern.",
+    funFact: "Kanye West first revealed the Zebra colorway with a simple tweet showing just the shoe on a table — generating over 300,000 retweets."
   },
   "NB-550": {
     designer: "New Balance Design Team",
-    story: "The New Balance 550 was originally released in 1989 as a basketball shoe, then quietly discontinued. In 2020, Aimé Leon Dore — a New York City boutique — collaborated with New Balance to bring it back, and the sneaker world went wild. The retro court silhouette with its chunky sole and vintage basketball DNA perfectly captured the post-hype era's appetite for understated, quality footwear. The White/Green colorway became the gateway drug for an entire generation discovering New Balance.",
-    colorwayInspiration: "The white leather base with forest green accents pays homage to classic Boston Celtics basketball aesthetics. The natural, slightly off-white leather gives it a vintage feel, while the green 'N' logo pops with preppy sophistication.",
-    funFact: "The New Balance 550 was essentially forgotten for 30 years before Aimé Leon Dore's Teddy Santis brought it back. The collaboration was so successful that it helped Santis land the role of Creative Director for New Balance's Made in USA line."
+    story: "The New Balance 550 was originally released in 1989 as a basketball shoe, then quietly discontinued. In 2020, Aimé Leon Dore brought it back.",
+    colorwayInspiration: "The white leather base with forest green accents pays homage to classic Boston Celtics basketball aesthetics.",
+    funFact: "The New Balance 550 was essentially forgotten for 30 years before Aimé Leon Dore's Teddy Santis brought it back."
   },
 };
 
@@ -230,18 +223,13 @@ function ShoeDetailModal({ shoe, onClose, onBuy }: { shoe: VaultShoe; onClose: (
 
   return (
     <div className="mo open" onClick={e => e.target === e.currentTarget && onClose()}>
-      <div className="mb">
+      <div className="mb modal-capped">
         <button className="mclose" onClick={onClose}>✕ CLOSE</button>
-
-        {/* Hero image */}
         <div style={{ height: 180, marginBottom: 14, border: "3px solid var(--border)", overflow: "hidden" }}>
           <SneakerImage shoeId={shoe.id} name={shoe.name} />
         </div>
-
         <div style={{ fontFamily: "var(--ft)", fontSize: 28, lineHeight: 0.92, marginBottom: 4 }}>{shoe.name}</div>
         <div style={{ fontFamily: "var(--fm)", fontSize: 10, color: "var(--red)", fontWeight: 700, marginBottom: 10 }}>{shoe.colorway} · {shoe.sku}</div>
-
-        {/* Quick stats grid */}
         <div className="sgrid">
           <div className="si2"><span className="sl">Brand</span><div className="sv">{shoe.brand}</div></div>
           <div className="si2"><span className="sl">Size</span><div className="sv">{shoe.size}</div></div>
@@ -250,8 +238,6 @@ function ShoeDetailModal({ shoe, onClose, onBuy }: { shoe: VaultShoe; onClose: (
           <div className="si2"><span className="sl">Tech</span><div className="sv">{shoe.tech}</div></div>
           <div className="si2"><span className="sl">Condition</span><div className="sv" style={{ color: cond.bg }}>{shoe.condition}</div></div>
         </div>
-
-        {/* Prices */}
         <div style={{ display: "flex", gap: 5, marginBottom: 14 }}>
           <div style={{ flex: 1, border: "3px solid var(--border)", padding: "8px", textAlign: "center" }}>
             <div style={{ fontFamily: "var(--fm)", fontSize: 8, color: "var(--red)", fontWeight: 700 }}>RETAIL</div>
@@ -262,24 +248,19 @@ function ShoeDetailModal({ shoe, onClose, onBuy }: { shoe: VaultShoe; onClose: (
             <div style={{ fontFamily: "var(--ft)", fontSize: 24, color: "var(--red)" }}>${shoe.resale}</div>
           </div>
         </div>
-
         {story && (
           <>
             <div className="sech">The Story</div>
             <p style={{ fontFamily: "var(--fm)", fontSize: 11, lineHeight: 1.55, marginBottom: 14 }}>{story.story}</p>
-
             <div className="sech">Colorway Inspiration</div>
             <p style={{ fontFamily: "var(--fm)", fontSize: 11, lineHeight: 1.55, marginBottom: 14 }}>{story.colorwayInspiration}</p>
-
             <div style={{ border: "3px solid var(--gold)", background: "rgba(245,166,35,0.06)", padding: 12, marginBottom: 14 }}>
               <div style={{ fontFamily: "var(--ft)", fontSize: 13, color: "var(--gold)", marginBottom: 4 }}>⭐ FUN FACT</div>
               <p style={{ fontFamily: "var(--fm)", fontSize: 10, lineHeight: 1.5 }}>{story.funFact}</p>
             </div>
-
             <div style={{ fontFamily: "var(--fm)", fontSize: 9, color: "var(--red)", fontWeight: 700, marginBottom: 10 }}>DESIGNED BY: {story.designer}</div>
           </>
         )}
-
         <button className="btn-r" onClick={() => { onClose(); onBuy(shoe); }}>🛒 BUY NOW — CHECKOUT</button>
         <button className="btn-o" onClick={onClose}>CLOSE</button>
       </div>
@@ -314,7 +295,6 @@ function VaultBuyModal({ shoe, onClose }: { shoe: VaultShoe; onClose: () => void
   const tax = Math.round(subtotal * TAX_RATE * 100) / 100;
   const total = subtotal + shipping + tax;
 
-  // Generate per-retailer prices (slight variation)
   const retailerPrices = VAULT_RETAILERS.map((r, i) => {
     const variation = [-5, 0, 7, 12, -8, 3, 10, -2][i] || 0;
     return shoe.resale + variation;
@@ -335,7 +315,7 @@ function VaultBuyModal({ shoe, onClose }: { shoe: VaultShoe; onClose: () => void
 
   return (
     <div className="mo open" onClick={e => e.target === e.currentTarget && onClose()}>
-      <div className="mb">
+      <div className="mb modal-capped">
         <button className="mclose" onClick={onClose}>✕ CLOSE</button>
         <div style={{ display: "flex", gap: 12, alignItems: "center", marginBottom: 14 }}>
           <div style={{ width: 60, height: 60, border: "3px solid var(--border)", flexShrink: 0 }}><SneakerImage shoeId={shoe.id} name={shoe.name} /></div>
@@ -345,26 +325,12 @@ function VaultBuyModal({ shoe, onClose }: { shoe: VaultShoe; onClose: () => void
           {[1, 2, 3, 4, 5].map(i => <div key={i} style={{ flex: 1, height: 4, background: step >= i ? (step > i ? "var(--green)" : "var(--red)") : "var(--sa)" }} />)}
         </div>
 
-        {/* Step 1: Choose Retailer */}
         {step === 1 && (
           <div>
             <div className="cktitle">01 — CHOOSE RETAILER</div>
             <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
               {VAULT_RETAILERS.map((r, i) => (
-                <div
-                  key={r.name}
-                  onClick={() => setSelectedRetailer(i)}
-                  style={{
-                    border: selectedRetailer === i ? "3px solid var(--red)" : "3px solid var(--border)",
-                    background: selectedRetailer === i ? "rgba(200,16,46,0.05)" : "var(--surface)",
-                    padding: "10px 12px",
-                    cursor: "pointer",
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    transition: "all 0.15s",
-                  }}
-                >
+                <div key={r.name} onClick={() => setSelectedRetailer(i)} style={{ border: selectedRetailer === i ? "3px solid var(--red)" : "3px solid var(--border)", background: selectedRetailer === i ? "rgba(200,16,46,0.05)" : "var(--surface)", padding: "10px 12px", cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center", transition: "all 0.15s" }}>
                   <div>
                     <div style={{ fontFamily: "var(--ft)", fontSize: 15 }}>{r.name}</div>
                     <div style={{ display: "flex", gap: 5, marginTop: 2 }}>
@@ -384,21 +350,17 @@ function VaultBuyModal({ shoe, onClose }: { shoe: VaultShoe; onClose: () => void
           </div>
         )}
 
-        {/* Step 2: Size */}
         {step === 2 && (
           <div>
             <div className="cktitle">02 — SELECT SIZE</div>
             <div className="szgrid">
-              {SIZES.map(s => (
-                <button key={s} className={`szbtn ${size === s ? "sel" : ""}`} onClick={() => setSize(s)}>{s}</button>
-              ))}
+              {SIZES.map(s => (<button key={s} className={`szbtn ${size === s ? "sel" : ""}`} onClick={() => setSize(s)}>{s}</button>))}
             </div>
             <button className="btn-r" onClick={goNext}>CONTINUE →</button>
             <button className="btn-o" onClick={() => setStep(1)}>← BACK</button>
           </div>
         )}
 
-        {/* Step 3: Shipping */}
         {step === 3 && (
           <div>
             <div className="cktitle">03 — SHIPPING INFO</div>
@@ -417,7 +379,6 @@ function VaultBuyModal({ shoe, onClose }: { shoe: VaultShoe; onClose: () => void
           </div>
         )}
 
-        {/* Step 4: Payment */}
         {step === 4 && (
           <div>
             <div className="cktitle">04 — PAYMENT</div>
@@ -441,7 +402,6 @@ function VaultBuyModal({ shoe, onClose }: { shoe: VaultShoe; onClose: () => void
           </div>
         )}
 
-        {/* Step 5: Confirmation */}
         {step === 5 && (
           <div style={{ textAlign: "center", padding: "18px 0" }}>
             <div style={{ fontSize: 46, marginBottom: 8 }}>✅</div>
@@ -457,6 +417,7 @@ function VaultBuyModal({ shoe, onClose }: { shoe: VaultShoe; onClose: () => void
     </div>
   );
 }
+
 interface VaultItem extends ShoeResult {
   savedAt: string;
 }
@@ -489,7 +450,7 @@ function CountdownDisplay({ target }: { target: Date }) {
   const { days, hours, minutes, seconds, total, dropped } = useCountdown(target);
   if (dropped) return <div style={{ fontFamily: "var(--ft)", fontSize: 13, color: "#c8102e", letterSpacing: "0.05em" }}>🔴 DROPPED — SHOP NOW</div>;
   const pad = (n: number) => String(n).padStart(2, "0");
-  const isUrgent = total < 3600000; // under 1 hour
+  const isUrgent = total < 3600000;
   return (
     <div style={{ fontFamily: "var(--fm)", fontSize: 14, fontWeight: 700, color: isUrgent ? "#c8102e" : "var(--txt)", letterSpacing: "0.06em" }}>
       {days > 0 && <span>{days}d </span>}
@@ -517,18 +478,19 @@ interface DropItem {
 
 const DROP_BRANDS = ["ALL", "JORDAN", "NIKE", "NIKE SB", "ADIDAS", "NEW BALANCE", "ASICS"] as const;
 
+// All drop images are now verified Unsplash URLs — no local asset imports needed
 const INITIAL_DROPS = ([
-  { id: "d1", name: "Air Jordan 4 Retro", brand: "JORDAN", brandFilter: "JORDAN", colorway: "Bred Reimagined", date: buildDropDate(2), dateLabel: "", retail: 210, image: aj4BredImg, hype: "SELLOUT" as const, alert: false, sku: "FV5029-006", retailer: "Nike SNKRS" },
-  { id: "d2", name: "Air Jordan 1 High OG", brand: "JORDAN", brandFilter: "JORDAN", colorway: "Royal Toe", date: buildDropDate(5), dateLabel: "", retail: 180, image: aj1RoyalImg, hype: "HIGH" as const, alert: false, sku: "555088-041", retailer: "Nike SNKRS" },
-  { id: "d3", name: "Air Jordan 3 Retro", brand: "JORDAN", brandFilter: "JORDAN", colorway: "Fear", date: buildDropDate(9), dateLabel: "", retail: 200, image: aj3FearImg, hype: "HIGH" as const, alert: false, sku: "CT8532-080", retailer: "Nike SNKRS" },
-  { id: "d4", name: "Air Jordan 11 Retro", brand: "JORDAN", brandFilter: "JORDAN", colorway: "Cool Grey", date: buildDropDate(14), dateLabel: "", retail: 225, image: aj11CoolGreyImg, hype: "SELLOUT" as const, alert: false, sku: "CT8012-005", retailer: "Foot Locker" },
-  { id: "d5", name: "Nike Dunk Low", brand: "NIKE", brandFilter: "NIKE", colorway: "University Blue", date: buildDropDate(3), dateLabel: "", retail: 115, image: dunkLowUbImg, hype: "HIGH" as const, alert: false, sku: "DD1391-102", retailer: "Nike SNKRS" },
+  { id: "d1", name: "Air Jordan 4 Retro", brand: "JORDAN", brandFilter: "JORDAN", colorway: "Bred Reimagined", date: buildDropDate(2), dateLabel: "", retail: 210, image: "https://images.unsplash.com/photo-1584735175315-9d5df23be6e0?auto=format&fit=crop&q=85&w=800&h=600", hype: "SELLOUT" as const, alert: false, sku: "FV5029-006", retailer: "Nike SNKRS" },
+  { id: "d2", name: "Air Jordan 1 High OG", brand: "JORDAN", brandFilter: "JORDAN", colorway: "Royal Toe", date: buildDropDate(5), dateLabel: "", retail: 180, image: "https://images.unsplash.com/photo-1600269452121-4f2416e55c28?auto=format&fit=crop&q=85&w=800&h=600", hype: "HIGH" as const, alert: false, sku: "555088-041", retailer: "Nike SNKRS" },
+  { id: "d3", name: "Air Jordan 3 Retro", brand: "JORDAN", brandFilter: "JORDAN", colorway: "Fear", date: buildDropDate(9), dateLabel: "", retail: 200, image: "https://images.unsplash.com/photo-1605348532760-6753d2c43329?auto=format&fit=crop&q=85&w=800&h=600", hype: "HIGH" as const, alert: false, sku: "CT8532-080", retailer: "Nike SNKRS" },
+  { id: "d4", name: "Air Jordan 11 Retro", brand: "JORDAN", brandFilter: "JORDAN", colorway: "Cool Grey", date: buildDropDate(14), dateLabel: "", retail: 225, image: "https://images.unsplash.com/photo-1543508282-6319a3e2621f?auto=format&fit=crop&q=85&w=800&h=600", hype: "SELLOUT" as const, alert: false, sku: "CT8012-005", retailer: "Foot Locker" },
+  { id: "d5", name: "Nike Dunk Low", brand: "NIKE", brandFilter: "NIKE", colorway: "University Blue", date: buildDropDate(3), dateLabel: "", retail: 115, image: "https://images.unsplash.com/photo-1607522370275-f6fd4197767c?auto=format&fit=crop&q=85&w=800&h=600", hype: "HIGH" as const, alert: false, sku: "DD1391-102", retailer: "Nike SNKRS" },
   { id: "d6", name: "Nike Air Force 1 Low", brand: "NIKE", brandFilter: "NIKE", colorway: "Triple White", date: buildDropDate(7), dateLabel: "", retail: 110, image: "https://images.unsplash.com/photo-1600185365926-3a2ce3cdb9eb?auto=format&fit=crop&q=80&w=600", hype: "LIMITED" as const, alert: false, sku: "CW2288-111", retailer: "Nike.com" },
   { id: "d7", name: "Nike SB Dunk Low", brand: "NIKE SB", brandFilter: "NIKE SB", colorway: "Court Purple", date: buildDropDate(11), dateLabel: "", retail: 120, image: "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?auto=format&fit=crop&q=80&w=600", hype: "SELLOUT" as const, alert: false, sku: "BQ6817-500", retailer: "Skate shops" },
-  { id: "d8", name: "Yeezy Slide", brand: "ADIDAS", brandFilter: "ADIDAS", colorway: "Onyx", date: buildDropDate(6), dateLabel: "", retail: 70, image: yeezySlideOnyxImg, hype: "LIMITED" as const, alert: false, sku: "HQ6448", retailer: "adidas Confirmed" },
+  { id: "d8", name: "Yeezy Slide", brand: "ADIDAS", brandFilter: "ADIDAS", colorway: "Onyx", date: buildDropDate(6), dateLabel: "", retail: 70, image: "https://images.unsplash.com/photo-1556906781-9a412961a28c?auto=format&fit=crop&q=80&w=600", hype: "LIMITED" as const, alert: false, sku: "HQ6448", retailer: "adidas Confirmed" },
   { id: "d9", name: "adidas Samba OG", brand: "ADIDAS", brandFilter: "ADIDAS", colorway: "Cloud White / Core Black", date: buildDropDate(18), dateLabel: "", retail: 100, image: "https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?auto=format&fit=crop&q=80&w=600", hype: "HIGH" as const, alert: false, sku: "B75806", retailer: "adidas.com" },
   { id: "d10", name: "New Balance 9060", brand: "NEW BALANCE", brandFilter: "NEW BALANCE", colorway: "Sea Salt", date: buildDropDate(10), dateLabel: "", retail: 150, image: "https://images.unsplash.com/photo-1539185441755-769473a23570?auto=format&fit=crop&q=80&w=600", hype: "HIGH" as const, alert: false, sku: "U9060HSB", retailer: "New Balance" },
-  { id: "d11", name: "New Balance 550", brand: "NEW BALANCE", brandFilter: "NEW BALANCE", colorway: "Tri-Color", date: buildDropDate(21), dateLabel: "", retail: 110, image: nb550TricolorImg, hype: "LIMITED" as const, alert: false, sku: "BB550HR1", retailer: "Kith" },
+  { id: "d11", name: "New Balance 550", brand: "NEW BALANCE", brandFilter: "NEW BALANCE", colorway: "Tri-Color", date: buildDropDate(21), dateLabel: "", retail: 110, image: "https://images.unsplash.com/photo-1551107696-a4b0c5a0d9a2?auto=format&fit=crop&q=80&w=600", hype: "LIMITED" as const, alert: false, sku: "BB550HR1", retailer: "Kith" },
   { id: "d12", name: "Asics Gel-Kayano 14", brand: "ASICS", brandFilter: "ASICS", colorway: "White/Midnight", date: buildDropDate(16), dateLabel: "", retail: 150, image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&q=80&w=600", hype: "HIGH" as const, alert: false, sku: "1201A019-115", retailer: "ASICS.com" },
 ] as DropItem[]).map(d => ({ ...d, dateLabel: d.date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) }))
 .sort((a, b) => a.date.getTime() - b.date.getTime());
@@ -549,7 +511,22 @@ interface Listing {
   colorway: string;
   price: number;
   status: "live" | "sold" | "pending";
-  image?: string;
+  views: number;
+  watchers: number;
+  offers: number;
+  listedDate: string;
+  description: string;
+  shippingMethod: string;
+}
+
+interface Offer {
+  id: string;
+  listingId: string;
+  buyerName: string;
+  amount: number;
+  date: string;
+  status: "pending" | "accepted" | "declined" | "countered";
+  counterAmount?: number;
 }
 
 // ─── DATA ────────────────────────────────────────────────────────────────────
@@ -572,10 +549,88 @@ const INITIAL_MARKET: MarketItem[] = [
 const SIZES = ["7", "7.5", "8", "8.5", "9", "9.5", "10", "10.5", "11", "11.5", "12", "13"];
 const CONDITIONS = ["Deadstock", "New in Box", "Like New", "Used — Great", "Used — Good", "Heavily Used"];
 
+// ─── DESKTOP SIDEBAR COMPONENT ──────────────────────────────────────────────
+function DesktopSidebar({ activeScreen, setActiveScreen, tabItems, vaultShoes, vault, listings, resetScan, scanned }: {
+  activeScreen: string;
+  setActiveScreen: (s: string) => void;
+  tabItems: { key: string; label: string; notif: number | null }[];
+  vaultShoes: VaultShoe[];
+  vault: VaultItem[];
+  listings: Listing[];
+  resetScan: () => void;
+  scanned: boolean;
+}) {
+  const totalResale = vaultShoes.reduce((s, v) => s + v.resale, 0);
+  const totalRetail = vaultShoes.reduce((s, v) => s + v.retail, 0);
+  const netGain = totalResale - totalRetail;
+
+  const navIcons: Record<string, string> = {
+    scan: "📷", drops: "📅", market: "📊", vault: "🏦", sell: "💰", id: "👤"
+  };
+
+  return (
+    <div className="desktop-sidebar">
+      <div className="ds-logo">
+        <div style={{ fontFamily: "var(--ft)", fontSize: 18, fontWeight: 700, color: "var(--gold)", letterSpacing: "0.08em" }}>SNAPSHOTZ</div>
+        <div style={{ fontFamily: "var(--fm)", fontSize: 8, color: "rgba(255,255,255,0.5)", letterSpacing: "0.12em" }}>SOLES · AI PLATFORM</div>
+      </div>
+      <nav className="ds-nav">
+        {tabItems.map(t => (
+          <button
+            key={t.key}
+            className={`ds-nav-item ${activeScreen === t.key ? "active" : ""}`}
+            onClick={() => { setActiveScreen(t.key); if (t.key === "scan" && scanned) resetScan(); }}
+          >
+            <span className="ds-nav-icon">{navIcons[t.key] || "■"}</span>
+            <span className="ds-nav-label">{t.label}</span>
+            {t.notif && <span className="ds-nav-badge">{t.notif}</span>}
+          </button>
+        ))}
+      </nav>
+      <div className="ds-footer">
+        <div className="ds-stat"><span className="ds-stat-label">VAULT VALUE</span><span className="ds-stat-value">${totalResale.toLocaleString()}</span></div>
+        <div className="ds-stat"><span className="ds-stat-label">NET GAIN</span><span className="ds-stat-value" style={{ color: netGain >= 0 ? "var(--green)" : "var(--red)" }}>{netGain >= 0 ? "+" : ""}${netGain.toLocaleString()}</span></div>
+        <div className="ds-stat"><span className="ds-stat-label">LISTINGS</span><span className="ds-stat-value">{listings.length} active</span></div>
+      </div>
+    </div>
+  );
+}
+
+// ─── SELL TABS COMPONENT ────────────────────────────────────────────────────
+const SELL_TABS = ["LIST", "LISTINGS", "OFFERS", "ANALYTICS"] as const;
+type SellTab = typeof SELL_TABS[number];
+
+const PRICE_SUGGESTIONS = [
+  { label: "Below Market", pct: -10, color: "var(--green)" },
+  { label: "Market Rate", pct: 0, color: "var(--gold)" },
+  { label: "Above Market", pct: 10, color: "var(--red)" },
+  { label: "Premium", pct: 25, color: "#5a3d8a" },
+];
+
+const SHIPPING_METHODS = ["SnapShotz Shipping", "Self-Ship", "Local Pickup"];
+
+const SELLER_TIPS = [
+  "📸 Add 4+ photos from different angles",
+  "💲 Price within 5% of market for faster sales",
+  "📦 Ship within 2 business days",
+  "🏷️ Include original box & tags if available",
+  "⭐ Good reviews = more visibility",
+];
+
 // ─── MAIN COMPONENT ─────────────────────────────────────────────────────────
 const Index = () => {
   // Navigation
   const [activeScreen, setActiveScreen] = useState("scan");
+
+  // Responsive
+  const [isDesktop, setIsDesktop] = useState(false);
+  useEffect(() => {
+    const mql = window.matchMedia("(min-width: 768px)");
+    const onChange = () => setIsDesktop(mql.matches);
+    mql.addEventListener("change", onChange);
+    onChange();
+    return () => mql.removeEventListener("change", onChange);
+  }, []);
 
   // Scan state
   const [scanning, setScanning] = useState(false);
@@ -590,7 +645,6 @@ const Index = () => {
 
   // Vault (scanned shoes)
   const [vault, setVault] = useState<VaultItem[]>([]);
-  // Vault collection (pre-loaded shoes with images)
   const [vaultShoes, setVaultShoes] = useState<VaultShoe[]>(INITIAL_VAULT_SHOES);
   const [vaultView, setVaultView] = useState<"grid" | "list">("grid");
   const [vaultSort, setVaultSort] = useState("saved");
@@ -608,10 +662,21 @@ const Index = () => {
   const [market] = useState<MarketItem[]>(INITIAL_MARKET);
   const [marketDetail, setMarketDetail] = useState<MarketItem | null>(null);
 
-  // Sell
+  // Sell — enhanced
   const [loggedIn, setLoggedIn] = useState(false);
-  const [listings, setListings] = useState<Listing[]>([]);
-  const [sellForm, setSellForm] = useState({ name: "", colorway: "", size: "", condition: "Deadstock", price: "" });
+  const [sellTab, setSellTab] = useState<SellTab>("LIST");
+  const [listings, setListings] = useState<Listing[]>([
+    { id: "l1", name: "Air Jordan 1 High OG", colorway: "Chicago", price: 290, status: "live", views: 142, watchers: 8, offers: 2, listedDate: "Apr 1, 2026", description: "DS, never worn, OG all.", shippingMethod: "SnapShotz Shipping" },
+    { id: "l2", name: "Nike Dunk Low", colorway: "Panda", price: 115, status: "sold", views: 320, watchers: 15, offers: 5, listedDate: "Mar 28, 2026", description: "Like new, worn once.", shippingMethod: "Self-Ship" },
+  ]);
+  const [offers, setOffers] = useState<Offer[]>([
+    { id: "o1", listingId: "l1", buyerName: "SneakerKing99", amount: 270, date: "Apr 3, 2026", status: "pending" },
+    { id: "o2", listingId: "l1", buyerName: "JordanFan23", amount: 280, date: "Apr 4, 2026", status: "pending" },
+    { id: "o3", listingId: "l2", buyerName: "DunkCollector", amount: 100, date: "Mar 30, 2026", status: "declined" },
+  ]);
+  const [sellForm, setSellForm] = useState({ name: "", colorway: "", size: "", condition: "Deadstock", price: "", description: "", shippingMethod: "SnapShotz Shipping" });
+  const [counterModal, setCounterModal] = useState<Offer | null>(null);
+  const [counterPrice, setCounterPrice] = useState("");
 
   // Profile
   const [totalScans, setTotalScans] = useState(0);
@@ -637,7 +702,6 @@ const Index = () => {
   const [memberCardCvv, setMemberCardCvv] = useState("");
   const [memberCardName, setMemberCardName] = useState("");
 
-  // Checkout modal
   const [selectedPlan, setSelectedPlan] = useState("free");
 
   // Checkout modal
@@ -758,17 +822,8 @@ const Index = () => {
   const openCheckout = (shoe: ShoeResult | MarketItem) => {
     setCheckoutShoe(shoe);
     setCkStep(0);
-    setCkSize("");
-    setCkName("");
-    setCkEmail("");
-    setCkAddr("");
-    setCkCity("");
-    setCkZip("");
-    setCkCard("");
-    setCkExp("");
-    setCkCvv("");
-    setCkCardName("");
-    setOrderNum("");
+    setCkSize(""); setCkName(""); setCkEmail(""); setCkAddr(""); setCkCity(""); setCkZip("");
+    setCkCard(""); setCkExp(""); setCkCvv(""); setCkCardName(""); setOrderNum("");
     setCheckoutModal(true);
   };
 
@@ -794,8 +849,14 @@ const Index = () => {
       colorway: sellForm.colorway,
       price: Number(sellForm.price),
       status: "live",
+      views: 0,
+      watchers: 0,
+      offers: 0,
+      listedDate: new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }),
+      description: sellForm.description,
+      shippingMethod: sellForm.shippingMethod,
     }]);
-    setSellForm({ name: "", colorway: "", size: "", condition: "Deadstock", price: "" });
+    setSellForm({ name: "", colorway: "", size: "", condition: "Deadstock", price: "", description: "", shippingMethod: "SnapShotz Shipping" });
     showToast("Listing created!");
   };
 
@@ -813,6 +874,18 @@ const Index = () => {
     setAuthModal(false);
     setAuthError("");
     showToast(authTab === "login" ? "Logged in!" : "Account created!");
+  };
+
+  // ─── SELL ANALYTICS DATA ─────────────────────────────────────────────────
+  const sellAnalytics = {
+    totalListed: listings.length,
+    liveNow: listings.filter(l => l.status === "live").length,
+    totalSold: listings.filter(l => l.status === "sold").length,
+    grossEarned: listings.filter(l => l.status === "sold").reduce((s, l) => s + l.price, 0),
+    avgAskingPrice: listings.length ? Math.round(listings.reduce((s, l) => s + l.price, 0) / listings.length) : 0,
+    totalViews: listings.reduce((s, l) => s + l.views, 0),
+    pendingOffers: offers.filter(o => o.status === "pending").length,
+    conversionRate: listings.length ? Math.round((listings.filter(l => l.status === "sold").length / listings.length) * 100) : 0,
   };
 
   // ─── RENDER HELPERS ────────────────────────────────────────────────────────
@@ -836,613 +909,694 @@ const Index = () => {
         <button className="bell-btn">🔔 ALERTS</button>
       </div>
 
-      {/* ═══════════════════ SCAN SCREEN ═══════════════════ */}
-      <div className={`screen ${activeScreen === "scan" ? "active" : ""}`} style={{ position: "relative" }}>
-        {/* Background */}
-        <div className="jbg" style={capturedImage ? { backgroundImage: `url(${capturedImage})` } : {}} />
-        {capturedImage && <div className={`cam-scanned ${scanned ? "vis" : ""}`} style={{ backgroundImage: `url(${capturedImage})` }} />}
+      <div className="app-layout">
+        {/* DESKTOP SIDEBAR */}
+        {isDesktop && (
+          <DesktopSidebar
+            activeScreen={activeScreen}
+            setActiveScreen={setActiveScreen}
+            tabItems={tabItems}
+            vaultShoes={vaultShoes}
+            vault={vault}
+            listings={listings}
+            resetScan={resetScan}
+            scanned={scanned}
+          />
+        )}
 
-        {/* Camera video */}
-        <video ref={videoRef} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", zIndex: 1, display: cameraActive && !scanned ? "block" : "none" }} playsInline muted />
-        <canvas ref={canvasRef} style={{ display: "none" }} />
-
-        {/* Scan frame */}
-        <div className="hf" style={{ zIndex: 5 }}>
-          <div className="hc tl" /><div className="hc tr" /><div className="hc bl" /><div className="hc br" />
-          <div className={`sline ${scanning ? "run" : ""}`} />
-          {scanning && <div className="hlbl" style={{ bottom: "12px", left: "50%", transform: "translateX(-50%)" }}>ANALYZING...</div>}
-        </div>
-
-        {/* Watermark */}
-        <div className="wmark">
-          <div className="wm1">SNAPSHOTZ SOLES</div>
-          <span className="wm2">AI SHOE RECOGNITION</span>
-        </div>
-
-        {/* Scan UI */}
-        <div className="si">
-          <div className="sh">
-            <div className="sbdg"><div className={`sdot ${scanning ? "pulse" : ""}`} />MODE: {scanning ? "SCANNING" : scanned ? "IDENTIFIED" : "STANDBY"}</div>
-            <div className="obdg">VER 1.0</div>
-          </div>
-
-          <div style={{ flex: 1 }} />
-
-          {/* Status labels */}
-          {!scanned && !scanning && (
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
-              <div className="hlbl" style={{ position: "static" }}>AWAITING SCAN...</div>
-              <div className="hlbl" style={{ position: "static" }}>[0] OBJECTS</div>
+        <div className="app-main">
+          {/* ═══════════════════ SCAN SCREEN ═══════════════════ */}
+          <div className={`screen ${activeScreen === "scan" ? "active" : ""}`} style={{ position: "relative" }}>
+            <div className="jbg" style={capturedImage ? { backgroundImage: `url(${capturedImage})` } : {}} />
+            {capturedImage && <div className={`cam-scanned ${scanned ? "vis" : ""}`} style={{ backgroundImage: `url(${capturedImage})` }} />}
+            <video ref={videoRef} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", zIndex: 1, display: cameraActive && !scanned ? "block" : "none" }} playsInline muted />
+            <canvas ref={canvasRef} style={{ display: "none" }} />
+            <div className="hf" style={{ zIndex: 5 }}>
+              <div className="hc tl" /><div className="hc tr" /><div className="hc bl" /><div className="hc br" />
+              <div className={`sline ${scanning ? "run" : ""}`} />
+              {scanning && <div className="hlbl" style={{ bottom: "12px", left: "50%", transform: "translateX(-50%)" }}>ANALYZING...</div>}
             </div>
-          )}
-          {scanned && shoeResult && (
-            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
-              <div className="hlbl" style={{ position: "static" }}>IDENTIFIED</div>
-              <div className="hlbl" style={{ position: "static" }}>{shoeResult.confidence}% MATCH</div>
+            <div className="wmark">
+              <div className="wm1">SNAPSHOTZ SOLES</div>
+              <span className="wm2">AI SHOE RECOGNITION</span>
             </div>
-          )}
-
-          {/* Capture / Upload */}
-          {!scanned && (
-            <div className="capwrap">
-              <button className="capbtn" onClick={capturePhoto}>
-                <div className="capinn">
-                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5"><circle cx="12" cy="13" r="4" /><path d="M5 7h2l2-3h6l2 3h2a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9a2 2 0 012-2z" /></svg>
+            <div className="si">
+              <div className="sh">
+                <div className="sbdg"><div className={`sdot ${scanning ? "pulse" : ""}`} />MODE: {scanning ? "SCANNING" : scanned ? "IDENTIFIED" : "STANDBY"}</div>
+                <div className="obdg">VER 1.0</div>
+              </div>
+              <div style={{ flex: 1 }} />
+              {!scanned && !scanning && (
+                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+                  <div className="hlbl" style={{ position: "static" }}>AWAITING SCAN...</div>
+                  <div className="hlbl" style={{ position: "static" }}>[0] OBJECTS</div>
                 </div>
-              </button>
-              <label className="uplbl">
-                ⬆ UPLOAD IMAGE
-                <input type="file" accept="image/*" style={{ display: "none" }} onChange={handleUpload} />
-              </label>
-            </div>
-          )}
-
-          {/* Results drawer */}
-          <div className={`drw ${drawerCollapsed ? "coll" : ""}`}>
-            <div className="hdl" onClick={() => setDrawerCollapsed(!drawerCollapsed)} />
-
-            {scanning && !shoeResult && (
-              <>
-                <div className="stitle">Scanning...</div>
-                <div className="smeta">ANALYZING IMAGE</div>
-                <div className="cbar"><div className="cfill" style={{ width: "60%" }} /></div>
-              </>
-            )}
-
-            {shoeResult && (
-              <>
-                <div className="stitle">{shoeResult.name}</div>
-                <div className="smeta">
-                  <span>{shoeResult.brand}</span>
-                  <span>{shoeResult.colorway}</span>
-                  <span>{shoeResult.confidence}% MATCH</span>
+              )}
+              {scanned && shoeResult && (
+                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
+                  <div className="hlbl" style={{ position: "static" }}>IDENTIFIED</div>
+                  <div className="hlbl" style={{ position: "static" }}>{shoeResult.confidence}% MATCH</div>
                 </div>
-                <div className="cbar"><div className="cfill" style={{ width: `${shoeResult.confidence}%` }} /></div>
-
-                <div className="sgrid">
-                  <div className="si2"><span className="sl">Silhouette</span><div className="sv">{shoeResult.silhouette}</div></div>
-                  <div className="si2"><span className="sl">Colorway</span><div className="sv">{shoeResult.colorway}</div></div>
-                  <div className="si2"><span className="sl">Release</span><div className="sv">{shoeResult.release}</div></div>
-                  <div className="si2"><span className="sl">Tech</span><div className="sv">{shoeResult.tech}</div></div>
+              )}
+              {!scanned && (
+                <div className="capwrap">
+                  <button className="capbtn" onClick={capturePhoto}>
+                    <div className="capinn">
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5"><circle cx="12" cy="13" r="4" /><path d="M5 7h2l2-3h6l2 3h2a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9a2 2 0 012-2z" /></svg>
+                    </div>
+                  </button>
+                  <label className="uplbl">
+                    ⬆ UPLOAD IMAGE
+                    <input type="file" accept="image/*" style={{ display: "none" }} onChange={handleUpload} />
+                  </label>
                 </div>
-
-                {shoeResult.designer && (
-                  <div className="sgrid" style={{ gridTemplateColumns: "1fr" }}>
-                    <div className="si2"><span className="sl">Designer</span><div className="sv">{shoeResult.designer}</div></div>
-                  </div>
-                )}
-
-                {shoeResult.inspiration && (
+              )}
+              <div className={`drw ${drawerCollapsed ? "coll" : ""}`}>
+                <div className="hdl" onClick={() => setDrawerCollapsed(!drawerCollapsed)} />
+                {scanning && !shoeResult && (
                   <>
-                    <div className="sech">The Story</div>
-                    <p style={{ fontFamily: "var(--fm)", fontSize: 11, lineHeight: 1.5, marginBottom: 12 }}>{shoeResult.inspiration}</p>
+                    <div className="stitle">Scanning...</div>
+                    <div className="smeta">ANALYZING IMAGE</div>
+                    <div className="cbar"><div className="cfill" style={{ width: "60%" }} /></div>
                   </>
                 )}
-
-                <button className="btn-o" onClick={saveToVault}>+ SAVE TO VAULT</button>
-
-                <div className="sech">Where to Buy</div>
-                <div className="rgrid">
-                  {["StockX", "GOAT", "Flight Club", "eBay"].map(r => (
-                    <div key={r} className="sc" onClick={() => openCheckout(shoeResult)}>
-                      <div className="sct">
-                        <span className="scn">{r}</span>
-                        <span className="scb bb">BUY</span>
+                {shoeResult && (
+                  <>
+                    <div className="stitle">{shoeResult.name}</div>
+                    <div className="smeta">
+                      <span>{shoeResult.brand}</span>
+                      <span>{shoeResult.colorway}</span>
+                      <span>{shoeResult.confidence}% MATCH</span>
+                    </div>
+                    <div className="cbar"><div className="cfill" style={{ width: `${shoeResult.confidence}%` }} /></div>
+                    <div className="sgrid">
+                      <div className="si2"><span className="sl">Silhouette</span><div className="sv">{shoeResult.silhouette}</div></div>
+                      <div className="si2"><span className="sl">Colorway</span><div className="sv">{shoeResult.colorway}</div></div>
+                      <div className="si2"><span className="sl">Release</span><div className="sv">{shoeResult.release}</div></div>
+                      <div className="si2"><span className="sl">Tech</span><div className="sv">{shoeResult.tech}</div></div>
+                    </div>
+                    {shoeResult.designer && (
+                      <div className="sgrid" style={{ gridTemplateColumns: "1fr" }}>
+                        <div className="si2"><span className="sl">Designer</span><div className="sv">{shoeResult.designer}</div></div>
                       </div>
-                      <div className="scs">LOWEST ASK</div>
-                      <div className="scp">{shoeResult.estimatedPrice || "—"}</div>
-                      <span className="sca">→</span>
+                    )}
+                    {shoeResult.inspiration && (
+                      <>
+                        <div className="sech">The Story</div>
+                        <p style={{ fontFamily: "var(--fm)", fontSize: 11, lineHeight: 1.5, marginBottom: 12 }}>{shoeResult.inspiration}</p>
+                      </>
+                    )}
+                    <button className="btn-o" onClick={saveToVault}>+ SAVE TO VAULT</button>
+                    <div className="sech">Where to Buy</div>
+                    <div className="rgrid">
+                      {["StockX", "GOAT", "Flight Club", "eBay"].map(r => (
+                        <div key={r} className="sc" onClick={() => openCheckout(shoeResult)}>
+                          <div className="sct"><span className="scn">{r}</span><span className="scb bb">BUY</span></div>
+                          <div className="scs">LOWEST ASK</div>
+                          <div className="scp">{shoeResult.estimatedPrice || "—"}</div>
+                          <span className="sca">→</span>
+                        </div>
+                      ))}
+                    </div>
+                    <button className="btn-r" onClick={() => openCheckout(shoeResult)}>🛒 BUY NOW — CHECKOUT</button>
+                    <button className="btn-o" style={{ marginTop: 8 }} onClick={resetScan}>SCAN ANOTHER</button>
+                  </>
+                )}
+                {!scanning && !shoeResult && (
+                  <>
+                    <div className="stitle">—</div>
+                    <div className="smeta">—% MATCH · ID: —</div>
+                    <div className="sgrid">
+                      <div className="si2"><span className="sl">Silhouette</span><div className="sv">—</div></div>
+                      <div className="si2"><span className="sl">Colorway</span><div className="sv">—</div></div>
+                      <div className="si2"><span className="sl">Release</span><div className="sv">—</div></div>
+                      <div className="si2"><span className="sl">Tech</span><div className="sv">—</div></div>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* ═══════════════════ DROPS SCREEN ═══════════════════ */}
+          <div className={`screen ${activeScreen === "drops" ? "active" : ""}`} style={{ background: "var(--surface)" }}>
+            <div className="phdr">
+              <div className="phdr-logo">SNAPSHOTZ SOLES</div>
+              <div className="phdr-title">Drop Calendar</div>
+              <div className="phdr-sub">{drops.filter(d => d.alert).length} ALERTS SET · {drops.length} UPCOMING</div>
+            </div>
+            <div style={{ display: "flex", gap: 4, padding: "10px 14px", overflowX: "auto", borderBottom: "3px solid var(--border)" }}>
+              {DROP_BRANDS.map(b => (
+                <button key={b} onClick={() => setDropBrandFilter(b)} style={{ background: dropBrandFilter === b ? "var(--border)" : "transparent", color: dropBrandFilter === b ? "var(--gold)" : "var(--border)", border: "2px solid var(--border)", fontFamily: "var(--ft)", fontSize: 10, padding: "5px 10px", cursor: "pointer", letterSpacing: "0.05em", whiteSpace: "nowrap", flexShrink: 0 }}>{b}</button>
+              ))}
+            </div>
+            <div className="dlist responsive-grid-drops">
+              {drops
+                .filter(d => dropBrandFilter === "ALL" || d.brandFilter === dropBrandFilter)
+                .map(drop => {
+                  const hypeColor: Record<string, string> = { SELLOUT: "#c8102e", HIGH: "#f5a623", LIMITED: "#0e4f8a" };
+                  return (
+                    <div key={drop.id} className="dcard" style={{ overflow: "hidden" }}>
+                      <div style={{ height: 160, position: "relative", overflow: "hidden" }}>
+                        <img src={drop.image} alt={drop.name} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+                        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.7) 100%)" }} />
+                        <div style={{ position: "absolute", bottom: 10, left: 10, right: 10 }}>
+                          <div style={{ fontFamily: "var(--fm)", fontSize: 9, color: "rgba(255,255,255,0.7)", fontWeight: 700, letterSpacing: "0.08em" }}>{drop.brand}</div>
+                          <div style={{ fontFamily: "var(--ft)", fontSize: 18, color: "#fff", lineHeight: 1.1 }}>{drop.name}</div>
+                          <div style={{ fontFamily: "var(--fm)", fontSize: 10, color: "rgba(255,255,255,0.8)", marginTop: 2 }}>{drop.colorway} · {drop.sku}</div>
+                        </div>
+                        <div style={{ position: "absolute", top: 8, right: 8, display: "flex", gap: 4 }}>
+                          <span style={{ background: hypeColor[drop.hype] || "#333", color: "#fff", fontFamily: "var(--fm)", fontSize: 8, fontWeight: 700, padding: "2px 7px", letterSpacing: "0.06em" }}>{drop.hype}</span>
+                          {drop.alert && <span style={{ background: "var(--green)", color: "#fff", fontFamily: "var(--fm)", fontSize: 8, fontWeight: 700, padding: "2px 7px" }}>🔔 ON</span>}
+                        </div>
+                      </div>
+                      <div className="dcbody">
+                        <div className="dmr">
+                          <div>
+                            <div style={{ fontFamily: "var(--fm)", fontSize: 8, color: "var(--red)", fontWeight: 700, letterSpacing: "0.06em" }}>DROP DATE</div>
+                            <div style={{ fontFamily: "var(--ft)", fontSize: 14 }}>{drop.dateLabel}</div>
+                          </div>
+                          <div style={{ textAlign: "right" }}>
+                            <div style={{ fontFamily: "var(--fm)", fontSize: 8, color: "var(--red)", fontWeight: 700 }}>RETAIL</div>
+                            <div style={{ fontFamily: "var(--ft)", fontSize: 18, fontWeight: 700 }}>${drop.retail}</div>
+                          </div>
+                        </div>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8, padding: "6px 0", borderTop: "1px solid rgba(13,13,13,0.1)", borderBottom: "1px solid rgba(13,13,13,0.1)" }}>
+                          <CountdownDisplay target={drop.date} />
+                          <span style={{ fontFamily: "var(--fm)", fontSize: 8, color: "var(--red)", fontWeight: 700 }}>{drop.retailer}</span>
+                        </div>
+                        <button
+                          className={`dnbtn ${drop.alert ? "dnset" : "dnon"}`}
+                          onClick={() => {
+                            if (!drop.alert) setAlertModal(drop);
+                            else { setDrops(prev => prev.map(d => d.id === drop.id ? { ...d, alert: false } : d)); showToast("Alert removed"); }
+                          }}
+                        >
+                          {drop.alert ? "✓ ALERT SET" : "🔔 SET DROP ALERT"}
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+            </div>
+          </div>
+
+          {/* ═══════════════════ MARKET SCREEN ═══════════════════ */}
+          <div className={`screen ${activeScreen === "market" ? "active" : ""}`} style={{ background: "var(--surface)" }}>
+            <div className="phdr">
+              <div className="phdr-logo">SNAPSHOTZ SOLES</div>
+              <div className="phdr-title">Market</div>
+              <div className="phdr-sub">LIVE RESALE PRICES · 8 RETAILERS</div>
+            </div>
+            <div className="mklist responsive-grid-market">
+              {market.map(item => (
+                <div key={item.id} className="mkcard">
+                  <div className="mkhdr">
+                    <span className="mkbr">{item.brand}</span>
+                    <span className={`mktr ${item.trend === "up" ? "up" : "dn"}`}>{item.trendPct}</span>
+                  </div>
+                  <div className="mkbody">
+                    <div className="mkname">{item.name}</div>
+                    <div className="mkcw">{item.colorway}</div>
+                    <div className="mkp">
+                      {item.prices.map(p => (
+                        <div key={p.label} className="mpb"><span className="mps">{p.label.toUpperCase()}</span><span className="mpn">{p.value}</span></div>
+                      ))}
+                    </div>
+                    <div className="mkctas">
+                      <button className="mkcta" onClick={() => openCheckout(item)}>BUY NOW</button>
+                      <button className="mkcta sec" onClick={() => setMarketDetail(item)}>DETAILS</button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* ═══════════════════ VAULT SCREEN ═══════════════════ */}
+          <div className={`screen ${activeScreen === "vault" ? "active" : ""}`} style={{ background: "var(--surface)" }}>
+            <div className="phdr">
+              <div className="phdr-logo">SNAPSHOTZ SOLES</div>
+              <div className="phdr-title">My Vault</div>
+              <div className="phdr-sub">{vaultShoes.length + vault.length} PAIRS · AI-SCANNED COLLECTION</div>
+            </div>
+            {(() => {
+              const totalResale = vaultShoes.reduce((s, v) => s + v.resale, 0);
+              const totalRetail = vaultShoes.reduce((s, v) => s + v.retail, 0);
+              const totalProfit = totalResale - totalRetail;
+              return (
+                <div style={{ display: "flex", gap: 3, padding: "10px 14px 0", background: "var(--border)" }}>
+                  {[
+                    { l: "Vault Value", v: `$${totalResale.toLocaleString()}` },
+                    { l: "Paid Retail", v: `$${totalRetail.toLocaleString()}` },
+                    { l: "Net Gain", v: `${totalProfit >= 0 ? "+" : ""}$${totalProfit.toLocaleString()}`, green: totalProfit >= 0 },
+                  ].map(({ l, v, green }) => (
+                    <div key={l} style={{ flex: 1, background: "var(--surface)", padding: "7px 9px", textAlign: "center" }}>
+                      <div style={{ fontFamily: "var(--fm)", fontSize: 8, color: "var(--red)", fontWeight: 700, textTransform: "uppercase" }}>{l}</div>
+                      <div style={{ fontFamily: "var(--ft)", fontSize: 18, color: green ? "var(--green)" : "var(--txt)", fontWeight: 700 }}>{v}</div>
                     </div>
                   ))}
                 </div>
-
-                <button className="btn-r" onClick={() => openCheckout(shoeResult)}>🛒 BUY NOW — CHECKOUT</button>
-                <button className="btn-o" style={{ marginTop: 8 }} onClick={resetScan}>SCAN ANOTHER</button>
-              </>
-            )}
-
-            {!scanning && !shoeResult && (
-              <>
-                <div className="stitle">—</div>
-                <div className="smeta">—% MATCH · ID: —</div>
-                <div className="sgrid">
-                  <div className="si2"><span className="sl">Silhouette</span><div className="sv">—</div></div>
-                  <div className="si2"><span className="sl">Colorway</span><div className="sv">—</div></div>
-                  <div className="si2"><span className="sl">Release</span><div className="sv">—</div></div>
-                  <div className="si2"><span className="sl">Tech</span><div className="sv">—</div></div>
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* ═══════════════════ DROPS SCREEN ═══════════════════ */}
-      <div className={`screen ${activeScreen === "drops" ? "active" : ""}`} style={{ background: "var(--surface)" }}>
-        <div className="phdr">
-          <div className="phdr-logo">SNAPSHOTZ SOLES</div>
-          <div className="phdr-title">Drop Calendar</div>
-          <div className="phdr-sub">{drops.filter(d => d.alert).length} ALERTS SET · {drops.length} UPCOMING</div>
-        </div>
-
-        {/* Brand filter bar */}
-        <div style={{ display: "flex", gap: 4, padding: "10px 14px", overflowX: "auto", borderBottom: "3px solid var(--border)" }}>
-          {DROP_BRANDS.map(b => (
-            <button key={b} onClick={() => setDropBrandFilter(b)} style={{
-              background: dropBrandFilter === b ? "var(--border)" : "transparent",
-              color: dropBrandFilter === b ? "var(--gold)" : "var(--border)",
-              border: "2px solid var(--border)",
-              fontFamily: "var(--ft)",
-              fontSize: 10,
-              padding: "5px 10px",
-              cursor: "pointer",
-              letterSpacing: "0.05em",
-              whiteSpace: "nowrap",
-              flexShrink: 0,
-            }}>{b}</button>
-          ))}
-        </div>
-
-        <div className="dlist">
-          {drops
-            .filter(d => dropBrandFilter === "ALL" || d.brandFilter === dropBrandFilter)
-            .map(drop => {
-              const hypeColor: Record<string, string> = { SELLOUT: "#c8102e", HIGH: "#f5a623", LIMITED: "#0e4f8a" };
-              return (
-                <div key={drop.id} className="dcard" style={{ overflow: "hidden" }}>
-                  <div style={{ height: 160, position: "relative", overflow: "hidden" }}>
-                    <img src={drop.image} alt={drop.name} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
-                    <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.7) 100%)" }} />
-                    <div style={{ position: "absolute", bottom: 10, left: 10, right: 10 }}>
-                      <div style={{ fontFamily: "var(--fm)", fontSize: 9, color: "rgba(255,255,255,0.7)", fontWeight: 700, letterSpacing: "0.08em" }}>{drop.brand}</div>
-                      <div style={{ fontFamily: "var(--ft)", fontSize: 18, color: "#fff", lineHeight: 1.1 }}>{drop.name}</div>
-                      <div style={{ fontFamily: "var(--fm)", fontSize: 10, color: "rgba(255,255,255,0.8)", marginTop: 2 }}>{drop.colorway} · {drop.sku}</div>
-                    </div>
-                    <div style={{ position: "absolute", top: 8, right: 8, display: "flex", gap: 4 }}>
-                      <span style={{ background: hypeColor[drop.hype] || "#333", color: "#fff", fontFamily: "var(--fm)", fontSize: 8, fontWeight: 700, padding: "2px 7px", letterSpacing: "0.06em" }}>{drop.hype}</span>
-                      {drop.alert && <span style={{ background: "var(--green)", color: "#fff", fontFamily: "var(--fm)", fontSize: 8, fontWeight: 700, padding: "2px 7px" }}>🔔 ON</span>}
-                    </div>
-                  </div>
-                  <div className="dcbody">
-                    <div className="dmr">
-                      <div>
-                        <div style={{ fontFamily: "var(--fm)", fontSize: 8, color: "var(--red)", fontWeight: 700, letterSpacing: "0.06em" }}>DROP DATE</div>
-                        <div style={{ fontFamily: "var(--ft)", fontSize: 14 }}>{drop.dateLabel}</div>
-                      </div>
-                      <div style={{ textAlign: "right" }}>
-                        <div style={{ fontFamily: "var(--fm)", fontSize: 8, color: "var(--red)", fontWeight: 700 }}>RETAIL</div>
-                        <div style={{ fontFamily: "var(--ft)", fontSize: 18, fontWeight: 700 }}>${drop.retail}</div>
-                      </div>
-                    </div>
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8, padding: "6px 0", borderTop: "1px solid rgba(13,13,13,0.1)", borderBottom: "1px solid rgba(13,13,13,0.1)" }}>
-                      <CountdownDisplay target={drop.date} />
-                      <span style={{ fontFamily: "var(--fm)", fontSize: 8, color: "var(--red)", fontWeight: 700 }}>{drop.retailer}</span>
-                    </div>
-                    <button
-                      className={`dnbtn ${drop.alert ? "dnset" : "dnon"}`}
-                      onClick={() => {
-                        if (!drop.alert) {
-                          setAlertModal(drop);
-                        } else {
-                          setDrops(prev => prev.map(d => d.id === drop.id ? { ...d, alert: false } : d));
-                          showToast("Alert removed");
-                        }
-                      }}
-                    >
-                      {drop.alert ? "✓ ALERT SET" : "🔔 SET DROP ALERT"}
-                    </button>
-                  </div>
-                </div>
               );
-            })}
-        </div>
-      </div>
-
-      {/* ═══════════════════ MARKET SCREEN ═══════════════════ */}
-      <div className={`screen ${activeScreen === "market" ? "active" : ""}`} style={{ background: "var(--surface)" }}>
-        <div className="phdr">
-          <div className="phdr-logo">SNAPSHOTZ SOLES</div>
-          <div className="phdr-title">Market</div>
-          <div className="phdr-sub">LIVE RESALE PRICES · 8 RETAILERS</div>
-        </div>
-        <div className="mklist">
-          {market.map(item => (
-            <div key={item.id} className="mkcard">
-              <div className="mkhdr">
-                <span className="mkbr">{item.brand}</span>
-                <span className={`mktr ${item.trend === "up" ? "up" : "dn"}`}>{item.trendPct}</span>
-              </div>
-              <div className="mkbody">
-                <div className="mkname">{item.name}</div>
-                <div className="mkcw">{item.colorway}</div>
-                <div className="mkp">
-                  {item.prices.map(p => (
-                    <div key={p.label} className="mpb">
-                      <span className="mps">{p.label.toUpperCase()}</span>
-                      <span className="mpn">{p.value}</span>
-                    </div>
+            })()}
+            <div style={{ padding: "10px 14px", display: "flex", flexDirection: "column", gap: 8, borderBottom: "3px solid var(--border)" }}>
+              <div style={{ display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" }}>
+                <input value={vaultSearch} onChange={e => setVaultSearch(e.target.value)} placeholder="Search by name or colorway..." className="finp" style={{ flex: 1, minWidth: 140, fontSize: 12, padding: "6px 10px" }} />
+                <div style={{ display: "flex", gap: 4 }}>
+                  {["ALL", ...Array.from(new Set(INITIAL_VAULT_SHOES.map(s => s.brand)))].map(b => (
+                    <button key={b} onClick={() => setVaultFilter(b)} style={{ background: vaultFilter === b ? "var(--border)" : "transparent", color: vaultFilter === b ? "var(--gold)" : "var(--border)", border: "2px solid var(--border)", fontFamily: "var(--ft)", fontSize: 11, padding: "4px 8px", cursor: "pointer", letterSpacing: "0.05em" }}>{b}</button>
                   ))}
                 </div>
-                <div className="mkctas">
-                  <button className="mkcta" onClick={() => openCheckout(item)}>BUY NOW</button>
-                  <button className="mkcta sec" onClick={() => setMarketDetail(item)}>DETAILS</button>
+              </div>
+              <div style={{ display: "flex", gap: 6, justifyContent: "space-between", alignItems: "center" }}>
+                <select value={vaultSort} onChange={e => setVaultSort(e.target.value)} className="fsel" style={{ fontSize: 11, padding: "5px 8px", width: "auto" }}>
+                  <option value="saved">Sort: Saved</option>
+                  <option value="resale">Sort: Resale ↓</option>
+                  <option value="match">Sort: Match %</option>
+                  <option value="brand">Sort: Brand</option>
+                </select>
+                <div style={{ display: "flex", gap: 2 }}>
+                  {([["grid", "⊞"], ["list", "≡"]] as const).map(([v, icon]) => (
+                    <button key={v} onClick={() => setVaultView(v as "grid" | "list")} style={{ background: vaultView === v ? "var(--border)" : "transparent", color: vaultView === v ? "var(--gold)" : "var(--border)", border: "none", fontFamily: "var(--ft)", fontSize: 17, padding: "4px 12px", cursor: "pointer" }}>{icon}</button>
+                  ))}
                 </div>
               </div>
             </div>
-          ))}
-        </div>
-      </div>
+            <div className="vlist">
+              {(() => {
+                const sorted = [...vaultShoes]
+                  .filter(s => vaultFilter === "ALL" || s.brand === vaultFilter)
+                  .filter(s => !vaultSearch || s.name.toLowerCase().includes(vaultSearch.toLowerCase()) || s.colorway.toLowerCase().includes(vaultSearch.toLowerCase()))
+                  .sort((a, b) => {
+                    if (vaultSort === "resale") return b.resale - a.resale;
+                    if (vaultSort === "match") return b.match - a.match;
+                    if (vaultSort === "brand") return a.brand.localeCompare(b.brand);
+                    return 0;
+                  });
 
-      {/* ═══════════════════ VAULT SCREEN ═══════════════════ */}
-      <div className={`screen ${activeScreen === "vault" ? "active" : ""}`} style={{ background: "var(--surface)" }}>
-        <div className="phdr">
-          <div className="phdr-logo">SNAPSHOTZ SOLES</div>
-          <div className="phdr-title">My Vault</div>
-          <div className="phdr-sub">{vaultShoes.length + vault.length} PAIRS · AI-SCANNED COLLECTION</div>
-        </div>
+                if (sorted.length === 0 && vault.length === 0) {
+                  return (
+                    <div className="empty">
+                      <div style={{ fontSize: 42 }}>👟</div>
+                      <h3 style={{ fontFamily: "var(--ft)", fontSize: 22 }}>VAULT IS EMPTY</h3>
+                      <p>{vaultSearch || vaultFilter !== "ALL" ? "No shoes match your filters." : "Scan a shoe to add it to your vault."}</p>
+                    </div>
+                  );
+                }
 
-        {/* Vault summary stats */}
-        {(() => {
-          const totalResale = vaultShoes.reduce((s, v) => s + v.resale, 0);
-          const totalRetail = vaultShoes.reduce((s, v) => s + v.retail, 0);
-          const totalProfit = totalResale - totalRetail;
-          return (
-            <div style={{ display: "flex", gap: 3, padding: "10px 14px 0", background: "var(--border)" }}>
-              {[
-                { l: "Vault Value", v: `$${totalResale.toLocaleString()}` },
-                { l: "Paid Retail", v: `$${totalRetail.toLocaleString()}` },
-                { l: "Net Gain", v: `${totalProfit >= 0 ? "+" : ""}$${totalProfit.toLocaleString()}`, green: totalProfit >= 0 },
-              ].map(({ l, v, green }) => (
-                <div key={l} style={{ flex: 1, background: "var(--surface)", padding: "7px 9px", textAlign: "center" }}>
-                  <div style={{ fontFamily: "var(--fm)", fontSize: 8, color: "var(--red)", fontWeight: 700, textTransform: "uppercase" }}>{l}</div>
-                  <div style={{ fontFamily: "var(--ft)", fontSize: 18, color: green ? "var(--green)" : "var(--txt)", fontWeight: 700 }}>{v}</div>
-                </div>
-              ))}
-            </div>
-          );
-        })()}
-
-        {/* Vault controls */}
-        <div style={{ padding: "10px 14px", display: "flex", flexDirection: "column", gap: 8, borderBottom: "3px solid var(--border)" }}>
-          <div style={{ display: "flex", gap: 6, flexWrap: "wrap", alignItems: "center" }}>
-            <input value={vaultSearch} onChange={e => setVaultSearch(e.target.value)} placeholder="Search by name or colorway..." className="finp" style={{ flex: 1, minWidth: 140, fontSize: 12, padding: "6px 10px" }} />
-            <div style={{ display: "flex", gap: 4 }}>
-              {["ALL", ...Array.from(new Set(INITIAL_VAULT_SHOES.map(s => s.brand)))].map(b => (
-                <button key={b} onClick={() => setVaultFilter(b)} style={{ background: vaultFilter === b ? "var(--border)" : "transparent", color: vaultFilter === b ? "var(--gold)" : "var(--border)", border: "2px solid var(--border)", fontFamily: "var(--ft)", fontSize: 11, padding: "4px 8px", cursor: "pointer", letterSpacing: "0.05em" }}>{b}</button>
-              ))}
-            </div>
-          </div>
-          <div style={{ display: "flex", gap: 6, justifyContent: "space-between", alignItems: "center" }}>
-            <select value={vaultSort} onChange={e => setVaultSort(e.target.value)} className="fsel" style={{ fontSize: 11, padding: "5px 8px", width: "auto" }}>
-              <option value="saved">Sort: Saved</option>
-              <option value="resale">Sort: Resale ↓</option>
-              <option value="match">Sort: Match %</option>
-              <option value="brand">Sort: Brand</option>
-            </select>
-            <div style={{ display: "flex", gap: 2 }}>
-              {([["grid", "⊞"], ["list", "≡"]] as const).map(([v, icon]) => (
-                <button key={v} onClick={() => setVaultView(v as "grid" | "list")} style={{ background: vaultView === v ? "var(--border)" : "transparent", color: vaultView === v ? "var(--gold)" : "var(--border)", border: "none", fontFamily: "var(--ft)", fontSize: 17, padding: "4px 12px", cursor: "pointer" }}>{icon}</button>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Vault content */}
-        <div className="vlist">
-          {(() => {
-            const sorted = [...vaultShoes]
-              .filter(s => vaultFilter === "ALL" || s.brand === vaultFilter)
-              .filter(s => !vaultSearch || s.name.toLowerCase().includes(vaultSearch.toLowerCase()) || s.colorway.toLowerCase().includes(vaultSearch.toLowerCase()))
-              .sort((a, b) => {
-                if (vaultSort === "resale") return b.resale - a.resale;
-                if (vaultSort === "match") return b.match - a.match;
-                if (vaultSort === "brand") return a.brand.localeCompare(b.brand);
-                return 0;
-              });
-
-            if (sorted.length === 0 && vault.length === 0) {
-              return (
-                <div className="empty">
-                  <div style={{ fontSize: 42 }}>👟</div>
-                  <h3 style={{ fontFamily: "var(--ft)", fontSize: 22 }}>VAULT IS EMPTY</h3>
-                  <p>{vaultSearch || vaultFilter !== "ALL" ? "No shoes match your filters." : "Scan a shoe to add it to your vault."}</p>
-                </div>
-              );
-            }
-
-            return (
-              <>
-                {vaultView === "grid" ? (
-                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: 12, padding: 14 }}>
-                    {sorted.map((shoe, i) => (
-                      <div key={shoe.id} style={{ animation: `fadeUp 0.4s ease ${i * 0.06}s both` }}>
-                        <ShoeCardGrid shoe={shoe} onRemove={id => { setVaultShoes(v => v.filter(s => s.id !== id)); showToast("Removed from vault"); }} onBuy={s => setVaultDetailShoe(s)} />
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div style={{ display: "flex", flexDirection: "column", gap: 8, padding: 14 }}>
-                    {sorted.map((shoe, i) => (
-                      <div key={shoe.id} style={{ animation: `fadeUp 0.4s ease ${i * 0.06}s both` }}>
-                        <ShoeCardList shoe={shoe} onRemove={id => { setVaultShoes(v => v.filter(s => s.id !== id)); showToast("Removed from vault"); }} onBuy={s => setVaultDetailShoe(s)} />
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {/* Also show scanned vault items */}
-                {vault.length > 0 && (
+                return (
                   <>
-                    <div style={{ fontFamily: "var(--ft)", fontSize: 12, letterSpacing: "0.1em", color: "var(--red)", textTransform: "uppercase", padding: "10px 14px", borderTop: "3px solid var(--border)" }}>SCANNED SHOES</div>
-                    {vault.map((v, i) => (
-                      <div key={i} className="vitem" style={{ margin: "0 14px 8px" }}>
-                        <div className="vthumb">{v.photo && <img src={v.photo} alt={v.name} />}</div>
-                        <div className="vinfo">
-                          <div className="vname">{v.name}</div>
-                          <div className="vsub">{v.brand} · {v.colorway}</div>
-                        </div>
-                        <div className="vbdg">{v.estimatedPrice || "—"}</div>
-                        <button className="vdel" onClick={e => { e.stopPropagation(); removeFromVault(i); }}>✕</button>
+                    {vaultView === "grid" ? (
+                      <div className="vault-grid-responsive">
+                        {sorted.map((shoe, i) => (
+                          <div key={shoe.id} style={{ animation: `fadeUp 0.4s ease ${i * 0.06}s both` }}>
+                            <ShoeCardGrid shoe={shoe} onRemove={id => { setVaultShoes(v => v.filter(s => s.id !== id)); showToast("Removed from vault"); }} onBuy={s => setVaultDetailShoe(s)} />
+                          </div>
+                        ))}
                       </div>
-                    ))}
+                    ) : (
+                      <div style={{ display: "flex", flexDirection: "column", gap: 8, padding: 14 }}>
+                        {sorted.map((shoe, i) => (
+                          <div key={shoe.id} style={{ animation: `fadeUp 0.4s ease ${i * 0.06}s both` }}>
+                            <ShoeCardList shoe={shoe} onRemove={id => { setVaultShoes(v => v.filter(s => s.id !== id)); showToast("Removed from vault"); }} onBuy={s => setVaultDetailShoe(s)} />
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    {vault.length > 0 && (
+                      <>
+                        <div style={{ fontFamily: "var(--ft)", fontSize: 12, letterSpacing: "0.1em", color: "var(--red)", textTransform: "uppercase", padding: "10px 14px", borderTop: "3px solid var(--border)" }}>SCANNED SHOES</div>
+                        {vault.map((v, i) => (
+                          <div key={i} className="vitem" style={{ margin: "0 14px 8px" }}>
+                            <div className="vthumb">{v.photo && <img src={v.photo} alt={v.name} />}</div>
+                            <div className="vinfo"><div className="vname">{v.name}</div><div className="vsub">{v.brand} · {v.colorway}</div></div>
+                            <div className="vbdg">{v.estimatedPrice || "—"}</div>
+                            <button className="vdel" onClick={e => { e.stopPropagation(); removeFromVault(i); }}>✕</button>
+                          </div>
+                        ))}
+                      </>
+                    )}
                   </>
-                )}
-              </>
-            );
-          })()}
-        </div>
-      </div>
-
-      {/* Vault Detail Modal */}
-      {vaultDetailShoe && <ShoeDetailModal shoe={vaultDetailShoe} onClose={() => setVaultDetailShoe(null)} onBuy={s => { setVaultDetailShoe(null); setVaultBuyShoe(s); }} />}
-
-      {/* Vault Buy Modal */}
-      {vaultBuyShoe && <VaultBuyModal shoe={vaultBuyShoe} onClose={() => setVaultBuyShoe(null)} />}
-
-      {/* ═══════════════════ SELL SCREEN ═══════════════════ */}
-      <div className={`screen ${activeScreen === "sell" ? "active" : ""}`} style={{ background: "var(--surface)" }}>
-        <div className="phdr">
-          <div className="phdr-logo">SNAPSHOTZ SOLES</div>
-          <div className="phdr-title">Sell</div>
-          <div className="phdr-sub">LIST YOUR SNEAKERS</div>
-        </div>
-        <div className="sbody">
-          {!loggedIn ? (
-            <div className="login-gate">
-              <h2>SELL YOUR KICKS</h2>
-              <p>Log in or create an account to start listing your sneakers.</p>
-              <button className="btn-r" style={{ maxWidth: 260 }} onClick={() => setAuthModal(true)}>LOG IN / SIGN UP</button>
-            </div>
-          ) : (
-            <div className="lfm">
-              <div className="fsect">CREATE LISTING</div>
-              <div className="fgrp">
-                <label className="flbl">Shoe Name</label>
-                <input className="finp" value={sellForm.name} onChange={e => setSellForm(p => ({ ...p, name: e.target.value }))} placeholder="Air Jordan 1 High OG" />
-              </div>
-              <div className="fgrp">
-                <label className="flbl">Colorway</label>
-                <input className="finp" value={sellForm.colorway} onChange={e => setSellForm(p => ({ ...p, colorway: e.target.value }))} placeholder="Chicago" />
-              </div>
-              <div className="frow">
-                <div className="fgrp">
-                  <label className="flbl">Size</label>
-                  <select className="fsel" value={sellForm.size} onChange={e => setSellForm(p => ({ ...p, size: e.target.value }))}>
-                    <option value="">Select</option>
-                    {SIZES.map(s => <option key={s} value={s}>{s}</option>)}
-                  </select>
-                </div>
-                <div className="fgrp">
-                  <label className="flbl">Condition</label>
-                  <select className="fsel" value={sellForm.condition} onChange={e => setSellForm(p => ({ ...p, condition: e.target.value }))}>
-                    {CONDITIONS.map(c => <option key={c} value={c}>{c}</option>)}
-                  </select>
-                </div>
-              </div>
-              <div className="fgrp">
-                <label className="flbl">Asking Price ($)</label>
-                <input className="finp" type="number" value={sellForm.price} onChange={e => setSellForm(p => ({ ...p, price: e.target.value }))} placeholder="250" />
-              </div>
-              <button className="btn-r" onClick={submitListing}>LIST FOR SALE</button>
-
-              {listings.length > 0 && (
-                <>
-                  <div className="fsect" style={{ marginTop: 16 }}>YOUR LISTINGS</div>
-                  <div className="lcards">
-                    {listings.map(l => (
-                      <div key={l.id} className="lcard">
-                        <div className="limg" />
-                        <div className="linfo">
-                          <div className="lname">{l.name}</div>
-                          <div className="lsub">{l.colorway}</div>
-                          <span className={`lstatus ${l.status === "live" ? "ls-live" : l.status === "sold" ? "ls-sold" : "ls-pend"}`}>{l.status.toUpperCase()}</span>
-                        </div>
-                        <div className="lprice">${l.price}</div>
-                      </div>
-                    ))}
-                  </div>
-                </>
-              )}
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* ═══════════════════ PROFILE SCREEN ═══════════════════ */}
-      <div className={`screen ${activeScreen === "id" ? "active" : ""}`} style={{ background: "var(--surface)" }}>
-        <div className="phdr">
-          <div className="phdr-logo">SNAPSHOTZ SOLES</div>
-          <div className="phdr-title">My Profile</div>
-          <div className="phdr-sub">{loggedIn ? authUser || authEmail : "NOT LOGGED IN"}</div>
-        </div>
-        <div className="idbody">
-          {/* Big name block */}
-          <div className="idbig">SNAP{"\n"}SHOTZ{"\n"}{loggedIn ? `@${authUser || "USER"}` : "@GUEST"}</div>
-          {loggedIn && <div className="mbdg">★ {memberPlan}</div>}
-
-          {/* Username edit */}
-          {loggedIn && (
-            <div className="idcard">
-              <div className="idst">Username</div>
-              {editingUsername ? (
-                <div style={{ display: "flex", gap: 6 }}>
-                  <input className="finp" style={{ flex: 1, fontSize: 14, padding: "7px 10px" }} value={editUsernameVal} onChange={e => setEditUsernameVal(e.target.value)} placeholder="New username" />
-                  <button className="btn-r" style={{ width: "auto", padding: "7px 14px", marginTop: 0 }} onClick={() => { if (editUsernameVal.trim()) setAuthUser(editUsernameVal.trim()); setEditingUsername(false); showToast("Username updated!"); }}>SAVE</button>
-                  <button className="btn-o" style={{ width: "auto", padding: "7px 14px", marginTop: 0 }} onClick={() => setEditingUsername(false)}>CANCEL</button>
-                </div>
-              ) : (
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <span style={{ fontFamily: "var(--ft)", fontSize: 18 }}>@{authUser || "USER"}</span>
-                  <button style={{ background: "none", border: "2px solid var(--border)", fontFamily: "var(--ft)", fontSize: 10, padding: "3px 10px", cursor: "pointer", letterSpacing: "0.05em" }} onClick={() => { setEditUsernameVal(authUser); setEditingUsername(true); }}>EDIT</button>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Stats — live from vault data */}
-          {(() => {
-            const allPairs = vaultShoes.length + vault.length;
-            const totalVal = vaultShoes.reduce((s, v) => s + v.resale, 0);
-            const totalRet = vaultShoes.reduce((s, v) => s + v.retail, 0);
-            const netGain = totalVal - totalRet;
-            const brandCounts: Record<string, number> = {};
-            vaultShoes.forEach(s => { brandCounts[s.brand] = (brandCounts[s.brand] || 0) + 1; });
-            const topBrand = Object.entries(brandCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || "—";
-            return (
-              <div className="idcard">
-                <div className="idst">Stats</div>
-                <div className="idr"><span className="idk">TOTAL SCANS</span><span className="idv">{totalScans}</span></div>
-                <div className="idr"><span className="idk">VAULT SIZE</span><span className="idv">{allPairs} pairs</span></div>
-                <div className="idr"><span className="idk">VAULT VALUE</span><span className="idv">${totalVal.toLocaleString()}</span></div>
-                <div className="idr"><span className="idk">RETAIL PAID</span><span className="idv">${totalRet.toLocaleString()}</span></div>
-                <div className="idr"><span className="idk">NET GAIN</span><span className="idv" style={{ color: netGain >= 0 ? "var(--green)" : "var(--red)" }}>{netGain >= 0 ? "+" : ""}${netGain.toLocaleString()}</span></div>
-                <div className="idr"><span className="idk">TOP BRAND</span><span className="idv">{topBrand}</span></div>
-                <div className="idr"><span className="idk">LISTINGS</span><span className="idv">{listings.length} active</span></div>
-                <div className="idr"><span className="idk">PLAN</span><span className="idv">{memberPlan}</span></div>
-              </div>
-            );
-          })()}
-
-          {/* Membership mini preview */}
-          <div className="idcard">
-            <div className="idst">Membership</div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 5 }}>
-              {([
-                { key: "FREE", label: "BASIC", price: "$0" },
-                { key: "SNEAKER HEAD", label: "GOLD", price: "$9.99" },
-                { key: "SOLE PRO", label: "PRO", price: "$24.99" },
-              ] as const).map(p => (
-                <div key={p.key} style={{ border: memberPlan === p.key ? "3px solid var(--red)" : "3px solid var(--border)", background: memberPlan === p.key ? "rgba(200,16,46,0.06)" : "var(--surface)", padding: "8px 6px", textAlign: "center" }}>
-                  <div style={{ fontFamily: "var(--ft)", fontSize: 12, letterSpacing: "0.05em" }}>{p.label}</div>
-                  <div style={{ fontFamily: "var(--ft)", fontSize: 18, color: "var(--red)", fontWeight: 700 }}>{p.price}</div>
-                  {memberPlan === p.key && <div style={{ fontFamily: "var(--fm)", fontSize: 8, fontWeight: 700, color: "var(--green)", marginTop: 2 }}>ACTIVE</div>}
-                </div>
-              ))}
-            </div>
-            <button className="btn-o" style={{ marginTop: 8 }} onClick={() => { setMemberStep("plans"); setMemberModal(true); }}>VIEW ALL PLANS & UPGRADE</button>
-          </div>
-
-          {/* Notifications */}
-          <div className="idcard">
-            <div className="idst">Notifications</div>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "6px 0", borderBottom: "1px solid rgba(13,13,13,0.12)" }}>
-              <span style={{ fontFamily: "var(--fm)", fontSize: 11, fontWeight: 700 }}>Drop Alerts</span>
-              <button onClick={() => setDropAlerts(!dropAlerts)} style={{ width: 40, height: 22, borderRadius: 11, border: "none", background: dropAlerts ? "var(--green)" : "var(--sa)", cursor: "pointer", position: "relative", transition: "background 0.2s" }}>
-                <div style={{ width: 16, height: 16, borderRadius: "50%", background: "#fff", position: "absolute", top: 3, left: dropAlerts ? 21 : 3, transition: "left 0.2s", boxShadow: "0 1px 3px rgba(0,0,0,0.3)" }} />
-              </button>
-            </div>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "6px 0" }}>
-              <span style={{ fontFamily: "var(--fm)", fontSize: 11, fontWeight: 700 }}>Resale Price Alerts</span>
-              <button onClick={() => setResaleAlerts(!resaleAlerts)} style={{ width: 40, height: 22, borderRadius: 11, border: "none", background: resaleAlerts ? "var(--green)" : "var(--sa)", cursor: "pointer", position: "relative", transition: "background 0.2s" }}>
-                <div style={{ width: 16, height: 16, borderRadius: "50%", background: "#fff", position: "absolute", top: 3, left: resaleAlerts ? 21 : 3, transition: "left 0.2s", boxShadow: "0 1px 3px rgba(0,0,0,0.3)" }} />
-              </button>
-            </div>
-            <button className="btn-o" style={{ marginTop: 6 }} onClick={() => showToast("Notification preferences saved!")}>SAVE PREFERENCES</button>
-          </div>
-
-          {/* Interests */}
-          <div className="idcard">
-            <div className="idst">Interests</div>
-            <div className="tagrow">
-              {["JORDAN", "AIR MAX", "YEEZY", "LOW-TOP", "RETRO", "DUNK"].map(t => (
-                <span key={t} className="tag">{t}</span>
-              ))}
+                );
+              })()}
             </div>
           </div>
 
-          {/* Account section */}
-          <div className="idcard">
-            <div className="idst">Account</div>
-            {loggedIn ? (
-              <>
-                <button className="btn-o" style={{ marginTop: 0 }} onClick={() => { setEditUsernameVal(authUser); setEditingUsername(true); window.scrollTo(0, 0); }}>CHANGE USERNAME</button>
-                <button className="btn-r" style={{ background: "var(--border)" }} onClick={() => { setLoggedIn(false); showToast("Logged out"); }}>SIGN OUT</button>
-              </>
+          {/* Vault Detail Modal */}
+          {vaultDetailShoe && <ShoeDetailModal shoe={vaultDetailShoe} onClose={() => setVaultDetailShoe(null)} onBuy={s => { setVaultDetailShoe(null); setVaultBuyShoe(s); }} />}
+          {vaultBuyShoe && <VaultBuyModal shoe={vaultBuyShoe} onClose={() => setVaultBuyShoe(null)} />}
+
+          {/* ═══════════════════ SELL SCREEN — ENHANCED ═══════════════════ */}
+          <div className={`screen ${activeScreen === "sell" ? "active" : ""}`} style={{ background: "var(--surface)" }}>
+            <div className="phdr">
+              <div className="phdr-logo">SNAPSHOTZ SOLES</div>
+              <div className="phdr-title">Sell</div>
+              <div className="phdr-sub">LIST · MANAGE · ANALYZE</div>
+            </div>
+
+            {!loggedIn ? (
+              <div className="sbody">
+                <div className="login-gate">
+                  <h2>SELL YOUR KICKS</h2>
+                  <p>Log in or create an account to start listing your sneakers.</p>
+                  <button className="btn-r" style={{ maxWidth: 260 }} onClick={() => setAuthModal(true)}>LOG IN / SIGN UP</button>
+                </div>
+              </div>
             ) : (
-              <button className="btn-r" onClick={() => setAuthModal(true)}>LOG IN / CREATE ACCOUNT</button>
+              <>
+                {/* Sell sub-tabs */}
+                <div className="sell-tabs">
+                  {SELL_TABS.map(t => (
+                    <button key={t} className={`sell-tab ${sellTab === t ? "active" : ""}`} onClick={() => setSellTab(t)}>
+                      {t}
+                      {t === "OFFERS" && offers.filter(o => o.status === "pending").length > 0 && (
+                        <span className="sell-tab-badge">{offers.filter(o => o.status === "pending").length}</span>
+                      )}
+                    </button>
+                  ))}
+                </div>
+
+                <div className="sbody">
+                  {/* LIST TAB */}
+                  {sellTab === "LIST" && (
+                    <div className="sell-list-layout">
+                      <div className="lfm">
+                        <div className="fsect">CREATE LISTING</div>
+                        <div className="fgrp">
+                          <label className="flbl">Shoe Name</label>
+                          <input className="finp" value={sellForm.name} onChange={e => setSellForm(p => ({ ...p, name: e.target.value }))} placeholder="Air Jordan 1 High OG" />
+                        </div>
+                        <div className="fgrp">
+                          <label className="flbl">Colorway</label>
+                          <input className="finp" value={sellForm.colorway} onChange={e => setSellForm(p => ({ ...p, colorway: e.target.value }))} placeholder="Chicago" />
+                        </div>
+                        <div className="frow">
+                          <div className="fgrp">
+                            <label className="flbl">Size</label>
+                            <select className="fsel" value={sellForm.size} onChange={e => setSellForm(p => ({ ...p, size: e.target.value }))}>
+                              <option value="">Select</option>
+                              {SIZES.map(s => <option key={s} value={s}>{s}</option>)}
+                            </select>
+                          </div>
+                          <div className="fgrp">
+                            <label className="flbl">Condition</label>
+                            <select className="fsel" value={sellForm.condition} onChange={e => setSellForm(p => ({ ...p, condition: e.target.value }))}>
+                              {CONDITIONS.map(c => <option key={c} value={c}>{c}</option>)}
+                            </select>
+                          </div>
+                        </div>
+                        <div className="fgrp">
+                          <label className="flbl">Asking Price ($)</label>
+                          <input className="finp" type="number" value={sellForm.price} onChange={e => setSellForm(p => ({ ...p, price: e.target.value }))} placeholder="250" />
+                        </div>
+
+                        {/* Price suggestion chips */}
+                        {sellForm.price && (
+                          <div style={{ display: "flex", gap: 5, flexWrap: "wrap" }}>
+                            {PRICE_SUGGESTIONS.map(ps => {
+                              const suggested = Math.round(Number(sellForm.price) * (1 + ps.pct / 100));
+                              return (
+                                <button key={ps.label} onClick={() => setSellForm(p => ({ ...p, price: String(suggested) }))} style={{ background: ps.color, color: "#fff", border: "none", fontFamily: "var(--fm)", fontSize: 9, fontWeight: 700, padding: "4px 10px", cursor: "pointer", letterSpacing: "0.04em" }}>
+                                  {ps.label} · ${suggested}
+                                </button>
+                              );
+                            })}
+                          </div>
+                        )}
+
+                        <div className="fgrp">
+                          <label className="flbl">Shipping Method</label>
+                          <select className="fsel" value={sellForm.shippingMethod} onChange={e => setSellForm(p => ({ ...p, shippingMethod: e.target.value }))}>
+                            {SHIPPING_METHODS.map(m => <option key={m} value={m}>{m}</option>)}
+                          </select>
+                        </div>
+                        <div className="fgrp">
+                          <label className="flbl">Description</label>
+                          <textarea className="finp" value={sellForm.description} onChange={e => setSellForm(p => ({ ...p, description: e.target.value }))} placeholder="DS, never worn, OG all included..." style={{ minHeight: 60, resize: "vertical" }} />
+                        </div>
+                        <button className="btn-r" onClick={submitListing}>LIST FOR SALE</button>
+                      </div>
+
+                      {/* Seller tips sidebar (visible on desktop) */}
+                      <div className="sell-sidebar">
+                        <div className="fsect">SELLER TIPS</div>
+                        {SELLER_TIPS.map((tip, i) => (
+                          <div key={i} style={{ fontFamily: "var(--fm)", fontSize: 10, padding: "6px 0", borderBottom: "1px solid rgba(13,13,13,0.1)" }}>{tip}</div>
+                        ))}
+                        <div className="fsect" style={{ marginTop: 12 }}>YOUR STATS</div>
+                        <div className="idr"><span className="idk">ACTIVE LISTINGS</span><span className="idv">{listings.filter(l => l.status === "live").length}</span></div>
+                        <div className="idr"><span className="idk">TOTAL SOLD</span><span className="idv">{listings.filter(l => l.status === "sold").length}</span></div>
+                        <div className="idr"><span className="idk">PENDING OFFERS</span><span className="idv">{offers.filter(o => o.status === "pending").length}</span></div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* LISTINGS TAB */}
+                  {sellTab === "LISTINGS" && (
+                    <div>
+                      <div className="fsect">YOUR LISTINGS ({listings.length})</div>
+                      {listings.length === 0 ? (
+                        <div className="empty"><div style={{ fontSize: 42 }}>📦</div><h3 style={{ fontFamily: "var(--ft)", fontSize: 22 }}>NO LISTINGS YET</h3><p>Create your first listing to start selling.</p></div>
+                      ) : (
+                        <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 8 }}>
+                          {listings.map(l => (
+                            <div key={l.id} style={{ border: "3px solid var(--border)", background: "var(--surface)", padding: 14 }}>
+                              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
+                                <div>
+                                  <div style={{ fontFamily: "var(--ft)", fontSize: 18 }}>{l.name}</div>
+                                  <div style={{ fontFamily: "var(--fm)", fontSize: 10, color: "var(--red)", fontWeight: 700 }}>{l.colorway}</div>
+                                </div>
+                                <div style={{ fontFamily: "var(--ft)", fontSize: 22, color: "var(--red)", fontWeight: 700 }}>${l.price}</div>
+                              </div>
+                              <div style={{ display: "flex", gap: 12, marginBottom: 8, flexWrap: "wrap" }}>
+                                <span style={{ fontFamily: "var(--fm)", fontSize: 9, fontWeight: 700 }}>👁 {l.views} views</span>
+                                <span style={{ fontFamily: "var(--fm)", fontSize: 9, fontWeight: 700 }}>❤️ {l.watchers} watchers</span>
+                                <span style={{ fontFamily: "var(--fm)", fontSize: 9, fontWeight: 700 }}>💬 {l.offers} offers</span>
+                                <span style={{ fontFamily: "var(--fm)", fontSize: 9, color: "var(--red)" }}>Listed {l.listedDate}</span>
+                              </div>
+                              <span className={`lstatus ${l.status === "live" ? "ls-live" : l.status === "sold" ? "ls-sold" : "ls-pend"}`}>{l.status.toUpperCase()}</span>
+                              <div style={{ display: "flex", gap: 5, marginTop: 10 }}>
+                                <button className="btn-o" style={{ flex: 1, marginTop: 0, fontSize: 10, padding: 7 }}>EDIT</button>
+                                <button className="btn-r" style={{ flex: 1, marginTop: 0, fontSize: 10, padding: 7 }} onClick={() => { setListings(prev => prev.map(li => li.id === l.id ? { ...li, status: "sold" } : li)); showToast("Marked as sold!"); }}>MARK SOLD</button>
+                                <button className="btn-o" style={{ flex: 1, marginTop: 0, fontSize: 10, padding: 7 }} onClick={() => setSellTab("OFFERS")}>OFFERS</button>
+                                <button style={{ flex: 0, background: "none", border: "2px solid var(--red)", color: "var(--red)", fontFamily: "var(--ft)", fontSize: 10, padding: "5px 10px", cursor: "pointer" }} onClick={() => { setListings(prev => prev.filter(li => li.id !== l.id)); showToast("Listing removed"); }}>✕</button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* OFFERS TAB */}
+                  {sellTab === "OFFERS" && (
+                    <div>
+                      <div className="fsect">OFFER INBOX ({offers.filter(o => o.status === "pending").length} PENDING)</div>
+                      {offers.length === 0 ? (
+                        <div className="empty"><div style={{ fontSize: 42 }}>💬</div><h3 style={{ fontFamily: "var(--ft)", fontSize: 22 }}>NO OFFERS YET</h3><p>Offers from buyers will appear here.</p></div>
+                      ) : (
+                        <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 8 }}>
+                          {offers.map(o => {
+                            const listing = listings.find(l => l.id === o.listingId);
+                            return (
+                              <div key={o.id} style={{ border: "3px solid var(--border)", background: o.status === "pending" ? "rgba(245,166,35,0.06)" : "var(--surface)", padding: 12 }}>
+                                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
+                                  <div>
+                                    <div style={{ fontFamily: "var(--ft)", fontSize: 14 }}>{listing?.name || "Unknown"}</div>
+                                    <div style={{ fontFamily: "var(--fm)", fontSize: 9, color: "var(--red)", fontWeight: 700 }}>from @{o.buyerName} · {o.date}</div>
+                                  </div>
+                                  <div style={{ fontFamily: "var(--ft)", fontSize: 20, color: "var(--red)", fontWeight: 700 }}>${o.amount}</div>
+                                </div>
+                                {o.status === "countered" && o.counterAmount && (
+                                  <div style={{ fontFamily: "var(--fm)", fontSize: 9, color: "var(--green)", fontWeight: 700, marginBottom: 6 }}>↳ You countered at ${o.counterAmount}</div>
+                                )}
+                                <span className={`lstatus ${o.status === "pending" ? "ls-pend" : o.status === "accepted" ? "ls-live" : o.status === "countered" ? "ls-pend" : "ls-sold"}`}>{o.status.toUpperCase()}</span>
+                                {o.status === "pending" && (
+                                  <div style={{ display: "flex", gap: 5, marginTop: 8 }}>
+                                    <button className="btn-r" style={{ flex: 1, marginTop: 0, fontSize: 10, padding: 7 }} onClick={() => { setOffers(prev => prev.map(oi => oi.id === o.id ? { ...oi, status: "accepted" } : oi)); showToast("Offer accepted!"); }}>ACCEPT</button>
+                                    <button className="btn-o" style={{ flex: 1, marginTop: 0, fontSize: 10, padding: 7 }} onClick={() => { setOffers(prev => prev.map(oi => oi.id === o.id ? { ...oi, status: "declined" } : oi)); showToast("Offer declined"); }}>DECLINE</button>
+                                    <button className="btn-g" style={{ flex: 1, marginTop: 0, fontSize: 10, padding: 7 }} onClick={() => { setCounterModal(o); setCounterPrice(""); }}>COUNTER</button>
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* ANALYTICS TAB */}
+                  {sellTab === "ANALYTICS" && (
+                    <div>
+                      <div className="fsect">SELLER ANALYTICS</div>
+                      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))", gap: 8, marginTop: 8 }}>
+                        {[
+                          { label: "TOTAL LISTED", value: sellAnalytics.totalListed, icon: "📦" },
+                          { label: "LIVE NOW", value: sellAnalytics.liveNow, icon: "🟢" },
+                          { label: "TOTAL SOLD", value: sellAnalytics.totalSold, icon: "✅" },
+                          { label: "GROSS EARNED", value: `$${sellAnalytics.grossEarned}`, icon: "💰" },
+                          { label: "AVG ASKING", value: `$${sellAnalytics.avgAskingPrice}`, icon: "📊" },
+                          { label: "TOTAL VIEWS", value: sellAnalytics.totalViews, icon: "👁" },
+                          { label: "PENDING OFFERS", value: sellAnalytics.pendingOffers, icon: "💬" },
+                          { label: "CONVERSION", value: `${sellAnalytics.conversionRate}%`, icon: "📈" },
+                        ].map(stat => (
+                          <div key={stat.label} style={{ border: "3px solid var(--border)", padding: 12, textAlign: "center" }}>
+                            <div style={{ fontSize: 22, marginBottom: 4 }}>{stat.icon}</div>
+                            <div style={{ fontFamily: "var(--fm)", fontSize: 8, color: "var(--red)", fontWeight: 700, marginBottom: 2 }}>{stat.label}</div>
+                            <div style={{ fontFamily: "var(--ft)", fontSize: 22, fontWeight: 700 }}>{stat.value}</div>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="fsect" style={{ marginTop: 16 }}>TIPS TO IMPROVE</div>
+                      {[
+                        "📸 Add more photos to your listings for 2x more views",
+                        "💲 Listings priced within 5% of market sell 3x faster",
+                        "⚡ Respond to offers within 1 hour for best results",
+                        "🏷️ Include box condition and extras in description",
+                        "📦 Fast shipping earns better reviews and repeat buyers",
+                      ].map((tip, i) => (
+                        <div key={i} style={{ fontFamily: "var(--fm)", fontSize: 10, padding: "8px 0", borderBottom: "1px solid rgba(13,13,13,0.1)" }}>{tip}</div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </>
             )}
           </div>
 
-          <button className="btn-g" onClick={() => { setMemberStep("plans"); setMemberModal(true); }}>★ UPGRADE MEMBERSHIP</button>
-        </div>
-      </div>
+          {/* ═══════════════════ PROFILE SCREEN ═══════════════════ */}
+          <div className={`screen ${activeScreen === "id" ? "active" : ""}`} style={{ background: "var(--surface)" }}>
+            <div className="phdr">
+              <div className="phdr-logo">SNAPSHOTZ SOLES</div>
+              <div className="phdr-title">My Profile</div>
+              <div className="phdr-sub">{loggedIn ? authUser || authEmail : "NOT LOGGED IN"}</div>
+            </div>
+            <div className="idbody">
+              <div className="idbig">SNAP{"\n"}SHOTZ{"\n"}{loggedIn ? `@${authUser || "USER"}` : "@GUEST"}</div>
+              {loggedIn && <div className="mbdg">★ {memberPlan}</div>}
 
-      {/* ═══════════════════ TAB BAR ═══════════════════ */}
-      <div className="tabbar">
-        {tabItems.map(t => (
-          <button key={t.key} className={`tabbtn ${activeScreen === t.key ? "active" : ""}`} onClick={() => { setActiveScreen(t.key); if (t.key === "scan" && scanned) resetScan(); }}>
-            <div className="tabico" />
-            {t.notif && <span className="tnotif">{t.notif}</span>}
-            {t.label}
-          </button>
-        ))}
+              {loggedIn && (
+                <div className="idcard">
+                  <div className="idst">Username</div>
+                  {editingUsername ? (
+                    <div style={{ display: "flex", gap: 6 }}>
+                      <input className="finp" style={{ flex: 1, fontSize: 14, padding: "7px 10px" }} value={editUsernameVal} onChange={e => setEditUsernameVal(e.target.value)} placeholder="New username" />
+                      <button className="btn-r" style={{ width: "auto", padding: "7px 14px", marginTop: 0 }} onClick={() => { if (editUsernameVal.trim()) setAuthUser(editUsernameVal.trim()); setEditingUsername(false); showToast("Username updated!"); }}>SAVE</button>
+                      <button className="btn-o" style={{ width: "auto", padding: "7px 14px", marginTop: 0 }} onClick={() => setEditingUsername(false)}>CANCEL</button>
+                    </div>
+                  ) : (
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <span style={{ fontFamily: "var(--ft)", fontSize: 18 }}>@{authUser || "USER"}</span>
+                      <button style={{ background: "none", border: "2px solid var(--border)", fontFamily: "var(--ft)", fontSize: 10, padding: "3px 10px", cursor: "pointer", letterSpacing: "0.05em" }} onClick={() => { setEditUsernameVal(authUser); setEditingUsername(true); }}>EDIT</button>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {(() => {
+                const allPairs = vaultShoes.length + vault.length;
+                const totalVal = vaultShoes.reduce((s, v) => s + v.resale, 0);
+                const totalRet = vaultShoes.reduce((s, v) => s + v.retail, 0);
+                const netGain = totalVal - totalRet;
+                const brandCounts: Record<string, number> = {};
+                vaultShoes.forEach(s => { brandCounts[s.brand] = (brandCounts[s.brand] || 0) + 1; });
+                const topBrand = Object.entries(brandCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || "—";
+                return (
+                  <div className="idcard">
+                    <div className="idst">Stats</div>
+                    <div className="idr"><span className="idk">TOTAL SCANS</span><span className="idv">{totalScans}</span></div>
+                    <div className="idr"><span className="idk">VAULT SIZE</span><span className="idv">{allPairs} pairs</span></div>
+                    <div className="idr"><span className="idk">VAULT VALUE</span><span className="idv">${totalVal.toLocaleString()}</span></div>
+                    <div className="idr"><span className="idk">RETAIL PAID</span><span className="idv">${totalRet.toLocaleString()}</span></div>
+                    <div className="idr"><span className="idk">NET GAIN</span><span className="idv" style={{ color: netGain >= 0 ? "var(--green)" : "var(--red)" }}>{netGain >= 0 ? "+" : ""}${netGain.toLocaleString()}</span></div>
+                    <div className="idr"><span className="idk">TOP BRAND</span><span className="idv">{topBrand}</span></div>
+                    <div className="idr"><span className="idk">LISTINGS</span><span className="idv">{listings.length} active</span></div>
+                    <div className="idr"><span className="idk">PLAN</span><span className="idv">{memberPlan}</span></div>
+                  </div>
+                );
+              })()}
+
+              <div className="idcard">
+                <div className="idst">Membership</div>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 5 }}>
+                  {([
+                    { key: "FREE", label: "BASIC", price: "$0" },
+                    { key: "SNEAKER HEAD", label: "GOLD", price: "$9.99" },
+                    { key: "SOLE PRO", label: "PRO", price: "$24.99" },
+                  ] as const).map(p => (
+                    <div key={p.key} style={{ border: memberPlan === p.key ? "3px solid var(--red)" : "3px solid var(--border)", background: memberPlan === p.key ? "rgba(200,16,46,0.06)" : "var(--surface)", padding: "8px 6px", textAlign: "center" }}>
+                      <div style={{ fontFamily: "var(--ft)", fontSize: 12, letterSpacing: "0.05em" }}>{p.label}</div>
+                      <div style={{ fontFamily: "var(--ft)", fontSize: 18, color: "var(--red)", fontWeight: 700 }}>{p.price}</div>
+                      {memberPlan === p.key && <div style={{ fontFamily: "var(--fm)", fontSize: 8, fontWeight: 700, color: "var(--green)", marginTop: 2 }}>ACTIVE</div>}
+                    </div>
+                  ))}
+                </div>
+                <button className="btn-o" style={{ marginTop: 8 }} onClick={() => { setMemberStep("plans"); setMemberModal(true); }}>VIEW ALL PLANS & UPGRADE</button>
+              </div>
+
+              <div className="idcard">
+                <div className="idst">Notifications</div>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "6px 0", borderBottom: "1px solid rgba(13,13,13,0.12)" }}>
+                  <span style={{ fontFamily: "var(--fm)", fontSize: 11, fontWeight: 700 }}>Drop Alerts</span>
+                  <button onClick={() => setDropAlerts(!dropAlerts)} style={{ width: 40, height: 22, borderRadius: 11, border: "none", background: dropAlerts ? "var(--green)" : "var(--sa)", cursor: "pointer", position: "relative", transition: "background 0.2s" }}>
+                    <div style={{ width: 16, height: 16, borderRadius: "50%", background: "#fff", position: "absolute", top: 3, left: dropAlerts ? 21 : 3, transition: "left 0.2s", boxShadow: "0 1px 3px rgba(0,0,0,0.3)" }} />
+                  </button>
+                </div>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "6px 0" }}>
+                  <span style={{ fontFamily: "var(--fm)", fontSize: 11, fontWeight: 700 }}>Resale Price Alerts</span>
+                  <button onClick={() => setResaleAlerts(!resaleAlerts)} style={{ width: 40, height: 22, borderRadius: 11, border: "none", background: resaleAlerts ? "var(--green)" : "var(--sa)", cursor: "pointer", position: "relative", transition: "background 0.2s" }}>
+                    <div style={{ width: 16, height: 16, borderRadius: "50%", background: "#fff", position: "absolute", top: 3, left: resaleAlerts ? 21 : 3, transition: "left 0.2s", boxShadow: "0 1px 3px rgba(0,0,0,0.3)" }} />
+                  </button>
+                </div>
+              </div>
+
+              <div className="idcard">
+                <div className="idst">Account</div>
+                {loggedIn ? (
+                  <>
+                    <div className="idr"><span className="idk">EMAIL</span><span className="idv">{authEmail}</span></div>
+                    <div className="idr"><span className="idk">JOINED</span><span className="idv">Apr 2026</span></div>
+                    <button className="btn-o" style={{ marginTop: 8 }} onClick={() => { setLoggedIn(false); showToast("Logged out"); }}>LOG OUT</button>
+                  </>
+                ) : (
+                  <button className="btn-r" onClick={() => setAuthModal(true)}>LOG IN / CREATE ACCOUNT</button>
+                )}
+              </div>
+
+              <button className="btn-g" onClick={() => { setMemberStep("plans"); setMemberModal(true); }}>★ UPGRADE MEMBERSHIP</button>
+            </div>
+          </div>
+
+          {/* ═══════════════════ TAB BAR (MOBILE ONLY) ═══════════════════ */}
+          {!isDesktop && (
+            <div className="tabbar">
+              {tabItems.map(t => (
+                <button key={t.key} className={`tabbtn ${activeScreen === t.key ? "active" : ""}`} onClick={() => { setActiveScreen(t.key); if (t.key === "scan" && scanned) resetScan(); }}>
+                  <div className="tabico" />
+                  {t.notif && <span className="tnotif">{t.notif}</span>}
+                  {t.label}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* ═══════════════════ CHECKOUT MODAL ═══════════════════ */}
       {checkoutModal && checkoutShoe && (
         <div className="mo open">
-          <div className="mb">
+          <div className="mb modal-capped">
             <button className="mclose" onClick={() => setCheckoutModal(false)}>✕ CLOSE</button>
             <div className="mtitle">Checkout</div>
-
             <div className="cksteps">
-              {[0, 1, 2, 3].map(i => (
-                <div key={i} className={`ckstep ${ckStep > i ? "done" : ckStep === i ? "act" : ""}`} />
-              ))}
+              {[0, 1, 2, 3].map(i => (<div key={i} className={`ckstep ${ckStep > i ? "done" : ckStep === i ? "act" : ""}`} />))}
             </div>
-
-            {/* Step 0: Size */}
             <div className={`cksec ${ckStep === 0 ? "act" : ""}`}>
               <div className="cktitle">01 — SELECT SIZE</div>
-              <div className="szgrid">
-                {SIZES.map(s => (
-                  <button key={s} className={`szbtn ${ckSize === s ? "sel" : ""}`} onClick={() => setCkSize(s)}>{s}</button>
-                ))}
-              </div>
+              <div className="szgrid">{SIZES.map(s => (<button key={s} className={`szbtn ${ckSize === s ? "sel" : ""}`} onClick={() => setCkSize(s)}>{s}</button>))}</div>
               <button className="btn-r" onClick={ckNext}>CONTINUE TO SHIPPING ›</button>
             </div>
-
-            {/* Step 1: Shipping */}
             <div className={`cksec ${ckStep === 1 ? "act" : ""}`}>
               <div className="cktitle">02 — SHIPPING INFO</div>
               <div className="aform">
@@ -1457,8 +1611,6 @@ const Index = () => {
               <button className="btn-r" onClick={ckNext}>CONTINUE TO PAYMENT ›</button>
               <button className="btn-o" onClick={() => setCkStep(0)}>‹ BACK</button>
             </div>
-
-            {/* Step 2: Payment */}
             <div className={`cksec ${ckStep === 2 ? "act" : ""}`}>
               <div className="cktitle">03 — PAYMENT</div>
               <div className="aform">
@@ -1478,8 +1630,6 @@ const Index = () => {
               <button className="btn-r" onClick={ckNext}>PLACE ORDER 🛒</button>
               <button className="btn-o" onClick={() => setCkStep(1)}>‹ BACK</button>
             </div>
-
-            {/* Step 3: Success */}
             <div className={`cksec ${ckStep === 3 ? "act" : ""}`}>
               <div className="succ">
                 <div className="succ-ico">✅</div>
@@ -1497,68 +1647,36 @@ const Index = () => {
       {/* ═══════════════════ MEMBERSHIP MODAL ═══════════════════ */}
       {memberModal && (
         <div className="mo open">
-          <div className="mb">
+          <div className="mb modal-capped">
             <button className="mclose" onClick={() => setMemberModal(false)}>✕ CLOSE</button>
             <div className="mtitle">{memberStep === "plans" ? "Choose Your Plan" : memberStep === "payment" ? "Payment Details" : "Welcome!"}</div>
-
             {memberStep === "plans" && (
               <>
                 <div className="mplans">
                   <div className={`mplan ${selectedPlan === "free" ? "sel2" : ""}`} onClick={() => setSelectedPlan("free")}>
                     <div className="pname">FREE</div>
                     <div className="pprice">$0<span className="pper">/month</span></div>
-                    <div className="pfeats">
-                      <div className="pfeat y">AI Shoe Scanning</div>
-                      <div className="pfeat y">Save up to 10 pairs</div>
-                      <div className="pfeat y">Market price viewing</div>
-                      <div className="pfeat n">Drop Alerts</div>
-                      <div className="pfeat n">Sell your shoes</div>
-                      <div className="pfeat n">Early access drops</div>
-                    </div>
+                    <div className="pfeats"><div className="pfeat y">AI Shoe Scanning</div><div className="pfeat y">Save up to 10 pairs</div><div className="pfeat y">Market price viewing</div><div className="pfeat n">Drop Alerts</div><div className="pfeat n">Sell your shoes</div><div className="pfeat n">Early access drops</div></div>
                   </div>
                   <div className={`mplan feat ${selectedPlan === "sneakerhead" ? "sel2" : ""}`} onClick={() => setSelectedPlan("sneakerhead")}>
                     <div className="ppop">MOST POPULAR</div>
                     <div className="pname">SNEAKER HEAD</div>
                     <div className="pprice">$9.99<span className="pper">/month</span></div>
-                    <div className="pfeats">
-                      <div className="pfeat y">Everything in Free</div>
-                      <div className="pfeat y">Unlimited vault storage</div>
-                      <div className="pfeat y">🔔 Drop Alerts (all releases)</div>
-                      <div className="pfeat y">Sell up to 10 pairs/month</div>
-                      <div className="pfeat y">No seller fees</div>
-                      <div className="pfeat n">Early access drops</div>
-                      <div className="pfeat n">Priority checkout</div>
-                    </div>
+                    <div className="pfeats"><div className="pfeat y">Everything in Free</div><div className="pfeat y">Unlimited vault storage</div><div className="pfeat y">🔔 Drop Alerts (all releases)</div><div className="pfeat y">Sell up to 10 pairs/month</div><div className="pfeat y">No seller fees</div><div className="pfeat n">Early access drops</div><div className="pfeat n">Priority checkout</div></div>
                   </div>
                   <div className={`mplan ${selectedPlan === "solepro" ? "sel2" : ""}`} onClick={() => setSelectedPlan("solepro")}>
                     <div className="pname">SOLE PRO ★</div>
                     <div className="pprice">$24.99<span className="pper">/month</span></div>
-                    <div className="pfeats">
-                      <div className="pfeat y">Everything in Sneaker Head</div>
-                      <div className="pfeat y">⚡ Early access to drops</div>
-                      <div className="pfeat y">Priority checkout (skip queue)</div>
-                      <div className="pfeat y">Unlimited selling</div>
-                      <div className="pfeat y">Seller analytics dashboard</div>
-                      <div className="pfeat y">Pro badge on listings</div>
-                    </div>
+                    <div className="pfeats"><div className="pfeat y">Everything in Sneaker Head</div><div className="pfeat y">⚡ Early access to drops</div><div className="pfeat y">Priority checkout (skip queue)</div><div className="pfeat y">Unlimited selling</div><div className="pfeat y">Seller analytics dashboard</div><div className="pfeat y">Pro badge on listings</div></div>
                   </div>
                 </div>
                 <button className="btn-r" onClick={() => {
-                  if (selectedPlan === "free") {
-                    setMemberPlan("FREE");
-                    setMemberModal(false);
-                    showToast("Plan updated!");
-                  } else {
-                    setMemberCardNum(""); setMemberCardExp(""); setMemberCardCvv(""); setMemberCardName("");
-                    setMemberStep("payment");
-                  }
-                }}>
-                  {selectedPlan === "free" ? "SELECT FREE PLAN" : "CONTINUE TO PAYMENT ›"}
-                </button>
+                  if (selectedPlan === "free") { setMemberPlan("FREE"); setMemberModal(false); showToast("Plan updated!"); }
+                  else { setMemberCardNum(""); setMemberCardExp(""); setMemberCardCvv(""); setMemberCardName(""); setMemberStep("payment"); }
+                }}>{selectedPlan === "free" ? "SELECT FREE PLAN" : "CONTINUE TO PAYMENT ›"}</button>
                 <p style={{ fontFamily: "var(--fm)", fontSize: 9, textAlign: "center", marginTop: 8, color: "var(--red)" }}>CANCEL ANYTIME · SECURE BILLING</p>
               </>
             )}
-
             {memberStep === "payment" && (
               <>
                 <div style={{ border: "3px solid var(--border)", padding: 12, marginBottom: 14, textAlign: "center" }}>
@@ -1582,7 +1700,6 @@ const Index = () => {
                 <button className="btn-o" onClick={() => setMemberStep("plans")}>‹ BACK TO PLANS</button>
               </>
             )}
-
             {memberStep === "success" && (
               <div style={{ textAlign: "center", padding: "18px 0" }}>
                 <div style={{ fontSize: 46, marginBottom: 8 }}>🎉</div>
@@ -1599,7 +1716,7 @@ const Index = () => {
       {/* ═══════════════════ AUTH MODAL ═══════════════════ */}
       {authModal && (
         <div className="mo open">
-          <div className="mb">
+          <div className="mb modal-capped">
             <button className="mclose" onClick={() => { setAuthModal(false); setAuthError(""); }}>✕ CLOSE</button>
             <div className="mtitle">Account</div>
             <div className="atabs">
@@ -1635,15 +1752,11 @@ const Index = () => {
       {/* ═══════════════════ ALERT MODAL ═══════════════════ */}
       {alertModal && (
         <div className="mo open">
-          <div className="mb">
+          <div className="mb modal-capped">
             <button className="mclose" onClick={() => setAlertModal(null)}>✕ CLOSE</button>
             <div className="mtitle">Set Drop Alert</div>
             <p style={{ fontFamily: "var(--fm)", fontSize: 11, marginBottom: 12 }}>{alertModal.name} — {alertModal.colorway}<br />{alertModal.dateLabel}</p>
-            <button className="btn-r" onClick={() => {
-              setDrops(prev => prev.map(d => d.id === alertModal.id ? { ...d, alert: true } : d));
-              setAlertModal(null);
-              showToast("Alert set!");
-            }}>🔔 NOTIFY ME ON DROP DAY</button>
+            <button className="btn-r" onClick={() => { setDrops(prev => prev.map(d => d.id === alertModal.id ? { ...d, alert: true } : d)); setAlertModal(null); showToast("Alert set!"); }}>🔔 NOTIFY ME ON DROP DAY</button>
             <button className="btn-o" onClick={() => setAlertModal(null)}>NOT NOW</button>
           </div>
         </div>
@@ -1652,16 +1765,13 @@ const Index = () => {
       {/* ═══════════════════ MARKET DETAIL MODAL ═══════════════════ */}
       {marketDetail && (
         <div className="mo open">
-          <div className="mb">
+          <div className="mb modal-capped">
             <button className="mclose" onClick={() => setMarketDetail(null)}>✕ CLOSE</button>
             <div className="mtitle">{marketDetail.name}</div>
             <div className="mkcw">{marketDetail.colorway}</div>
             <div className="mkp" style={{ marginTop: 12 }}>
               {marketDetail.prices.map(p => (
-                <div key={p.label} className="mpb">
-                  <span className="mps">{p.label.toUpperCase()}</span>
-                  <span className="mpn">{p.value}</span>
-                </div>
+                <div key={p.label} className="mpb"><span className="mps">{p.label.toUpperCase()}</span><span className="mpn">{p.value}</span></div>
               ))}
             </div>
             <button className="btn-r" onClick={() => { setMarketDetail(null); openCheckout(marketDetail); }}>🛒 BUY NOW — CHECKOUT</button>
@@ -1670,6 +1780,28 @@ const Index = () => {
               setMarketDetail(null);
               showToast("Saved to vault!");
             }}>+ SAVE TO VAULT</button>
+          </div>
+        </div>
+      )}
+
+      {/* ═══════════════════ COUNTER OFFER MODAL ═══════════════════ */}
+      {counterModal && (
+        <div className="mo open" onClick={e => e.target === e.currentTarget && setCounterModal(null)}>
+          <div className="mb modal-capped">
+            <button className="mclose" onClick={() => setCounterModal(null)}>✕ CLOSE</button>
+            <div className="mtitle">Counter Offer</div>
+            <p style={{ fontFamily: "var(--fm)", fontSize: 11, marginBottom: 6 }}>Buyer offered <strong>${counterModal.amount}</strong></p>
+            <div className="fgrp">
+              <label className="flbl">Your Counter Price ($)</label>
+              <input className="finp" type="number" value={counterPrice} onChange={e => setCounterPrice(e.target.value)} placeholder="Enter your price" />
+            </div>
+            <button className="btn-r" onClick={() => {
+              if (!counterPrice) return;
+              setOffers(prev => prev.map(o => o.id === counterModal.id ? { ...o, status: "countered", counterAmount: Number(counterPrice) } : o));
+              setCounterModal(null);
+              showToast("Counter sent!");
+            }}>SEND COUNTER — ${counterPrice || "0"}</button>
+            <button className="btn-o" onClick={() => setCounterModal(null)}>CANCEL</button>
           </div>
         </div>
       )}
