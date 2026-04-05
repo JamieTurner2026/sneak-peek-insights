@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import SneakerImage, { getSneakerImageData } from "@/components/SneakerImage";
 
@@ -454,17 +454,77 @@ interface VaultItem extends ShoeResult {
   savedAt: string;
 }
 
+// ─── DROP DATE BUILDER ──────────────────────────────────────────────────────
+function buildDropDate(daysFromNow: number, hour = 10): Date {
+  const d = new Date();
+  d.setDate(d.getDate() + daysFromNow);
+  d.setHours(hour, 0, 0, 0);
+  return d;
+}
+
+// ─── COUNTDOWN HOOK ─────────────────────────────────────────────────────────
+function useCountdown(target: Date) {
+  const [now, setNow] = useState(() => new Date());
+  useEffect(() => {
+    const id = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(id);
+  }, []);
+  const diff = target.getTime() - now.getTime();
+  if (diff <= 0) return { days: 0, hours: 0, minutes: 0, seconds: 0, total: 0, dropped: true };
+  const days = Math.floor(diff / 86400000);
+  const hours = Math.floor((diff % 86400000) / 3600000);
+  const minutes = Math.floor((diff % 3600000) / 60000);
+  const seconds = Math.floor((diff % 60000) / 1000);
+  return { days, hours, minutes, seconds, total: diff, dropped: false };
+}
+
+function CountdownDisplay({ target }: { target: Date }) {
+  const { days, hours, minutes, seconds, total, dropped } = useCountdown(target);
+  if (dropped) return <div style={{ fontFamily: "var(--ft)", fontSize: 13, color: "#c8102e", letterSpacing: "0.05em" }}>🔴 DROPPED — SHOP NOW</div>;
+  const pad = (n: number) => String(n).padStart(2, "0");
+  const isUrgent = total < 3600000; // under 1 hour
+  return (
+    <div style={{ fontFamily: "var(--fm)", fontSize: 14, fontWeight: 700, color: isUrgent ? "#c8102e" : "var(--txt)", letterSpacing: "0.06em" }}>
+      {days > 0 && <span>{days}d </span>}
+      <span>{pad(hours)}:{pad(minutes)}:{pad(seconds)}</span>
+      {isUrgent && <span style={{ marginLeft: 6, fontSize: 10 }}>⚡ DROPPING SOON</span>}
+    </div>
+  );
+}
+
 interface DropItem {
   id: string;
   name: string;
   brand: string;
   colorway: string;
-  date: string;
+  date: Date;
+  dateLabel: string;
   retail: number;
   image: string;
   hype: "HIGH" | "SELLOUT" | "LIMITED";
   alert: boolean;
+  sku: string;
+  retailer: string;
+  brandFilter: string;
 }
+
+const DROP_BRANDS = ["ALL", "JORDAN", "NIKE", "NIKE SB", "ADIDAS", "NEW BALANCE", "ASICS"] as const;
+
+const INITIAL_DROPS = ([
+  { id: "d1", name: "Air Jordan 4 Retro", brand: "JORDAN", brandFilter: "JORDAN", colorway: "Bred Reimagined", date: buildDropDate(2), dateLabel: "", retail: 210, image: "https://images.unsplash.com/photo-1600269452121-4f2416e55c28?auto=format&fit=crop&q=80&w=600", hype: "SELLOUT" as const, alert: false, sku: "FV5029-006", retailer: "Nike SNKRS" },
+  { id: "d2", name: "Air Jordan 1 High OG", brand: "JORDAN", brandFilter: "JORDAN", colorway: "Royal Toe", date: buildDropDate(5), dateLabel: "", retail: 180, image: "https://images.unsplash.com/photo-1597045566677-8cf032ed6634?auto=format&fit=crop&q=80&w=600", hype: "HIGH" as const, alert: false, sku: "555088-041", retailer: "Nike SNKRS" },
+  { id: "d3", name: "Air Jordan 3 Retro", brand: "JORDAN", brandFilter: "JORDAN", colorway: "Fear", date: buildDropDate(9), dateLabel: "", retail: 200, image: "https://images.unsplash.com/photo-1605348532760-6753d2c43329?auto=format&fit=crop&q=80&w=600", hype: "HIGH" as const, alert: false, sku: "CT8532-080", retailer: "Nike SNKRS" },
+  { id: "d4", name: "Air Jordan 11 Retro", brand: "JORDAN", brandFilter: "JORDAN", colorway: "Cool Grey", date: buildDropDate(14), dateLabel: "", retail: 225, image: "https://images.unsplash.com/photo-1551107696-a4b0c5a0d9a2?auto=format&fit=crop&q=80&w=600", hype: "SELLOUT" as const, alert: false, sku: "CT8012-005", retailer: "Foot Locker" },
+  { id: "d5", name: "Nike Dunk Low", brand: "NIKE", brandFilter: "NIKE", colorway: "University Blue", date: buildDropDate(3), dateLabel: "", retail: 115, image: "https://images.unsplash.com/photo-1607522370275-f6fd4197767c?auto=format&fit=crop&q=80&w=600", hype: "HIGH" as const, alert: false, sku: "DD1391-102", retailer: "Nike SNKRS" },
+  { id: "d6", name: "Nike Air Force 1 Low", brand: "NIKE", brandFilter: "NIKE", colorway: "Triple White", date: buildDropDate(7), dateLabel: "", retail: 110, image: "https://images.unsplash.com/photo-1600185365926-3a2ce3cdb9eb?auto=format&fit=crop&q=80&w=600", hype: "LIMITED" as const, alert: false, sku: "CW2288-111", retailer: "Nike.com" },
+  { id: "d7", name: "Nike SB Dunk Low", brand: "NIKE SB", brandFilter: "NIKE SB", colorway: "Court Purple", date: buildDropDate(11), dateLabel: "", retail: 120, image: "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?auto=format&fit=crop&q=80&w=600", hype: "SELLOUT" as const, alert: false, sku: "BQ6817-500", retailer: "Skate shops" },
+  { id: "d8", name: "Yeezy Slide", brand: "ADIDAS", brandFilter: "ADIDAS", colorway: "Onyx", date: buildDropDate(6), dateLabel: "", retail: 70, image: "https://images.unsplash.com/photo-1584735175315-9d5df23be6e0?auto=format&fit=crop&q=80&w=600", hype: "LIMITED" as const, alert: false, sku: "HQ6448", retailer: "adidas Confirmed" },
+  { id: "d9", name: "adidas Samba OG", brand: "ADIDAS", brandFilter: "ADIDAS", colorway: "Cloud White / Core Black", date: buildDropDate(18), dateLabel: "", retail: 100, image: "https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?auto=format&fit=crop&q=80&w=600", hype: "HIGH" as const, alert: false, sku: "B75806", retailer: "adidas.com" },
+  { id: "d10", name: "New Balance 9060", brand: "NEW BALANCE", brandFilter: "NEW BALANCE", colorway: "Sea Salt", date: buildDropDate(10), dateLabel: "", retail: 150, image: "https://images.unsplash.com/photo-1539185441755-769473a23570?auto=format&fit=crop&q=80&w=600", hype: "HIGH" as const, alert: false, sku: "U9060HSB", retailer: "New Balance" },
+  { id: "d11", name: "New Balance 550", brand: "NEW BALANCE", brandFilter: "NEW BALANCE", colorway: "Tri-Color", date: buildDropDate(21), dateLabel: "", retail: 110, image: "https://images.unsplash.com/photo-1556906781-9a412961a28c?auto=format&fit=crop&q=80&w=600", hype: "LIMITED" as const, alert: false, sku: "BB550HR1", retailer: "Kith" },
+  { id: "d12", name: "Asics Gel-Kayano 14", brand: "ASICS", brandFilter: "ASICS", colorway: "White/Midnight", date: buildDropDate(16), dateLabel: "", retail: 150, image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&q=80&w=600", hype: "HIGH" as const, alert: false, sku: "1201A019-115", retailer: "ASICS.com" },
+] as DropItem[]).map(d => ({ ...d, dateLabel: d.date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) }))
+.sort((a, b) => a.date.getTime() - b.date.getTime());
 
 interface MarketItem {
   id: string;
@@ -496,13 +556,6 @@ const TICKER_ITEMS = [
   { text: "AJ11 CONCORD", price: "$380" },
   { text: "DUNK SB TRAVIS", price: "$1,850" },
 ];
-
-const INITIAL_DROPS: DropItem[] = [
-  { id: "d1", name: "Air Jordan 4 Retro", brand: "JORDAN", colorway: "Bred Reimagined", date: "Apr 12, 2026", retail: 210, image: "https://images.unsplash.com/photo-1600269452121-4f2416e55c28?auto=format&fit=crop&q=80&w=600", hype: "HIGH", alert: false },
-  { id: "d2", name: "Nike Dunk Low", brand: "NIKE", colorway: "University Blue", date: "Apr 19, 2026", retail: 115, image: "https://images.unsplash.com/photo-1607522370275-f6fd4197767c?auto=format&fit=crop&q=80&w=600", hype: "SELLOUT", alert: false },
-  { id: "d3", name: "Yeezy Slide", brand: "ADIDAS", colorway: "Onyx", date: "Apr 25, 2026", retail: 70, image: "https://images.unsplash.com/photo-1584735175315-9d5df23be6e0?auto=format&fit=crop&q=80&w=600", hype: "LIMITED", alert: false },
-];
-
 const INITIAL_MARKET: MarketItem[] = [
   { id: "m1", name: "Air Jordan 1 High OG", brand: "JORDAN", colorway: "Chicago · DZ5485-612", trend: "up", trendPct: "+12%", prices: [{ label: "StockX", value: "$298" }, { label: "GOAT", value: "$305" }, { label: "Flight Club", value: "$310" }, { label: "eBay", value: "$285" }] },
   { id: "m2", name: "Nike Dunk Low", brand: "NIKE", colorway: "Panda · DD1391-100", trend: "down", trendPct: "-3%", prices: [{ label: "StockX", value: "$118" }, { label: "GOAT", value: "$120" }, { label: "Flight Club", value: "$125" }, { label: "eBay", value: "$112" }] },
@@ -542,6 +595,7 @@ const Index = () => {
   // Drops
   const [drops, setDrops] = useState<DropItem[]>(INITIAL_DROPS);
   const [alertModal, setAlertModal] = useState<DropItem | null>(null);
+  const [dropBrandFilter, setDropBrandFilter] = useState<string>("ALL");
 
   // Market
   const [market] = useState<MarketItem[]>(INITIAL_MARKET);
@@ -760,7 +814,7 @@ const Index = () => {
 
   const tabItems = [
     { key: "scan", label: "Scan", notif: null },
-    { key: "drops", label: "Drops", notif: drops.filter(d => d.hype === "HIGH").length || null },
+    { key: "drops", label: "Drops", notif: drops.filter(d => d.alert).length || null },
     { key: "market", label: "Market", notif: null },
     { key: "vault", label: "Vault", notif: (vaultShoes.length + vault.length) || null },
     { key: "sell", label: "Sell", notif: null },
@@ -921,43 +975,79 @@ const Index = () => {
         <div className="phdr">
           <div className="phdr-logo">SNAPSHOTZ SOLES</div>
           <div className="phdr-title">Drop Calendar</div>
-          <div className="phdr-sub">UPCOMING RELEASES · SET ALERTS</div>
+          <div className="phdr-sub">{drops.filter(d => d.alert).length} ALERTS SET · {drops.length} UPCOMING</div>
         </div>
-        <div className="dlist">
-          {drops.map(drop => (
-            <div key={drop.id} className="dcard">
-              <div className="dcimg" style={{ backgroundImage: `url(${drop.image})` }}>
-                <div className="dcimgi">
-                  <div className="dcbr">{drop.brand}</div>
-                  <div className="dcn">{drop.name}</div>
-                </div>
-              </div>
-              <div className="dcbody">
-                <div className="dmr">
-                  <div className="ddate"><span className="ddlbl">Drop Date</span>{drop.date}</div>
-                  <div className="dret">${drop.retail}</div>
-                </div>
-                <div style={{ display: "flex", gap: 5, marginBottom: 9 }}>
-                  <span className="dtag th">{drop.hype}</span>
-                  <span className="dtag ts">{drop.colorway}</span>
-                </div>
-                <div className="cdown">⏱ COUNTDOWN ACTIVE</div>
-                <button
-                  className={`dnbtn ${drop.alert ? "dnset" : "dnon"}`}
-                  onClick={() => {
-                    if (!drop.alert) {
-                      setAlertModal(drop);
-                    } else {
-                      setDrops(prev => prev.map(d => d.id === drop.id ? { ...d, alert: false } : d));
-                      showToast("Alert removed");
-                    }
-                  }}
-                >
-                  {drop.alert ? "✓ ALERT SET" : "🔔 SET DROP ALERT"}
-                </button>
-              </div>
-            </div>
+
+        {/* Brand filter bar */}
+        <div style={{ display: "flex", gap: 4, padding: "10px 14px", overflowX: "auto", borderBottom: "3px solid var(--border)" }}>
+          {DROP_BRANDS.map(b => (
+            <button key={b} onClick={() => setDropBrandFilter(b)} style={{
+              background: dropBrandFilter === b ? "var(--border)" : "transparent",
+              color: dropBrandFilter === b ? "var(--gold)" : "var(--border)",
+              border: "2px solid var(--border)",
+              fontFamily: "var(--ft)",
+              fontSize: 10,
+              padding: "5px 10px",
+              cursor: "pointer",
+              letterSpacing: "0.05em",
+              whiteSpace: "nowrap",
+              flexShrink: 0,
+            }}>{b}</button>
           ))}
+        </div>
+
+        <div className="dlist">
+          {drops
+            .filter(d => dropBrandFilter === "ALL" || d.brandFilter === dropBrandFilter)
+            .map(drop => {
+              const hypeColor: Record<string, string> = { SELLOUT: "#c8102e", HIGH: "#f5a623", LIMITED: "#0e4f8a" };
+              return (
+                <div key={drop.id} className="dcard" style={{ overflow: "hidden" }}>
+                  <div style={{ height: 160, position: "relative", overflow: "hidden" }}>
+                    <img src={drop.image} alt={drop.name} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+                    <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.7) 100%)" }} />
+                    <div style={{ position: "absolute", bottom: 10, left: 10, right: 10 }}>
+                      <div style={{ fontFamily: "var(--fm)", fontSize: 9, color: "rgba(255,255,255,0.7)", fontWeight: 700, letterSpacing: "0.08em" }}>{drop.brand}</div>
+                      <div style={{ fontFamily: "var(--ft)", fontSize: 18, color: "#fff", lineHeight: 1.1 }}>{drop.name}</div>
+                      <div style={{ fontFamily: "var(--fm)", fontSize: 10, color: "rgba(255,255,255,0.8)", marginTop: 2 }}>{drop.colorway} · {drop.sku}</div>
+                    </div>
+                    <div style={{ position: "absolute", top: 8, right: 8, display: "flex", gap: 4 }}>
+                      <span style={{ background: hypeColor[drop.hype] || "#333", color: "#fff", fontFamily: "var(--fm)", fontSize: 8, fontWeight: 700, padding: "2px 7px", letterSpacing: "0.06em" }}>{drop.hype}</span>
+                      {drop.alert && <span style={{ background: "var(--green)", color: "#fff", fontFamily: "var(--fm)", fontSize: 8, fontWeight: 700, padding: "2px 7px" }}>🔔 ON</span>}
+                    </div>
+                  </div>
+                  <div className="dcbody">
+                    <div className="dmr">
+                      <div>
+                        <div style={{ fontFamily: "var(--fm)", fontSize: 8, color: "var(--red)", fontWeight: 700, letterSpacing: "0.06em" }}>DROP DATE</div>
+                        <div style={{ fontFamily: "var(--ft)", fontSize: 14 }}>{drop.dateLabel}</div>
+                      </div>
+                      <div style={{ textAlign: "right" }}>
+                        <div style={{ fontFamily: "var(--fm)", fontSize: 8, color: "var(--red)", fontWeight: 700 }}>RETAIL</div>
+                        <div style={{ fontFamily: "var(--ft)", fontSize: 18, fontWeight: 700 }}>${drop.retail}</div>
+                      </div>
+                    </div>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8, padding: "6px 0", borderTop: "1px solid rgba(13,13,13,0.1)", borderBottom: "1px solid rgba(13,13,13,0.1)" }}>
+                      <CountdownDisplay target={drop.date} />
+                      <span style={{ fontFamily: "var(--fm)", fontSize: 8, color: "var(--red)", fontWeight: 700 }}>{drop.retailer}</span>
+                    </div>
+                    <button
+                      className={`dnbtn ${drop.alert ? "dnset" : "dnon"}`}
+                      onClick={() => {
+                        if (!drop.alert) {
+                          setAlertModal(drop);
+                        } else {
+                          setDrops(prev => prev.map(d => d.id === drop.id ? { ...d, alert: false } : d));
+                          showToast("Alert removed");
+                        }
+                      }}
+                    >
+                      {drop.alert ? "✓ ALERT SET" : "🔔 SET DROP ALERT"}
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
         </div>
       </div>
 
@@ -1541,7 +1631,7 @@ const Index = () => {
           <div className="mb">
             <button className="mclose" onClick={() => setAlertModal(null)}>✕ CLOSE</button>
             <div className="mtitle">Set Drop Alert</div>
-            <p style={{ fontFamily: "var(--fm)", fontSize: 11, marginBottom: 12 }}>{alertModal.name} — {alertModal.colorway}<br />{alertModal.date}</p>
+            <p style={{ fontFamily: "var(--fm)", fontSize: 11, marginBottom: 12 }}>{alertModal.name} — {alertModal.colorway}<br />{alertModal.dateLabel}</p>
             <button className="btn-r" onClick={() => {
               setDrops(prev => prev.map(d => d.id === alertModal.id ? { ...d, alert: true } : d));
               setAlertModal(null);
