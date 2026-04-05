@@ -388,6 +388,10 @@ const Index = () => {
   // Profile
   const [totalScans, setTotalScans] = useState(0);
   const [memberPlan, setMemberPlan] = useState("FREE");
+  const [editingUsername, setEditingUsername] = useState(false);
+  const [editUsernameVal, setEditUsernameVal] = useState("");
+  const [dropAlerts, setDropAlerts] = useState(true);
+  const [resaleAlerts, setResaleAlerts] = useState(false);
 
   // Auth modal
   const [authModal, setAuthModal] = useState(false);
