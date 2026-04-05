@@ -1116,6 +1116,9 @@ const Index = () => {
         </div>
       </div>
 
+      {/* Vault Detail Modal */}
+      {vaultDetailShoe && <ShoeDetailModal shoe={vaultDetailShoe} onClose={() => setVaultDetailShoe(null)} onBuy={s => { setVaultDetailShoe(null); setVaultBuyShoe(s); }} />}
+
       {/* Vault Buy Modal */}
       {vaultBuyShoe && <VaultBuyModal shoe={vaultBuyShoe} onClose={() => setVaultBuyShoe(null)} />}
 
