@@ -1503,26 +1503,32 @@ const Index = () => {
       {authModal && (
         <div className="mo open">
           <div className="mb">
-            <button className="mclose" onClick={() => setAuthModal(false)}>✕ CLOSE</button>
+            <button className="mclose" onClick={() => { setAuthModal(false); setAuthError(""); }}>✕ CLOSE</button>
             <div className="mtitle">Account</div>
             <div className="atabs">
-              <button className={`atab ${authTab === "login" ? "act" : ""}`} onClick={() => setAuthTab("login")}>LOG IN</button>
-              <button className={`atab ${authTab === "signup" ? "act" : ""}`} onClick={() => setAuthTab("signup")}>SIGN UP</button>
+              <button className={`atab ${authTab === "login" ? "act" : ""}`} onClick={() => { setAuthTab("login"); setAuthError(""); }}>LOG IN</button>
+              <button className={`atab ${authTab === "signup" ? "act" : ""}`} onClick={() => { setAuthTab("signup"); setAuthError(""); }}>SIGN UP</button>
             </div>
+            {authError && (
+              <div style={{ background: "rgba(200,16,46,0.1)", border: "2px solid var(--red)", padding: "8px 10px", marginBottom: 10, fontFamily: "var(--fm)", fontSize: 10, color: "var(--red)", fontWeight: 700 }}>⚠ {authError}</div>
+            )}
             {authTab === "login" ? (
               <div className="aform">
                 <div className="fgrp"><label className="flbl">Email</label><input className="finp" type="email" value={authEmail} onChange={e => setAuthEmail(e.target.value)} placeholder="you@email.com" /></div>
-                <div className="fgrp"><label className="flbl">Password</label><input className="finp" type="password" value={authPass} onChange={e => setAuthPass(e.target.value)} /></div>
+                <div className="fgrp"><label className="flbl">Password</label><input className="finp" type="password" value={authPass} onChange={e => setAuthPass(e.target.value)} placeholder="Min 6 characters" /></div>
                 <button className="btn-r" onClick={handleAuth}>LOG IN</button>
                 <button className="btn-o">G&nbsp;&nbsp;CONTINUE WITH GOOGLE</button>
+                <p style={{ fontFamily: "var(--fm)", fontSize: 10, textAlign: "center", marginTop: 4, opacity: 0.6 }}>Don't have an account? <span style={{ color: "var(--red)", cursor: "pointer", fontWeight: 700 }} onClick={() => { setAuthTab("signup"); setAuthError(""); }}>Sign up</span></p>
               </div>
             ) : (
               <div className="aform">
                 <div className="fgrp"><label className="flbl">Username</label><input className="finp" value={authUser} onChange={e => setAuthUser(e.target.value)} placeholder="@sneakerhead99" /></div>
                 <div className="fgrp"><label className="flbl">Email</label><input className="finp" type="email" value={authEmail} onChange={e => setAuthEmail(e.target.value)} placeholder="you@email.com" /></div>
-                <div className="fgrp"><label className="flbl">Password</label><input className="finp" type="password" value={authPass} onChange={e => setAuthPass(e.target.value)} /></div>
+                <div className="fgrp"><label className="flbl">Password</label><input className="finp" type="password" value={authPass} onChange={e => setAuthPass(e.target.value)} placeholder="Min 6 characters" /></div>
+                <div className="fgrp"><label className="flbl">Confirm Password</label><input className="finp" type="password" value={authPassConfirm} onChange={e => setAuthPassConfirm(e.target.value)} placeholder="Re-enter password" /></div>
                 <button className="btn-r" onClick={handleAuth}>CREATE ACCOUNT</button>
                 <button className="btn-o">G&nbsp;&nbsp;CONTINUE WITH GOOGLE</button>
+                <p style={{ fontFamily: "var(--fm)", fontSize: 10, textAlign: "center", marginTop: 4, opacity: 0.6 }}>Already have an account? <span style={{ color: "var(--red)", cursor: "pointer", fontWeight: 700 }} onClick={() => { setAuthTab("login"); setAuthError(""); }}>Log in</span></p>
               </div>
             )}
           </div>
