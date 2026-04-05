@@ -537,6 +537,7 @@ const Index = () => {
   const [vaultFilter, setVaultFilter] = useState("ALL");
   const [vaultSearch, setVaultSearch] = useState("");
   const [vaultBuyShoe, setVaultBuyShoe] = useState<VaultShoe | null>(null);
+  const [vaultDetailShoe, setVaultDetailShoe] = useState<VaultShoe | null>(null);
 
   // Drops
   const [drops, setDrops] = useState<DropItem[]>(INITIAL_DROPS);
