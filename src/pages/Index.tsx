@@ -1,6 +1,10 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import SneakerImage, { getSneakerImageData } from "@/components/SneakerImage";
+import aj4BredImg from "@/assets/aj4-bred.png";
+import aj1RoyalImg from "@/assets/aj1-royal.png";
+import aj3FearImg from "@/assets/aj3-fear.png";
+import aj11CoolGreyImg from "@/assets/aj11-cool-grey.png";
 
 // ─── TYPES ───────────────────────────────────────────────────────────────────
 interface ShoeResult {
