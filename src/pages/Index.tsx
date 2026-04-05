@@ -556,6 +556,7 @@ const TICKER_ITEMS = [
   { text: "AJ11 CONCORD", price: "$380" },
   { text: "DUNK SB TRAVIS", price: "$1,850" },
 ];
+const INITIAL_MARKET: MarketItem[] = [
   { id: "m1", name: "Air Jordan 1 High OG", brand: "JORDAN", colorway: "Chicago · DZ5485-612", trend: "up", trendPct: "+12%", prices: [{ label: "StockX", value: "$298" }, { label: "GOAT", value: "$305" }, { label: "Flight Club", value: "$310" }, { label: "eBay", value: "$285" }] },
   { id: "m2", name: "Nike Dunk Low", brand: "NIKE", colorway: "Panda · DD1391-100", trend: "down", trendPct: "-3%", prices: [{ label: "StockX", value: "$118" }, { label: "GOAT", value: "$120" }, { label: "Flight Club", value: "$125" }, { label: "eBay", value: "$112" }] },
   { id: "m3", name: "Yeezy Boost 350 V2", brand: "ADIDAS", colorway: "Zebra · CP9654", trend: "up", trendPct: "+8%", prices: [{ label: "StockX", value: "$240" }, { label: "GOAT", value: "$245" }, { label: "Flight Club", value: "$255" }, { label: "eBay", value: "$230" }] },
