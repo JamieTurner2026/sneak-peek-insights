@@ -1,4 +1,5 @@
 import { useState } from "react";
+import aj3BlackCement from "@/assets/aj3-black-cement.png";
 
 // ─── VERIFIED SHOE IMAGE DATABASE ────────────────────────────────────────────
 // Each entry has 3 progressively more reliable fallback sources:
@@ -26,8 +27,8 @@ export const SNEAKER_IMAGE_DATA: Record<
   // Air Jordan 3 Retro 'Black Cement' — grey/black/cement
   "AJ3-BLC": {
     srcs: [
+      aj3BlackCement,
       "https://images.unsplash.com/photo-1605348532760-6753d2c43329?auto=format&fit=crop&q=85&w=800&h=600",
-      "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&q=80&w=600",
     ],
     bg: "#e8e8e8",
     accent: "#333",
