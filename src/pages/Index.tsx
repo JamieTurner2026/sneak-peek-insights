@@ -595,6 +595,7 @@ const Index = () => {
   // Drops
   const [drops, setDrops] = useState<DropItem[]>(INITIAL_DROPS);
   const [alertModal, setAlertModal] = useState<DropItem | null>(null);
+  const [dropBrandFilter, setDropBrandFilter] = useState<string>("ALL");
 
   // Market
   const [market] = useState<MarketItem[]>(INITIAL_MARKET);
