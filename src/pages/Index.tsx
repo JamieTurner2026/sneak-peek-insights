@@ -65,23 +65,58 @@ interface VaultShoe {
   photo?: string;
 }
 
-const INITIAL_VAULT_SHOES: VaultShoe[] = [
-  { id: "AJ1-CHI", name: "Air Jordan 1 Retro High OG", brand: "JORDAN", colorway: "Chicago", size: "10", condition: "Deadstock", match: 98.4, retail: 170, resale: 298, release: "Feb 2022", silhouette: "HIGH-TOP", tech: "Air Sole", sku: "DZ5485-612", tags: ["Jordan", "Retro", "Limited"], saved: "Mar 12, 2026" },
-  { id: "AJ3-BLC", name: "Air Jordan 3 Retro", brand: "JORDAN", colorway: "Black Cement", size: "10.5", condition: "Like New", match: 96.1, retail: 190, resale: 245, release: "Jan 2018", silhouette: "MID-TOP", tech: "Air Sole", sku: "854262-001", tags: ["Jordan", "Cement", "OG"], saved: "Mar 20, 2026" },
-  { id: "DUNK-PND", name: "Nike Dunk Low", brand: "NIKE", colorway: "Panda", size: "11", condition: "New in Box", match: 97.5, retail: 110, resale: 118, release: "Mar 2021", silhouette: "LOW-TOP", tech: "Cushlon", sku: "DD1391-100", tags: ["Nike", "Dunk", "Classic"], saved: "Apr 1, 2026" },
-  { id: "YZY-ZBR", name: "Yeezy Boost 350 V2", brand: "ADIDAS", colorway: "Zebra", size: "9.5", condition: "Deadstock", match: 94.3, retail: 220, resale: 240, release: "Feb 2017", silhouette: "LOW-TOP", tech: "Boost", sku: "CP9654", tags: ["Yeezy", "Adidas", "Boost"], saved: "Apr 2, 2026" },
-  { id: "NB-550", name: "New Balance 550", brand: "NEW BALANCE", colorway: "White / Green", size: "10", condition: "Used — Great", match: 92.6, retail: 110, resale: 95, release: "Nov 2020", silhouette: "LOW-TOP", tech: "Encap", sku: "BB550WT1", tags: ["New Balance", "Court", "Retro"], saved: "Apr 3, 2026" },
-];
-
-const CONDITION_COLOR: Record<string, { bg: string; text: string }> = {
-  "Deadstock": { bg: "#1a6b3c", text: "#fff" },
-  "New in Box": { bg: "#0e4f8a", text: "#fff" },
-  "Like New": { bg: "#5a3d8a", text: "#fff" },
-  "Used — Great": { bg: "#8a5a1a", text: "#fff" },
-  "Used — Good": { bg: "#6b2a2a", text: "#fff" },
+// ─── SHOE STORIES DATABASE ──────────────────────────────────────────────────
+const SHOE_STORIES: Record<string, { story: string; colorwayInspiration: string; funFact: string; designer: string }> = {
+  "AJ1-CHI": {
+    designer: "Peter Moore",
+    story: "The Air Jordan 1 'Chicago' is the shoe that started it all. In 1985, Nike signed a rookie Michael Jordan to an unprecedented deal, and Peter Moore designed a shoe that broke every NBA uniform rule. The league fined Jordan $5,000 per game for wearing them — and Nike happily paid, turning the controversy into the most successful marketing campaign in sneaker history. The Chicago colorway, matching the Bulls' red, white, and black, became the definitive Jordan 1.",
+    colorwayInspiration: "The red, white, and black colorway was directly inspired by the Chicago Bulls' team colors. The bold varsity red panels against the white leather and black accents perfectly captured the energy of 1980s Chicago basketball.",
+    funFact: "The NBA fined Michael Jordan $5,000 every game he wore the original Air Jordan 1 because they violated the league's uniform policy. Nike paid every fine and turned it into the legendary 'Banned' marketing campaign."
+  },
+  "AJ3-BLC": {
+    designer: "Tinker Hatfield",
+    story: "The Air Jordan 3 'Black Cement' saved the Jordan line. By 1988, Michael Jordan was ready to leave Nike for Adidas. Enter Tinker Hatfield, who redesigned the entire silhouette with elephant print panels, a visible Air unit, and the now-iconic Jumpman logo. Jordan fell in love and stayed with Nike. The Black Cement colorway debuted during the 1988 Slam Dunk Contest, where MJ launched from the free-throw line for his legendary dunk.",
+    colorwayInspiration: "The cement grey elephant print texture was inspired by safari patterns, giving the shoe a rugged, textured look. The black leather base with fire red accents created a timeless combination that Tinker Hatfield called 'sophisticated street.'",
+    funFact: "This was the first Jordan to feature the Jumpman logo instead of the Nike Wings. It was also the shoe MJ wore when he took off from the free-throw line at the 1988 Slam Dunk Contest — arguably the most iconic dunk in basketball history."
+  },
+  "DUNK-PND": {
+    designer: "Nike Design Team",
+    story: "Originally designed in 1985 as a college basketball shoe, the Nike Dunk was created for Nike's 'Be True to Your School' campaign, featuring colorways for top NCAA programs. The shoe faded from mainstream attention for decades before being rediscovered by skaters and streetwear enthusiasts. The 'Panda' colorway — simple black and white — became a viral sensation in 2021, becoming one of the most sought-after sneakers of the decade and a staple of everyday style.",
+    colorwayInspiration: "The 'Panda' name comes from its striking black and white contrast, mimicking the iconic coloring of a giant panda. The simplicity of the two-tone design is what makes it so versatile and universally appealing.",
+    funFact: "The Panda Dunk became so popular that Nike couldn't keep up with demand, leading to dozens of restocks throughout 2021-2023. At one point, it was the #1 most-traded sneaker on StockX for over 50 consecutive weeks."
+  },
+  "YZY-ZBR": {
+    designer: "Kanye West & adidas Design Team",
+    story: "The Yeezy Boost 350 V2 'Zebra' was teased by Kanye West himself on Twitter in 2016, causing an internet frenzy. When it finally released in February 2017, it sold out in seconds. The distinctive black and white Primeknit pattern with the signature SPLY-350 branding became one of the most recognizable sneakers of the 2010s. The Zebra represented the peak of Yeezy hype, when getting a pair felt like winning the lottery.",
+    colorwayInspiration: "The alternating white and black Primeknit stripes were designed to mimic a zebra's natural pattern, creating an organic, almost hypnotic visual effect. The red 'SPLY-350' text adds a bold pop against the monochrome upper.",
+    funFact: "Kanye West first revealed the Zebra colorway with a simple tweet showing just the shoe on a table. That single image generated over 300,000 retweets and essentially invented the modern 'sneaker leak' format on social media."
+  },
+  "NB-550": {
+    designer: "New Balance Design Team",
+    story: "The New Balance 550 was originally released in 1989 as a basketball shoe, then quietly discontinued. In 2020, Aimé Leon Dore — a New York City boutique — collaborated with New Balance to bring it back, and the sneaker world went wild. The retro court silhouette with its chunky sole and vintage basketball DNA perfectly captured the post-hype era's appetite for understated, quality footwear. The White/Green colorway became the gateway drug for an entire generation discovering New Balance.",
+    colorwayInspiration: "The white leather base with forest green accents pays homage to classic Boston Celtics basketball aesthetics. The natural, slightly off-white leather gives it a vintage feel, while the green 'N' logo pops with preppy sophistication.",
+    funFact: "The New Balance 550 was essentially forgotten for 30 years before Aimé Leon Dore's Teddy Santis brought it back. The collaboration was so successful that it helped Santis land the role of Creative Director for New Balance's Made in USA line."
+  },
 };
 
-const VAULT_RETAILERS = ["StockX", "GOAT", "Flight Club", "Stadium Goods", "eBay"];
+// ─── RETAILER DATA ──────────────────────────────────────────────────────────
+interface RetailerInfo {
+  name: string;
+  badge: string;
+  shipping: number;
+  verified: boolean;
+}
+
+const VAULT_RETAILERS: RetailerInfo[] = [
+  { name: "StockX", badge: "VERIFIED ✓", shipping: 13.95, verified: true },
+  { name: "GOAT", badge: "TRUSTED", shipping: 12.00, verified: true },
+  { name: "Flight Club", badge: "CONSIGNMENT", shipping: 10.00, verified: true },
+  { name: "Stadium Goods", badge: "PREMIUM", shipping: 15.00, verified: true },
+  { name: "eBay", badge: "MARKETPLACE", shipping: 9.99, verified: false },
+  { name: "Grailed", badge: "RESALE", shipping: 11.50, verified: false },
+  { name: "KICKS CREW", badge: "GLOBAL", shipping: 14.00, verified: true },
+  { name: "Sneaker Con", badge: "EVENT", shipping: 0, verified: true },
+];
 
 
 // ─── SHOE CARD — GRID ─────────────────────────────────────────────────────────
