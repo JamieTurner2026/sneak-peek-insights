@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import SneakerImage, { getSneakerImageData } from "@/components/SneakerImage";
 
 // ─── TYPES ───────────────────────────────────────────────────────────────────
 interface ShoeResult {
@@ -82,32 +83,6 @@ const CONDITION_COLOR: Record<string, { bg: string; text: string }> = {
 
 const VAULT_RETAILERS = ["StockX", "GOAT", "Flight Club", "Stadium Goods", "eBay"];
 
-// ─── SHOE IMAGE COMPONENT ─────────────────────────────────────────────────────
-function ShoeImage({ shoeId, name, style = {} }: { shoeId: string; name: string; style?: React.CSSProperties }) {
-  const imgData = SHOE_IMAGES[shoeId] as { primary: string; fallback: string; bg: string } | undefined;
-  const [src, setSrc] = useState(imgData?.primary || imgData?.fallback || "");
-  const [tried, setTried] = useState(0);
-
-  const handleError = () => {
-    if (tried === 0 && imgData?.fallback) {
-      setSrc(imgData.fallback);
-      setTried(1);
-    }
-  };
-
-  return (
-    <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", background: imgData?.bg || "var(--sa)", ...style }}>
-      {src ? (
-        <img src={src} alt={name} onError={handleError} style={{ width: "100%", height: "100%", objectFit: "contain" }} />
-      ) : (
-        <svg width="60" height="40" viewBox="0 0 60 40" fill="none">
-          <path d="M5 30 Q10 10 25 15 Q35 5 45 12 Q55 8 58 20 L55 30 Z" fill="var(--sa)" stroke="var(--border)" strokeWidth="1.5" />
-          <circle cx="15" cy="32" r="5" fill="var(--border)" /><circle cx="45" cy="32" r="5" fill="var(--border)" />
-        </svg>
-      )}
-    </div>
-  );
-}
 
 // ─── SHOE CARD — GRID ─────────────────────────────────────────────────────────
 function ShoeCardGrid({ shoe, onRemove, onBuy }: { shoe: VaultShoe; onRemove: (id: string) => void; onBuy: (shoe: VaultShoe) => void }) {
@@ -124,7 +99,7 @@ function ShoeCardGrid({ shoe, onRemove, onBuy }: { shoe: VaultShoe; onRemove: (i
       onClick={() => onBuy(shoe)}
     >
       <div style={{ height: 160, position: "relative", overflow: "hidden" }}>
-        <ShoeImage shoeId={shoe.id} name={shoe.name} />
+        <SneakerImage shoeId={shoe.id} name={shoe.name} />
         <div style={{ position: "absolute", top: 7, left: 7, background: "rgba(13,13,13,.82)", color: "var(--gold)", border: "1.5px solid var(--gold)", fontFamily: "var(--fm)", fontSize: 10, fontWeight: 700, padding: "2px 7px", letterSpacing: "0.06em" }}>{shoe.match}% MATCH</div>
         <div style={{ position: "absolute", bottom: 7, left: 7, background: cond.bg, color: cond.text, fontFamily: "var(--fm)", fontSize: 9, fontWeight: 700, padding: "2px 7px" }}>{shoe.condition.toUpperCase()}</div>
         <div style={{ position: "absolute", bottom: 7, right: 7, fontFamily: "var(--fm)", fontSize: 8, color: "rgba(255,255,255,.6)" }}>{shoe.sku}</div>
@@ -166,7 +141,7 @@ function ShoeCardList({ shoe, onRemove, onBuy }: { shoe: VaultShoe; onRemove: (i
       style={{ display: "flex", alignItems: "center", gap: 0, border: "3px solid var(--border)", background: hovered ? "var(--sa)" : "var(--surface)", transition: "background 0.18s", position: "relative", cursor: "pointer", overflow: "hidden" }}
       onClick={() => onBuy(shoe)}
     >
-      <div style={{ width: 90, height: 90, flexShrink: 0, borderRight: "3px solid var(--border)" }}><ShoeImage shoeId={shoe.id} name={shoe.name} /></div>
+      <div style={{ width: 90, height: 90, flexShrink: 0, borderRight: "3px solid var(--border)" }}><SneakerImage shoeId={shoe.id} name={shoe.name} /></div>
       <div style={{ flex: 1, padding: "8px 10px", minWidth: 0 }}>
         <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 2 }}>
           <span style={{ fontFamily: "var(--ft)", fontSize: 10, letterSpacing: "0.06em", color: "var(--red)" }}>{shoe.brand}</span>
@@ -222,7 +197,7 @@ function VaultBuyModal({ shoe, onClose }: { shoe: VaultShoe; onClose: () => void
       <div className="mb">
         <button className="mclose" onClick={onClose}>✕ CLOSE</button>
         <div style={{ display: "flex", gap: 12, alignItems: "center", marginBottom: 14 }}>
-          <div style={{ width: 60, height: 60, border: "3px solid var(--border)", flexShrink: 0 }}><ShoeImage shoeId={shoe.id} name={shoe.name} /></div>
+          <div style={{ width: 60, height: 60, border: "3px solid var(--border)", flexShrink: 0 }}><SneakerImage shoeId={shoe.id} name={shoe.name} /></div>
           <div><div style={{ fontFamily: "var(--ft)", fontSize: 18 }}>{shoe.name}</div><div style={{ fontFamily: "var(--fm)", fontSize: 10, color: "var(--red)", fontWeight: 700 }}>{shoe.colorway} · SZ {shoe.size}</div></div>
         </div>
         <div style={{ display: "flex", gap: 6, marginBottom: 14 }}>
