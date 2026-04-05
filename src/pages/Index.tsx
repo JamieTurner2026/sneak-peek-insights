@@ -565,7 +565,9 @@ const Index = () => {
   const [authTab, setAuthTab] = useState<"login" | "signup">("login");
   const [authEmail, setAuthEmail] = useState("");
   const [authPass, setAuthPass] = useState("");
+  const [authPassConfirm, setAuthPassConfirm] = useState("");
   const [authUser, setAuthUser] = useState("");
+  const [authError, setAuthError] = useState("");
 
   const [memberModal, setMemberModal] = useState(false);
   const [memberStep, setMemberStep] = useState<"plans" | "payment" | "success">("plans");
