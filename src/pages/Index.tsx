@@ -20,28 +20,28 @@ interface ShoeResult {
 // ─── SHOE IMAGE MAP ──────────────────────────────────────────────────────────
 const SHOE_IMAGES: Record<string, { primary: string; fallback: string; bg: string }> = {
   "AJ1-CHI": {
-    primary: "https://images.unsplash.com/photo-1600269452121-4f2416e55c28?auto=format&fit=crop&q=85&w=800&h=600",
-    fallback: "https://images.unsplash.com/photo-1584735175315-9d5df23be6e0?auto=format&fit=crop&q=80&w=600",
+    primary: "https://image.goat.com/transform/v1/attachments/product_template_pictures/images/078/070/229/original/DZ5485_612.png.png",
+    fallback: "https://image.goat.com/transform/v1/attachments/product_template_pictures/images/021/733/322/original/364949_01.png.png",
     bg: "#f5e8e8",
   },
   "AJ3-BLC": {
-    primary: "https://images.unsplash.com/photo-1605348532760-6753d2c43329?auto=format&fit=crop&q=85&w=800&h=600",
-    fallback: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&q=80&w=600",
+    primary: "https://image.goat.com/transform/v1/attachments/product_template_pictures/images/021/213/634/original/76547_01.png.png",
+    fallback: "https://image.goat.com/transform/v1/attachments/product_template_pictures/images/050/420/847/original/854262_001.png.png",
     bg: "#e8e8e8",
   },
   "DUNK-PND": {
-    primary: "https://images.unsplash.com/photo-1607522370275-f6fd4197767c?auto=format&fit=crop&q=85&w=800&h=600",
-    fallback: "https://images.unsplash.com/photo-1556906781-9a412961a28c?auto=format&fit=crop&q=80&w=600",
+    primary: "https://image.goat.com/transform/v1/attachments/product_template_pictures/images/047/995/693/original/DD1391_100.png.png",
+    fallback: "https://image.goat.com/transform/v1/attachments/product_template_pictures/images/047/995/750/original/DD1391_102.png.png",
     bg: "#f2f2f2",
   },
   "YZY-ZBR": {
-    primary: "https://images.unsplash.com/photo-1584735175315-9d5df23be6e0?auto=format&fit=crop&q=85&w=800&h=600",
-    fallback: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&q=80&w=600",
+    primary: "https://image.goat.com/transform/v1/attachments/product_template_pictures/images/021/063/623/original/107023_01.png.png",
+    fallback: "https://image.goat.com/transform/v1/attachments/product_template_pictures/images/067/536/811/original/HQ6448.png.png",
     bg: "#ececec",
   },
   "NB-550": {
-    primary: "https://images.unsplash.com/photo-1539185441755-769473a23570?auto=format&fit=crop&q=85&w=800&h=600",
-    fallback: "https://images.unsplash.com/photo-1556906781-9a412961a28c?auto=format&fit=crop&q=80&w=600",
+    primary: "https://image.goat.com/transform/v1/attachments/product_template_pictures/images/030/198/890/original/BB550WT1.png.png",
+    fallback: "https://image.goat.com/transform/v1/attachments/product_template_pictures/images/074/942/121/original/BB550HR1.png.png",
     bg: "#e8f4ee",
   },
 };
