@@ -3,37 +3,38 @@
 @tailwind utilities;
 
 :root {
-  --bg: #0d0d0d;
-  --surface: #f0e6d3;
-  --sa: #ddd0b8;
-  --border: #0d0d0d;
-  --txt: #0d0d0d;
-  --red: #c8102e;
-  --gold: #f5a623;
+  --bg: #1A1818;
+  --surface: #EAB5B5;
+  --sa: #D49E9E;
+  --border: #1A1818;
+  --txt: #1A1818;
+  --red: #D93631;
+  --gold: #D93631;
+  --paper: #EAE6E1;
   --green: #1e7a3c;
   --ft: 'Oswald', Impact, sans-serif;
   --fs: 'Playfair Display', Georgia, serif;
   --fm: 'Courier Prime', monospace;
 
-  --background: 0 0% 5%;
-  --foreground: 43 40% 88%;
-  --card: 43 40% 88%;
-  --card-foreground: 0 0% 5%;
-  --popover: 43 40% 88%;
-  --popover-foreground: 0 0% 5%;
-  --primary: 350 85% 42%;
+  --background: 0 4% 10%;
+  --foreground: 35 30% 90%;
+  --card: 0 56% 81%;
+  --card-foreground: 0 4% 10%;
+  --popover: 0 56% 81%;
+  --popover-foreground: 0 4% 10%;
+  --primary: 2 70% 53%;
   --primary-foreground: 0 0% 100%;
-  --secondary: 37 88% 55%;
-  --secondary-foreground: 0 0% 5%;
-  --muted: 37 20% 78%;
+  --secondary: 0 56% 81%;
+  --secondary-foreground: 0 4% 10%;
+  --muted: 0 35% 73%;
   --muted-foreground: 0 0% 40%;
-  --accent: 37 88% 55%;
-  --accent-foreground: 0 0% 5%;
-  --destructive: 350 85% 42%;
+  --accent: 2 70% 53%;
+  --accent-foreground: 0 0% 100%;
+  --destructive: 2 70% 53%;
   --destructive-foreground: 0 0% 100%;
-  --border: 0 0% 5%;
-  --input: 0 0% 5%;
-  --ring: 37 88% 55%;
+  --border: 0 4% 10%;
+  --input: 0 4% 10%;
+  --ring: 2 70% 53%;
   --radius: 0px;
 }
 
@@ -53,7 +54,7 @@ body::after {
   position: fixed;
   inset: 0;
   border: 10px solid var(--bg);
-  box-shadow: inset 0 0 0 2px var(--gold);
+  box-shadow: inset 0 0 0 2px var(--paper);
   z-index: 9998;
   pointer-events: none;
 }

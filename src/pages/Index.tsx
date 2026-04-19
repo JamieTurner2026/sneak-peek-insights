@@ -448,11 +448,11 @@ function useCountdown(target: Date) {
 
 function CountdownDisplay({ target }: { target: Date }) {
   const { days, hours, minutes, seconds, total, dropped } = useCountdown(target);
-  if (dropped) return <div style={{ fontFamily: "var(--ft)", fontSize: 13, color: "#c8102e", letterSpacing: "0.05em" }}>🔴 DROPPED — SHOP NOW</div>;
+  if (dropped) return <div style={{ fontFamily: "var(--ft)", fontSize: 13, color: "var(--red)", letterSpacing: "0.05em" }}>🔴 DROPPED — SHOP NOW</div>;
   const pad = (n: number) => String(n).padStart(2, "0");
   const isUrgent = total < 3600000;
   return (
-    <div style={{ fontFamily: "var(--fm)", fontSize: 14, fontWeight: 700, color: isUrgent ? "#c8102e" : "var(--txt)", letterSpacing: "0.06em" }}>
+    <div style={{ fontFamily: "var(--fm)", fontSize: 14, fontWeight: 700, color: isUrgent ? "var(--red)" : "var(--txt)", letterSpacing: "0.06em" }}>
       {days > 0 && <span>{days}d </span>}
       <span>{pad(hours)}:{pad(minutes)}:{pad(seconds)}</span>
       {isUrgent && <span style={{ marginLeft: 6, fontSize: 10 }}>⚡ DROPPING SOON</span>}
@@ -1054,7 +1054,7 @@ const Index = () => {
               {drops
                 .filter(d => dropBrandFilter === "ALL" || d.brandFilter === dropBrandFilter)
                 .map(drop => {
-                  const hypeColor: Record<string, string> = { SELLOUT: "#c8102e", HIGH: "#f5a623", LIMITED: "#0e4f8a" };
+                  const hypeColor: Record<string, string> = { SELLOUT: "#D93631", HIGH: "#D93631", LIMITED: "#1A1818" };
                   return (
                     <div key={drop.id} className="dcard" style={{ overflow: "hidden" }}>
                       <div style={{ height: 160, position: "relative", overflow: "hidden" }}>
