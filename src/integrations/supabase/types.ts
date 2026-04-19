@@ -14,7 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      scan_history: {
+        Row: {
+          brand: string | null
+          colorway: string | null
+          confidence: number | null
+          estimated_price: string | null
+          id: string
+          photo_data_url: string | null
+          scanned_at: string
+          shoe_name: string
+          silhouette: string | null
+          user_id: string
+        }
+        Insert: {
+          brand?: string | null
+          colorway?: string | null
+          confidence?: number | null
+          estimated_price?: string | null
+          id?: string
+          photo_data_url?: string | null
+          scanned_at?: string
+          shoe_name: string
+          silhouette?: string | null
+          user_id: string
+        }
+        Update: {
+          brand?: string | null
+          colorway?: string | null
+          confidence?: number | null
+          estimated_price?: string | null
+          id?: string
+          photo_data_url?: string | null
+          scanned_at?: string
+          shoe_name?: string
+          silhouette?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

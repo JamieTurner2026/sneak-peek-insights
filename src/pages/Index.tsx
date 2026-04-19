@@ -642,6 +642,28 @@ const Index = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const [torchOn, setTorchOn] = useState(false);
+  const [torchSupported, setTorchSupported] = useState(false);
+
+  // Scan history (persisted to localStorage; DB-ready when auth is wired)
+  type ScanHistoryItem = {
+    id: string;
+    name: string;
+    brand?: string;
+    colorway?: string;
+    silhouette?: string;
+    confidence?: number;
+    estimatedPrice?: string;
+    photo?: string;
+    scannedAt: string;
+  };
+  const [scanHistory, setScanHistory] = useState<ScanHistoryItem[]>(() => {
+    if (typeof window === "undefined") return [];
+    try { return JSON.parse(localStorage.getItem("snapshotz_scan_history") || "[]"); } catch { return []; }
+  });
+  useEffect(() => {
+    try { localStorage.setItem("snapshotz_scan_history", JSON.stringify(scanHistory.slice(0, 50))); } catch { /* ignore quota */ }
+  }, [scanHistory]);
 
   // Vault (scanned shoes)
   const [vault, setVault] = useState<VaultItem[]>([]);
@@ -745,7 +767,50 @@ const Index = () => {
     streamRef.current?.getTracks().forEach(t => t.stop());
     streamRef.current = null;
     setCameraActive(false);
+    setTorchOn(false);
+    setTorchSupported(false);
   }, []);
+
+  // Detect torch capability when camera starts
+  useEffect(() => {
+    if (!cameraActive) return;
+    const track = streamRef.current?.getVideoTracks()[0];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const caps = (track as any)?.getCapabilities?.();
+    setTorchSupported(!!caps?.torch);
+  }, [cameraActive]);
+
+  const toggleTorch = async () => {
+    const track = streamRef.current?.getVideoTracks()[0];
+    if (!track) { showToast("Start camera first"); return; }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const caps = (track as any).getCapabilities?.();
+    if (!caps?.torch) { showToast("Flash not available on this device"); return; }
+    try {
+      const next = !torchOn;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await track.applyConstraints({ advanced: [{ torch: next } as any] });
+      setTorchOn(next);
+      showToast(next ? "Flash ON" : "Flash OFF");
+    } catch {
+      showToast("Could not toggle flash");
+    }
+  };
+
+  const shareResult = async () => {
+    if (!shoeResult) return;
+    const text = `${shoeResult.brand || ""} ${shoeResult.name}${shoeResult.colorway ? ` — ${shoeResult.colorway}` : ""}\n${shoeResult.estimatedPrice ? `Est. ${shoeResult.estimatedPrice}\n` : ""}Identified by SnapShotz Soles`;
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: shoeResult.name, text });
+      } else {
+        await navigator.clipboard.writeText(text);
+        showToast("Copied to clipboard!");
+      }
+    } catch {
+      /* user cancelled share */
+    }
+  };
 
   useEffect(() => {
     if (activeScreen === "scan" && !scanned) startCamera();
@@ -789,6 +854,17 @@ const Index = () => {
       if (error) throw error;
       setShoeResult({ ...data, photo: imageBase64 });
       setTotalScans(s => s + 1);
+      setScanHistory(prev => [{
+        id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+        name: data.name,
+        brand: data.brand,
+        colorway: data.colorway,
+        silhouette: data.silhouette,
+        confidence: data.confidence,
+        estimatedPrice: data.estimatedPrice,
+        photo: imageBase64,
+        scannedAt: new Date().toISOString(),
+      }, ...prev].slice(0, 50));
     } catch {
       showToast("Identification failed — try again");
       setScanned(false);
@@ -960,7 +1036,22 @@ const Index = () => {
               )}
               {!scanned && (
                 <div className="capwrap">
-                  <button className="capbtn" onClick={capturePhoto}>
+                  <button
+                    className="capbtn"
+                    onClick={toggleTorch}
+                    aria-label={torchOn ? "Turn flash off" : "Turn flash on"}
+                    title={torchSupported ? "Toggle flash" : "Flash not supported"}
+                    style={{
+                      width: 48, height: 48,
+                      opacity: torchSupported ? 1 : 0.45,
+                      background: torchOn ? "var(--red)" : undefined,
+                    }}
+                  >
+                    <div className="capinn" style={{ width: 36, height: 36, background: torchOn ? "var(--red)" : undefined }}>
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill={torchOn ? "#fff" : "none"} stroke="#fff" strokeWidth="2.5"><path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z"/></svg>
+                    </div>
+                  </button>
+                  <button className="capbtn" onClick={capturePhoto} aria-label="Capture photo">
                     <div className="capinn">
                       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5"><circle cx="12" cy="13" r="4" /><path d="M5 7h2l2-3h6l2 3h2a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9a2 2 0 012-2z" /></svg>
                     </div>
@@ -1006,7 +1097,10 @@ const Index = () => {
                         <p style={{ fontFamily: "var(--fm)", fontSize: 11, lineHeight: 1.5, marginBottom: 12 }}>{shoeResult.inspiration}</p>
                       </>
                     )}
-                    <button className="btn-o" onClick={saveToVault}>+ SAVE TO VAULT</button>
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
+                      <button className="btn-o" onClick={saveToVault}>+ SAVE TO VAULT</button>
+                      <button className="btn-o" onClick={shareResult}>↗ SHARE</button>
+                    </div>
                     <div className="sech">Where to Buy</div>
                     <div className="rgrid">
                       {["StockX", "GOAT", "Flight Club", "eBay"].map(r => (
@@ -1516,6 +1610,44 @@ const Index = () => {
                   </div>
                 );
               })()}
+
+              <div className="idcard">
+                <div className="idst" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span>Recent Scans</span>
+                  {scanHistory.length > 0 && (
+                    <button
+                      onClick={() => { setScanHistory([]); showToast("History cleared"); }}
+                      style={{ background: "none", border: "2px solid var(--border)", fontFamily: "var(--ft)", fontSize: 9, padding: "3px 8px", cursor: "pointer", letterSpacing: "0.05em" }}
+                    >CLEAR</button>
+                  )}
+                </div>
+                {scanHistory.length === 0 ? (
+                  <div style={{ fontFamily: "var(--fm)", fontSize: 11, padding: "12px 0", opacity: 0.7 }}>
+                    No scans yet. Tap the Scan tab to identify a shoe.
+                  </div>
+                ) : (
+                  <div style={{ display: "flex", flexDirection: "column", gap: 6, maxHeight: 280, overflowY: "auto" }}>
+                    {scanHistory.slice(0, 10).map(h => (
+                      <div key={h.id} style={{ display: "flex", gap: 8, alignItems: "center", padding: 6, border: "2px solid var(--border)", background: "var(--surface)" }}>
+                        {h.photo ? (
+                          <img src={h.photo} alt={h.name} style={{ width: 44, height: 44, objectFit: "cover", border: "2px solid var(--border)", flexShrink: 0 }} />
+                        ) : (
+                          <div style={{ width: 44, height: 44, background: "var(--border)", flexShrink: 0 }} />
+                        )}
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontFamily: "var(--ft)", fontSize: 11, fontWeight: 700, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{h.name}</div>
+                          <div style={{ fontFamily: "var(--fm)", fontSize: 9, opacity: 0.7 }}>
+                            {h.brand} · {h.confidence ?? "—"}% · {new Date(h.scannedAt).toLocaleDateString()}
+                          </div>
+                        </div>
+                        {h.estimatedPrice && (
+                          <span style={{ fontFamily: "var(--ft)", fontSize: 11, fontWeight: 700, color: "var(--red)" }}>{h.estimatedPrice}</span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
 
               <div className="idcard">
                 <div className="idst">Membership</div>
