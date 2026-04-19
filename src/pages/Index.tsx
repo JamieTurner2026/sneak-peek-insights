@@ -1036,7 +1036,22 @@ const Index = () => {
               )}
               {!scanned && (
                 <div className="capwrap">
-                  <button className="capbtn" onClick={capturePhoto}>
+                  <button
+                    className="capbtn"
+                    onClick={toggleTorch}
+                    aria-label={torchOn ? "Turn flash off" : "Turn flash on"}
+                    title={torchSupported ? "Toggle flash" : "Flash not supported"}
+                    style={{
+                      width: 48, height: 48,
+                      opacity: torchSupported ? 1 : 0.45,
+                      background: torchOn ? "var(--red)" : undefined,
+                    }}
+                  >
+                    <div className="capinn" style={{ width: 36, height: 36, background: torchOn ? "var(--red)" : undefined }}>
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill={torchOn ? "#fff" : "none"} stroke="#fff" strokeWidth="2.5"><path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z"/></svg>
+                    </div>
+                  </button>
+                  <button className="capbtn" onClick={capturePhoto} aria-label="Capture photo">
                     <div className="capinn">
                       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5"><circle cx="12" cy="13" r="4" /><path d="M5 7h2l2-3h6l2 3h2a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9a2 2 0 012-2z" /></svg>
                     </div>
