@@ -124,49 +124,67 @@ export default function SneakerImage({ shoeId, name, style }: SneakerImageProps)
           }}
         />
       ) : (
-        /* SVG shoe silhouette fallback — always renders, matches colorway */
-        <svg
-          viewBox="0 0 200 120"
-          style={{ width: "82%", height: "82%", opacity: 0.35 }}
-          xmlns="http://www.w3.org/2000/svg"
+        /* Branded SNEAKID placeholder fallback */
+        <div
+          style={{
+            width: "100%",
+            height: "100%",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "12px",
+          }}
         >
-          {/* sole shadow */}
-          <ellipse cx="100" cy="108" rx="82" ry="9" fill={accent} opacity="0.25" />
-          {/* main upper */}
-          <path
-            d="M18 88 Q24 30 90 26 Q130 22 162 46 Q178 58 178 88 Z"
-            fill={accent}
-          />
-          {/* toe box highlight */}
-          <path
-            d="M18 88 Q24 68 50 60 Q70 54 90 54 Q70 40 50 46 Q30 52 18 88 Z"
-            fill="white"
-            opacity="0.18"
-          />
-          {/* tongue */}
-          <path
-            d="M90 26 Q94 14 112 16 Q128 14 140 30 Q130 34 118 38 Q104 42 90 42 Z"
-            fill="white"
-            opacity="0.22"
-          />
-          {/* swoosh-like stripe */}
-          <path
-            d="M60 72 Q90 56 140 60"
-            stroke="white"
-            strokeWidth="5"
+          {/* Logo mark */}
+          <svg
+            width="48"
+            height="48"
+            viewBox="0 0 48 48"
             fill="none"
-            opacity="0.35"
-            strokeLinecap="round"
-          />
-          {/* midsole */}
-          <rect x="16" y="86" width="164" height="14" rx="3" fill="white" opacity="0.55" />
-          {/* outsole */}
-          <rect x="14" y="98" width="168" height="8" rx="3" fill={accent} opacity="0.55" />
-          {/* laces dots */}
-          {[100, 110, 120, 130].map((y) => (
-            <circle key={y} cx="104" cy={y - 80} r="2.5" fill="white" opacity="0.5" />
-          ))}
-        </svg>
+            xmlns="http://www.w3.org/2000/svg"
+            style={{ opacity: 0.6 }}
+          >
+            <rect x="8" y="28" width="32" height="8" rx="2" fill={accent} />
+            <path
+              d="M12 28L16 16L28 14L36 20L40 28"
+              stroke={accent}
+              strokeWidth="3"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              fill="none"
+            />
+            <circle cx="18" cy="22" r="3" fill={accent} />
+            <circle cx="30" cy="20" r="3" fill={accent} />
+          </svg>
+          {/* Brand text */}
+          <span
+            style={{
+              fontSize: "11px",
+              fontWeight: 700,
+              letterSpacing: "0.15em",
+              color: accent,
+              opacity: 0.5,
+              textTransform: "uppercase",
+            }}
+          >
+            SNEAKID
+          </span>
+          {/* Subtle shoe silhouette watermark */}
+          <svg
+            viewBox="0 0 200 120"
+            style={{ width: "60%", height: "40%", opacity: 0.15, position: "absolute" }}
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <ellipse cx="100" cy="108" rx="82" ry="9" fill={accent} />
+            <path
+              d="M18 88 Q24 30 90 26 Q130 22 162 46 Q178 58 178 88 Z"
+              fill={accent}
+            />
+            <rect x="16" y="86" width="164" height="14" rx="3" fill="white" opacity="0.3" />
+            <rect x="14" y="98" width="168" height="8" rx="3" fill={accent} opacity="0.3" />
+          </svg>
+        </div>
       )}
     </div>
   );
