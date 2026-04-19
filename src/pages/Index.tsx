@@ -1612,6 +1612,44 @@ const Index = () => {
               })()}
 
               <div className="idcard">
+                <div className="idst" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span>Recent Scans</span>
+                  {scanHistory.length > 0 && (
+                    <button
+                      onClick={() => { setScanHistory([]); showToast("History cleared"); }}
+                      style={{ background: "none", border: "2px solid var(--border)", fontFamily: "var(--ft)", fontSize: 9, padding: "3px 8px", cursor: "pointer", letterSpacing: "0.05em" }}
+                    >CLEAR</button>
+                  )}
+                </div>
+                {scanHistory.length === 0 ? (
+                  <div style={{ fontFamily: "var(--fm)", fontSize: 11, padding: "12px 0", opacity: 0.7 }}>
+                    No scans yet. Tap the Scan tab to identify a shoe.
+                  </div>
+                ) : (
+                  <div style={{ display: "flex", flexDirection: "column", gap: 6, maxHeight: 280, overflowY: "auto" }}>
+                    {scanHistory.slice(0, 10).map(h => (
+                      <div key={h.id} style={{ display: "flex", gap: 8, alignItems: "center", padding: 6, border: "2px solid var(--border)", background: "var(--surface)" }}>
+                        {h.photo ? (
+                          <img src={h.photo} alt={h.name} style={{ width: 44, height: 44, objectFit: "cover", border: "2px solid var(--border)", flexShrink: 0 }} />
+                        ) : (
+                          <div style={{ width: 44, height: 44, background: "var(--border)", flexShrink: 0 }} />
+                        )}
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontFamily: "var(--ft)", fontSize: 11, fontWeight: 700, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{h.name}</div>
+                          <div style={{ fontFamily: "var(--fm)", fontSize: 9, opacity: 0.7 }}>
+                            {h.brand} · {h.confidence ?? "—"}% · {new Date(h.scannedAt).toLocaleDateString()}
+                          </div>
+                        </div>
+                        {h.estimatedPrice && (
+                          <span style={{ fontFamily: "var(--ft)", fontSize: 11, fontWeight: 700, color: "var(--red)" }}>{h.estimatedPrice}</span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="idcard">
                 <div className="idst">Membership</div>
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 5 }}>
                   {([
