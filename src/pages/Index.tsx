@@ -1097,7 +1097,10 @@ const Index = () => {
                         <p style={{ fontFamily: "var(--fm)", fontSize: 11, lineHeight: 1.5, marginBottom: 12 }}>{shoeResult.inspiration}</p>
                       </>
                     )}
-                    <button className="btn-o" onClick={saveToVault}>+ SAVE TO VAULT</button>
+                    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 6 }}>
+                      <button className="btn-o" onClick={saveToVault}>+ SAVE TO VAULT</button>
+                      <button className="btn-o" onClick={shareResult}>↗ SHARE</button>
+                    </div>
                     <div className="sech">Where to Buy</div>
                     <div className="rgrid">
                       {["StockX", "GOAT", "Flight Club", "eBay"].map(r => (
