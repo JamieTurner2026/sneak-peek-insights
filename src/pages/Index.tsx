@@ -642,6 +642,28 @@ const Index = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const [torchOn, setTorchOn] = useState(false);
+  const [torchSupported, setTorchSupported] = useState(false);
+
+  // Scan history (persisted to localStorage; DB-ready when auth is wired)
+  type ScanHistoryItem = {
+    id: string;
+    name: string;
+    brand?: string;
+    colorway?: string;
+    silhouette?: string;
+    confidence?: number;
+    estimatedPrice?: string;
+    photo?: string;
+    scannedAt: string;
+  };
+  const [scanHistory, setScanHistory] = useState<ScanHistoryItem[]>(() => {
+    if (typeof window === "undefined") return [];
+    try { return JSON.parse(localStorage.getItem("snapshotz_scan_history") || "[]"); } catch { return []; }
+  });
+  useEffect(() => {
+    try { localStorage.setItem("snapshotz_scan_history", JSON.stringify(scanHistory.slice(0, 50))); } catch { /* ignore quota */ }
+  }, [scanHistory]);
 
   // Vault (scanned shoes)
   const [vault, setVault] = useState<VaultItem[]>([]);
@@ -745,7 +767,50 @@ const Index = () => {
     streamRef.current?.getTracks().forEach(t => t.stop());
     streamRef.current = null;
     setCameraActive(false);
+    setTorchOn(false);
+    setTorchSupported(false);
   }, []);
+
+  // Detect torch capability when camera starts
+  useEffect(() => {
+    if (!cameraActive) return;
+    const track = streamRef.current?.getVideoTracks()[0];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const caps = (track as any)?.getCapabilities?.();
+    setTorchSupported(!!caps?.torch);
+  }, [cameraActive]);
+
+  const toggleTorch = async () => {
+    const track = streamRef.current?.getVideoTracks()[0];
+    if (!track) { showToast("Start camera first"); return; }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const caps = (track as any).getCapabilities?.();
+    if (!caps?.torch) { showToast("Flash not available on this device"); return; }
+    try {
+      const next = !torchOn;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      await track.applyConstraints({ advanced: [{ torch: next } as any] });
+      setTorchOn(next);
+      showToast(next ? "Flash ON" : "Flash OFF");
+    } catch {
+      showToast("Could not toggle flash");
+    }
+  };
+
+  const shareResult = async () => {
+    if (!shoeResult) return;
+    const text = `${shoeResult.brand || ""} ${shoeResult.name}${shoeResult.colorway ? ` — ${shoeResult.colorway}` : ""}\n${shoeResult.estimatedPrice ? `Est. ${shoeResult.estimatedPrice}\n` : ""}Identified by SnapShotz Soles`;
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: shoeResult.name, text });
+      } else {
+        await navigator.clipboard.writeText(text);
+        showToast("Copied to clipboard!");
+      }
+    } catch {
+      /* user cancelled share */
+    }
+  };
 
   useEffect(() => {
     if (activeScreen === "scan" && !scanned) startCamera();
@@ -789,6 +854,17 @@ const Index = () => {
       if (error) throw error;
       setShoeResult({ ...data, photo: imageBase64 });
       setTotalScans(s => s + 1);
+      setScanHistory(prev => [{
+        id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+        name: data.name,
+        brand: data.brand,
+        colorway: data.colorway,
+        silhouette: data.silhouette,
+        confidence: data.confidence,
+        estimatedPrice: data.estimatedPrice,
+        photo: imageBase64,
+        scannedAt: new Date().toISOString(),
+      }, ...prev].slice(0, 50));
     } catch {
       showToast("Identification failed — try again");
       setScanned(false);
